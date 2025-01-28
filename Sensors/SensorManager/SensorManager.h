@@ -6,13 +6,12 @@
 
 #include <vector>
 #include "../Sensor/Sensor.h"
-#include "../TaskScheduler/Task.h"
 
-class SensorManager: public Task {
+class SensorManager {
 public:
     bool addSensor(Sensor* sensorPtr); // add sensor, true if added, false if not added
     bool removeSensor(Sensor* sensorPtr); // remove sensor, true if success
-    void run() override; // going to be called by taskScheduler
+    void run(); // going to be called
     virtual ~SensorManager() = default; // un-allocation
     bool sensorInit(); // true if success false if something fail
 
