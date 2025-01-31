@@ -12,7 +12,7 @@
  * @note Templates should not bleed into subclasses, only the base class needs
  * them.
  */
-template <typename Context, typename StateId, typename millis> class State {
+template <typename Context, typename StateId, typename MillisFn> class State {
   public:
     /**
      * @brief Code to be run once when the state begins.
@@ -55,7 +55,8 @@ template <typename Context, typename StateId, typename millis> class State {
   protected:
     //! @note Constructor to be called from subclasses (subclass constructors
     //! should only need to take in ctx)
-    State<Context, StateId, millis>(StateId id, Context *ctx) : id(id), ctx(ctx) {}
+    State<Context, StateId, MillisFn>(StateId id, MillisFn millis, Context *ctx)
+        : id(id), millis(millis), ctx(ctx) {}
     //! @brief number of milliseconds since the initialize call
     long long currentTime = 0;
     //! @brief number of milliseconds since the last loop call
@@ -72,6 +73,8 @@ template <typename Context, typename StateId, typename millis> class State {
     long long lastLoopTime = 0;
     //! @brief id of the current state
     StateId id;
+    //! @brief function to get the time, not needed in subclasses
+    MillisFn millis;
 
     virtual void initialize_impl() = 0;
     virtual State *loop_impl() = 0;
