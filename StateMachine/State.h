@@ -55,7 +55,7 @@ template <typename Context, typename StateId, typename millis> class State {
   protected:
     //! @note Constructor to be called from subclasses (subclass constructors
     //! should only need to take in ctx)
-    State(StateId id, Context *ctx) : id(id), ctx(ctx) {}
+    State<Context, StateId, millis>(StateId id, Context *ctx) : id(id), ctx(ctx) {}
     //! @brief number of milliseconds since the initialize call
     long long currentTime = 0;
     //! @brief number of milliseconds since the last loop call
