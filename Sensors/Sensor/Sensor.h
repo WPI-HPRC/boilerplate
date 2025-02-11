@@ -5,39 +5,60 @@
 #pragma once
 
 #include "../../Services/Time.h"
-#include <stdlib.h>
-
-struct ID {
-    long timestamp;
-    // int sensorNumber;
-    // would having a field for telemetry use here be useful??
-};
+#include <cstdlib>
 
 class Sensor {
+  protected:
+    long lastTimeRead = 0;
+    void *data = nullptr;
 
-protected:
-    long lastTimeRead;
-    long pollingPeriod;
-    virtual void* poll() = 0;
-    virtual void throwInitFailure() = 0;
+    virtual void *poll() = 0;
+
+  public:
     bool initStatus = false;
-    int sensorNumber;
+    /**
+     * @param data allocated pointer to store sensor data in.
+     * Must be `sensorDataBytes()` bytes long.
+     */
+    Sensor(void *data) : data(data) {}
 
-private:
-    ID id{};
-
-public:
-    Sensor(long pollingPeriod, int sensorNumber) :
-        sensorNumber(sensorNumber),
-        pollingPeriod(pollingPeriod),
-        lastTimeRead(0) { }
-
+    /**
+     * gets if the sensor was initialized
+     * @return whether or not the sensor was initialized
+     */
     bool getInitStatus();
-    virtual bool init() = 0;
-    virtual void debugData() = 0;
-    void* update(long currentTime);
+
+    /**
+     *
+     * @param currentTime current time of the rocket
+     */
+    void update(long currentTime);
+
+    /**
+     * gets the last time the sensor was read in millis
+     * @return long, the last time the sensor was read in millis
+     */
     long getLastTimeRead();
-    long getPollingPeriod();
+
+    virtual bool init() = 0;
+
+    /**
+     * Must be overriden by subclass for specific type of data that
+     * that sensor stores
+    */
+    template <typename T>
+    T getData() { __builtin_unreachable(); }
+
+    /**
+     * gets polling period of the sensor in millis
+     * @return long, the polling period of the sensor in millis
+     */
+    virtual long getPollingPeriod() = 0;
+
+    /**
+     * @returns size of this sensor's data object
+     */
     virtual size_t sensorDataBytes() const = 0;
+
     virtual ~Sensor() = default;
 };
