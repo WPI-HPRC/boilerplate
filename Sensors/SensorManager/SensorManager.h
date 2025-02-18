@@ -7,14 +7,14 @@
 #include "../Sensor/Sensor.h"
 #include <vector>
 
-template <typename MillisFn> class SensorManager {
+template <typename MillisFn, unsigned int N> class SensorManager {
   public:
-    SensorManager<MillisFn>(std::vector<Sensor *> sensors, MillisFn millis)
+    SensorManager<MillisFn>(Sensor *sensors[N], MillisFn millis)
         : sensors(sensors), millis(millis) {}
 
     // read the sensors
     void loop() {
-        for (size_t i = 0; i < sensors.size(); i++) {
+        for (size_t i = 0; i < N; i++) {
             if (sensors[i]->getInitStatus()) {
                 long currentTime = this->millis();
                 if (currentTime - sensors[i]->getLastTimeRead() >=
@@ -27,18 +27,15 @@ template <typename MillisFn> class SensorManager {
 
     bool sensorInit() {
         bool success = true;
-        for (size_t i = 0; i < sensors.size(); i++) {
-            sensors[i]->initStatus = sensors[i]->init();
+        for (size_t i = 0; i < N; i++) {
+            sensors[i]->init();
             success = success && sensors[i]->getInitStatus();
         }
         return success;
     } // true if success false if something fail
 
   private:
-    void **readSensors(); // array of reading pointers
-    const std::vector<Sensor *> sensors;
+    const Sensor *sensors[N];
     MillisFn millis; // time
     long long currentTime = 0;
-
-  protected:
 };

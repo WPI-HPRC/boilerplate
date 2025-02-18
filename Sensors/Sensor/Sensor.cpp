@@ -4,6 +4,11 @@
 
 #include "Sensor.h"
 
+bool Sensor::init() {
+    initStatus = init_impl();
+    return initStatus;
+}
+
 void Sensor::update(long currentTime) {
     if (initStatus) {
         lastTimeRead = currentTime;
@@ -11,10 +16,8 @@ void Sensor::update(long currentTime) {
     }
 }
 
-long Sensor::getLastTimeRead() {
-    return lastTimeRead;
-}
+long Sensor::getLastTimeRead() { return lastTimeRead; }
 
-bool Sensor::getInitStatus() {
-    return initStatus;
-}
+bool Sensor::getInitStatus() { return initStatus; }
+
+long Sensor::getPollingPeriod() { return pollingPeriod; }

@@ -11,16 +11,20 @@ class Sensor {
   protected:
     long lastTimeRead = 0;
     void *data = nullptr;
+    long pollingPeriod;
 
     virtual void *poll() = 0;
+    virtual bool init_impl() = 0;
 
-  public:
-    bool initStatus = false;
     /**
      * @param data allocated pointer to store sensor data in.
      * Must be `sensorDataBytes()` bytes long.
      */
-    Sensor(void *data) : data(data) {}
+    Sensor(size_t dataSize, long pollingPeriod)
+        : data(malloc(dataSize)), pollingPeriod(pollingPeriod) {}
+
+  public:
+    bool initStatus = false;
 
     /**
      * gets if the sensor was initialized
@@ -40,25 +44,13 @@ class Sensor {
      */
     long getLastTimeRead();
 
-    virtual bool init() = 0;
-
-    /**
-     * Must be overriden by subclass for specific type of data that
-     * that sensor stores
-    */
-    template <typename T>
-    T getData() { __builtin_unreachable(); }
+    bool init();
 
     /**
      * gets polling period of the sensor in millis
      * @return long, the polling period of the sensor in millis
      */
-    virtual long getPollingPeriod() = 0;
-
-    /**
-     * @returns size of this sensor's data object
-     */
-    virtual size_t sensorDataBytes() const = 0;
+    long getPollingPeriod();
 
     virtual ~Sensor() = default;
 };
