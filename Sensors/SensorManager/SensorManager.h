@@ -9,7 +9,7 @@
 
 template <typename MillisFn, unsigned int N> class SensorManager {
   public:
-    SensorManager<MillisFn>(Sensor *sensors[N], MillisFn millis)
+    SensorManager<MillisFn, N>(Sensor *sensors[N], MillisFn millis)
         : sensors(sensors), millis(millis) {}
 
     // read the sensors
@@ -35,7 +35,7 @@ template <typename MillisFn, unsigned int N> class SensorManager {
     } // true if success false if something fail
 
   private:
-    const Sensor *sensors[N];
+    Sensor *sensors[N];
     MillisFn millis; // time
     long long currentTime = 0;
 };
