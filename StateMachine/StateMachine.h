@@ -9,16 +9,16 @@
  * parameters
  */
 template <typename Context, typename StateId, typename millis>
-class StateMachine {
+class TStateMachine {
   public:
-    using State_t = State<Context, StateId, millis>;
+    using State = TState<Context, StateId, millis>;
 
-    StateMachine(State_t *initialState) : currentState(initialState) {}
+    TStateMachine(State *initialState) : currentState(initialState) {}
 
     void initialize() { currentState->initialize(); }
 
     void loop() {
-        State_t *nextState = currentState->loop();
+        State *nextState = currentState->loop();
         if (nextState != nullptr) {
             delete currentState;
             currentState = nextState;
@@ -29,5 +29,5 @@ class StateMachine {
     StateId getCurrentStateId() { return currentState->getId(); }
 
   private:
-    State_t *currentState;
+    State *currentState;
 };

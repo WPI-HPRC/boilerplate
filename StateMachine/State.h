@@ -12,7 +12,7 @@
  * @note Templates should not bleed into subclasses, only the base class needs
  * them.
  */
-template <typename Context, typename StateId, typename MillisFn> class State {
+template <typename Context, typename StateId, typename MillisFn> class TState {
   public:
     /**
      * @brief Code to be run once when the state begins.
@@ -28,7 +28,7 @@ template <typename Context, typename StateId, typename MillisFn> class State {
      * @return The pointer to the next state or nullptr if the state has not
      * changed.
      */
-    State *loop() {
+    TState *loop() {
         long long now = millis();
         // These values may be used in the state code
         this->currentTime = now - this->startTime;
@@ -36,7 +36,7 @@ template <typename Context, typename StateId, typename MillisFn> class State {
         this->lastLoopTime = now;
         this->loopCount++;
 
-        State *next = loop_impl();
+        TState *next = loop_impl();
 
 #ifndef NO_TRANSITION
         return next;
@@ -50,12 +50,12 @@ template <typename Context, typename StateId, typename MillisFn> class State {
      */
     StateId getId() { return id; }
 
-    virtual ~State() {}
+    virtual ~TState() {}
 
   protected:
     //! @note Constructor to be called from subclasses (subclass constructors
     //! should only need to take in ctx)
-    State<Context, StateId, MillisFn>(StateId id, MillisFn millis, Context *ctx)
+    TState<Context, StateId, MillisFn>(StateId id, MillisFn millis, Context *ctx)
         : id(id), millis(millis), ctx(ctx) {}
     //! @brief number of milliseconds since the initialize call
     long long currentTime = 0;
@@ -77,5 +77,5 @@ template <typename Context, typename StateId, typename MillisFn> class State {
     MillisFn millis;
 
     virtual void initialize_impl() = 0;
-    virtual State *loop_impl() = 0;
+    virtual TState *loop_impl() = 0;
 };
