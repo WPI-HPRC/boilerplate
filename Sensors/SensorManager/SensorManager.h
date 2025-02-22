@@ -5,7 +5,6 @@
 #pragma once
 
 #include "../Sensor/Sensor.h"
-#include <vector>
 
 template <typename MillisFn, unsigned int N> class SensorManager {
   public:
@@ -35,7 +34,7 @@ template <typename MillisFn, unsigned int N> class SensorManager {
     } // true if success false if something fail
 
   private:
-    Sensor *sensors[N];
+    Sensor **sensors;
     MillisFn millis; // time
     long long currentTime = 0;
 };
