@@ -20,6 +20,8 @@ class ASM330 : public Sensor {
         : Sensor(sizeof(ASM330Data), 40), AccGyr(&Wire, ASM330LHH_I2C_ADD_L) {}
     // this number WILL change probably, i made it up
 
+    ASM330Data getData() { return *(ASM330Data *)data; }
+
   private:
     ASM330LHHSensor AccGyr;
     bool init_impl() override {
