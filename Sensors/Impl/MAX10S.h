@@ -19,6 +19,7 @@ struct MAX10SData {
 class MAX10S : public Sensor {
      public:
           MAX10S() : Sensor(sizeof(MAX10SData), 40), GPS() {} // This gps initialization defaults to i2c
+          // the 40 is arbitrary
 
      private:
           SFE_UBLOX_GNSS GPS;
