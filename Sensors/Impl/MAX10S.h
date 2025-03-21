@@ -13,7 +13,7 @@ struct MAX10SData {
      int32_t velD = 0;
      uint32_t epochTime = 0;
      uint8_t satellites = 0;
-     bool gpsLock = false;
+     uint8_t gpsLockType = 0;
 };
 
 class MAX10S : public Sensor {
@@ -31,6 +31,7 @@ class MAX10S : public Sensor {
           }
 
           void* poll() override {
+               ((MAX10SData*)data)->gpsLockType = GPS.getFixType();
                ((MAX10SData*)data)->lat = GPS.getLatitude();
                ((MAX10SData*)data)->lon = GPS.getLongitude();
                ((MAX10SData*)data)->altMSL = GPS.getAltitudeMSL();
@@ -40,11 +41,6 @@ class MAX10S : public Sensor {
                ((MAX10SData*)data)->velD = GPS.getNedDownVel();
                ((MAX10SData*)data)->epochTime = GPS.getUnixEpoch();
                ((MAX10SData*)data)->satellites = GPS.getSIV(); // Satellites In View
-
-               uint8_t fix_type = GPS.getFixType();
-               ((MAX10SData*)data)->gpsLock = (fix_type == 3 || fix_type == 4);
-               // there are 6 types of locks, 3 or 4 are needed for 3D positioning
-               // may be useful to store fix type not just true/false
 
                return data;
           }
