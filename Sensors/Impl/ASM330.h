@@ -22,6 +22,16 @@ class ASM330 : public Sensor {
 
     ASM330Data getData() { return *(ASM330Data *)data; }
 
+    void debugPrint() {
+        Serial.print("xAcc: "); Serial.print(((ASM330Data *)data)->xAcc); Serial.print(", ");
+        Serial.print("yAcc: "); Serial.print(((ASM330Data *)data)->yAcc); Serial.print(", ");
+        Serial.print("zAcc: "); Serial.print(((ASM330Data *)data)->zAcc); Serial.print(", ");
+
+        Serial.print("xGyr: "); Serial.print(((ASM330Data *)data)->xGyr); Serial.print(", ");
+        Serial.print("yGyr: "); Serial.print(((ASM330Data *)data)->yGyr); Serial.print(", ");
+        Serial.print("zGyr: "); Serial.print(((ASM330Data *)data)->zGyr); Serial.println();
+    };
+
   private:
     ASM330LHHSensor AccGyr;
     bool init_impl() override {

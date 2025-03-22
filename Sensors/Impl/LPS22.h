@@ -16,6 +16,11 @@ class Barometer : public Sensor {
 
     BarometerData getData() { return *(BarometerData *)data; }
 
+    void debugPrint() {
+        Serial.print("pressure: "); Serial.print(((BarometerData *)data)->pressure); Serial.print(", ");
+        Serial.print("altitude: "); Serial.print(((BarometerData *)data)->altitude); Serial.println();
+    }
+
   private:
     Adafruit_LPS25 lps;
 

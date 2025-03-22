@@ -19,6 +19,19 @@ class ICM20948 : public Sensor {
 
     ICMData getData() { return *(ICMData *)data; }
 
+    void debugPrint() {
+      Serial.print("accelX"); Serial.print(((ICMData *)data)->accelX); Serial.print(", ");
+      Serial.print("accelY"); Serial.print(((ICMData *)data)->accelY); Serial.print(", ");
+      Serial.print("accelZ"); Serial.print(((ICMData *)data)->accelZ); Serial.print(", ");
+      Serial.print("gyrX"); Serial.print(((ICMData *)data)->gyrX); Serial.print(", ");
+      Serial.print("gyrY"); Serial.print(((ICMData *)data)->gyrY); Serial.print(", ");
+      Serial.print("gyrZ"); Serial.print(((ICMData *)data)->gyrZ); Serial.print(", ");
+      Serial.print("magX"); Serial.print(((ICMData *)data)->magX); Serial.print(", ");
+      Serial.print("magY"); Serial.print(((ICMData *)data)->magY); Serial.print(", ");
+      Serial.print("magZ"); Serial.print(((ICMData *)data)->magZ); Serial.print(", ");
+      Serial.print("temp"); Serial.print(((ICMData *)data)->temp); Serial.println();
+    }
+
   private:
     Adafruit_ICM20948 icm;
 
