@@ -5,37 +5,37 @@
 #include <Arduino.h>
 
 struct ASM330Data {
-    float xAcc;
-    float yAcc;
-    float zAcc;
+    double xAcc;
+    double yAcc;
+    double zAcc;
 
-    float xGyr;
-    float yGyr;
-    float zGyr;
+    double xGyr;
+    double yGyr;
+    double zGyr;
 };
 
 class ASM330 : public Sensor {
   public:
     ASM330()
-        : Sensor(sizeof(ASM330Data), 40), AccGyr(&Wire, ASM330LHH_I2C_ADD_L) {}
+        : Sensor(sizeof(ASM330Data), 40), AccGyr(&Wire, ASM330LHH_I2C_ADD_H) {}
     // this number WILL change probably, i made it up
 
     ASM330Data getData() { return *(ASM330Data *)data; }
 
     void debugPrint() {
-        Serial.print("xAcc: "); Serial.print(((ASM330Data *)data)->xAcc); Serial.print(", ");
-        Serial.print("yAcc: "); Serial.print(((ASM330Data *)data)->yAcc); Serial.print(", ");
-        Serial.print("zAcc: "); Serial.print(((ASM330Data *)data)->zAcc); Serial.print(", ");
+        Serial.print("xAcc: "); Serial.print(((ASM330Data *)data)->xAcc, 4); Serial.print(", ");
+        Serial.print("yAcc: "); Serial.print(((ASM330Data *)data)->yAcc, 4); Serial.print(", ");
+        Serial.print("zAcc: "); Serial.print(((ASM330Data *)data)->zAcc, 4); Serial.print(", ");
 
-        Serial.print("xGyr: "); Serial.print(((ASM330Data *)data)->xGyr); Serial.print(", ");
-        Serial.print("yGyr: "); Serial.print(((ASM330Data *)data)->yGyr); Serial.print(", ");
-        Serial.print("zGyr: "); Serial.print(((ASM330Data *)data)->zGyr); Serial.println();
+        Serial.print("xGyr: "); Serial.print(((ASM330Data *)data)->xGyr, 4); Serial.print(", ");
+        Serial.print("yGyr: "); Serial.print(((ASM330Data *)data)->yGyr, 4); Serial.print(", ");
+        Serial.print("zGyr: "); Serial.print(((ASM330Data *)data)->zGyr, 4); Serial.println();
     };
 
   private:
     ASM330LHHSensor AccGyr;
     bool init_impl() override {
-        if (AccGyr.begin()) {
+        if (AccGyr.begin() == 0) {
             AccGyr.Enable_X();
             AccGyr.Enable_G();
 
