@@ -21,6 +21,19 @@ class MAX10S : public Sensor {
           MAX10S() : Sensor(sizeof(MAX10SData), 40), GPS() {} // This gps initialization defaults to i2c
           // the 40 is arbitrary
 
+          void debugPrint() {
+               Serial.print("lat: "); Serial.print(((MAX10SData *)data)->lat); Serial.print(", ");
+               Serial.print("lon: "); Serial.print(((MAX10SData *)data)->lon); Serial.print(", ");
+               Serial.print("altMSL: "); Serial.print(((MAX10SData *)data)->altMSL); Serial.print(", ");
+               Serial.print("altAGL: "); Serial.print(((MAX10SData *)data)->altAGL); Serial.print(", ");
+               Serial.print("velN: "); Serial.print(((MAX10SData *)data)->velN); Serial.print(", ");
+               Serial.print("velE: "); Serial.print(((MAX10SData *)data)->velE); Serial.print(", ");
+               Serial.print("velD: "); Serial.print(((MAX10SData *)data)->velD); Serial.print(", ");
+               Serial.print("epochTime: "); Serial.print(((MAX10SData *)data)->epochTime); Serial.print(", ");
+               Serial.print("satellites: "); Serial.print(((MAX10SData *)data)->satellites); Serial.print(", ");
+               Serial.print("gpsLockType: "); Serial.print(((MAX10SData *)data)->gpsLockType); Serial.println();
+          }
+
      private:
           SFE_UBLOX_GNSS GPS;
           bool init_impl () override {
