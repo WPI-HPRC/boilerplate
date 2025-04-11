@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Sensor/Sensor.h"
+#include "SdFat.h"
 #include <SparkFun_u-blox_GNSS_v3.h>
 
 struct MAX10SData {
@@ -18,26 +19,29 @@ struct MAX10SData {
 
 class MAX10S : public Sensor {
      public:
-          MAX10S() : Sensor(sizeof(MAX10SData), 40), GPS() {} // This gps initialization defaults to i2c
+          MAX10S() : Sensor(sizeof(MAX10SData), 25), GPS() {} // This gps initialization defaults to i2c
           // the 40 is arbitrary
 
-          void debugPrint() {
-               Serial.print("lat: "); Serial.print(((MAX10SData *)data)->lat); Serial.print(", ");
-               Serial.print("lon: "); Serial.print(((MAX10SData *)data)->lon); Serial.print(", ");
-               Serial.print("altMSL: "); Serial.print(((MAX10SData *)data)->altMSL); Serial.print(", ");
-               Serial.print("altAGL: "); Serial.print(((MAX10SData *)data)->altAGL); Serial.print(", ");
-               Serial.print("velN: "); Serial.print(((MAX10SData *)data)->velN); Serial.print(", ");
-               Serial.print("velE: "); Serial.print(((MAX10SData *)data)->velE); Serial.print(", ");
-               Serial.print("velD: "); Serial.print(((MAX10SData *)data)->velD); Serial.print(", ");
-               Serial.print("epochTime: "); Serial.print(((MAX10SData *)data)->epochTime); Serial.print(", ");
-               Serial.print("satellites: "); Serial.print(((MAX10SData *)data)->satellites); Serial.print(", ");
-               Serial.print("gpsLockType: "); Serial.print(((MAX10SData *)data)->gpsLockType); Serial.println();
+          void debugPrint(Print& p) {
+               p.print("lat: "); p.print(((MAX10SData *)data)->lat); p.print(", ");
+               p.print("lon: "); p.print(((MAX10SData *)data)->lon); p.print(", ");
+               p.print("altMSL: "); p.print(((MAX10SData *)data)->altMSL); p.print(", ");
+               p.print("altAGL: "); p.print(((MAX10SData *)data)->altAGL); p.print(", ");
+               p.print("velN: "); p.print(((MAX10SData *)data)->velN); p.print(", ");
+               p.print("velE: "); p.print(((MAX10SData *)data)->velE); p.print(", ");
+               p.print("velD: "); p.print(((MAX10SData *)data)->velD); p.print(", ");
+               p.print("epochTime: "); p.print(((MAX10SData *)data)->epochTime); p.print(", ");
+               p.print("satellites: "); p.print(((MAX10SData *)data)->satellites); p.print(", ");
+               p.print("gpsLockType: "); p.print(((MAX10SData *)data)->gpsLockType); p.println();
           }
 
      private:
           SFE_UBLOX_GNSS GPS;
           bool init_impl () override {
                if (GPS.begin()) {
+                    // GPS.setI2CpollingWait(40);
+                    GPS.setNavigationFrequency(40);
+                    GPS.setAutoPVT(true);
                     return true;
                }
                return false;

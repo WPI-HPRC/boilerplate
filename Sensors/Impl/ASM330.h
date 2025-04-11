@@ -2,6 +2,7 @@
 
 #include "../Sensor/Sensor.h"
 #include "ASM330LHHSensor.h"
+#include "SdFat.h"
 #include <Arduino.h>
 
 struct ASM330Data {
@@ -22,14 +23,14 @@ class ASM330 : public Sensor {
 
     ASM330Data getData() { return *(ASM330Data *)data; }
 
-    void debugPrint() {
-        Serial.print("xAcc: "); Serial.print(((ASM330Data *)data)->xAcc, 4); Serial.print(", ");
-        Serial.print("yAcc: "); Serial.print(((ASM330Data *)data)->yAcc, 4); Serial.print(", ");
-        Serial.print("zAcc: "); Serial.print(((ASM330Data *)data)->zAcc, 4); Serial.print(", ");
+    void debugPrint(Print& p) {
+        p.print("xAcc: "); p.print(((ASM330Data *)data)->xAcc, 4); p.print(", ");
+        p.print("yAcc: "); p.print(((ASM330Data *)data)->yAcc, 4); p.print(", ");
+        p.print("zAcc: "); p.print(((ASM330Data *)data)->zAcc, 4); p.print(", ");
 
-        Serial.print("xGyr: "); Serial.print(((ASM330Data *)data)->xGyr, 4); Serial.print(", ");
-        Serial.print("yGyr: "); Serial.print(((ASM330Data *)data)->yGyr, 4); Serial.print(", ");
-        Serial.print("zGyr: "); Serial.print(((ASM330Data *)data)->zGyr, 4); Serial.println();
+        p.print("xGyr: "); p.print(((ASM330Data *)data)->xGyr, 4); p.print(", ");
+        p.print("yGyr: "); p.print(((ASM330Data *)data)->yGyr, 4); p.print(", ");
+        p.print("zGyr: "); p.print(((ASM330Data *)data)->zGyr, 4); p.println();
     };
 
   private:

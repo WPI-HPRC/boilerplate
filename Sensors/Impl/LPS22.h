@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Sensor/Sensor.h"
+#include "SdFat.h"
 #include <Adafruit_LPS2X.h>
 #include <Adafruit_Sensor.h>
 #include <cmath>
@@ -16,9 +17,9 @@ class Barometer : public Sensor {
 
     BarometerData getData() { return *(BarometerData *)data; }
 
-    void debugPrint() {
-        Serial.print("pressure: "); Serial.print(((BarometerData *)data)->pressure, 4); Serial.print(", ");
-        Serial.print("altitude: "); Serial.print(((BarometerData *)data)->altitude, 4); Serial.println();
+    void debugPrint(Print& p) {
+        p.print("pressure: "); p.print(((BarometerData *)data)->pressure, 4); p.print(", ");
+        p.print("altitude: "); p.print(((BarometerData *)data)->altitude, 4); p.println();
     }
 
   private:
