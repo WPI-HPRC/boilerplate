@@ -55,5 +55,7 @@ class ICM42688_ : public Sensor {
       ((ICM42688Data *)data)->xGyr = icm.gyrX();
       ((ICM42688Data *)data)->yGyr = icm.gyrY();
       ((ICM42688Data *)data)->zGyr = icm.gyrZ();
+
+      return data;
     }
 };
