@@ -1,25 +1,25 @@
 #pragma once
 
 #include "../Sensor/Sensor.h"
-#include "SdFat.h"
+#include "Print.h"
 #include <Adafruit_LPS2X.h>
 #include <Adafruit_Sensor.h>
 #include <cmath>
 
-struct BarometerData {
+struct LPS22Data {
     double pressure;
     double altitude;
 };
 
-class Barometer : public Sensor {
+class LPS22 : public Sensor {
   public:
-    Barometer() : Sensor(sizeof(BarometerData), 40), lps() {}
+    LPS22() : Sensor(sizeof(LPS22Data), 40), lps() {}
 
-    BarometerData getData() { return *(BarometerData *)data; }
+    LPS22Data getData() { return *(LPS22Data *)data; }
 
     void debugPrint(Print& p) {
-        p.print("pressure: "); p.print(((BarometerData *)data)->pressure, 4); p.print(", ");
-        p.print("altitude: "); p.print(((BarometerData *)data)->altitude, 4); p.println();
+        p.print("pressure: "); p.print(((LPS22Data *)data)->pressure, 4); p.print(", ");
+        p.print("altitude: "); p.print(((LPS22Data *)data)->altitude, 4); p.println();
     }
 
   private:
@@ -36,8 +36,8 @@ class Barometer : public Sensor {
     void *poll() override {
         sensors_event_t pressure;
         lps.getEvent(&pressure, nullptr);
-        ((BarometerData *)data)->pressure = pressure.pressure;
-        ((BarometerData *)data)->altitude = solveAltitude(pressure.pressure);
+        ((LPS22Data *)data)->pressure = pressure.pressure;
+        ((LPS22Data *)data)->altitude = solveAltitude(pressure.pressure);
 
         return data;
     }

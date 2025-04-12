@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../Sensor/Sensor.h"
-#include "SdFat.h"
 #include <SparkFun_u-blox_GNSS_v3.h>
+#include "Print.h"
 
 struct MAX10SData {
      float lat = 0.0;

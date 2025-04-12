@@ -19,17 +19,17 @@ class ICM20948 : public Sensor {
 
     ICMData getData() { return *(ICMData *)data; }
 
-    void debugPrint() {
-      Serial.print("accelX"); Serial.print(((ICMData *)data)->accelX); Serial.print(", ");
-      Serial.print("accelY"); Serial.print(((ICMData *)data)->accelY); Serial.print(", ");
-      Serial.print("accelZ"); Serial.print(((ICMData *)data)->accelZ); Serial.print(", ");
-      Serial.print("gyrX"); Serial.print(((ICMData *)data)->gyrX); Serial.print(", ");
-      Serial.print("gyrY"); Serial.print(((ICMData *)data)->gyrY); Serial.print(", ");
-      Serial.print("gyrZ"); Serial.print(((ICMData *)data)->gyrZ); Serial.print(", ");
-      Serial.print("magX"); Serial.print(((ICMData *)data)->magX); Serial.print(", ");
-      Serial.print("magY"); Serial.print(((ICMData *)data)->magY); Serial.print(", ");
-      Serial.print("magZ"); Serial.print(((ICMData *)data)->magZ); Serial.print(", ");
-      Serial.print("temp"); Serial.print(((ICMData *)data)->temp); Serial.println();
+    void debugPrint(Print& p) {
+      p.print("accelX: "); p.print(((ICMData *)data)->accelX); p.print(", ");
+      p.print("accelY: "); p.print(((ICMData *)data)->accelY); p.print(", ");
+      p.print("accelZ: "); p.print(((ICMData *)data)->accelZ); p.print(", ");
+      p.print("gyrX: "); p.print(((ICMData *)data)->gyrX); p.print(", ");
+      p.print("gyrY: "); p.print(((ICMData *)data)->gyrY); p.print(", ");
+      p.print("gyrZ: "); p.print(((ICMData *)data)->gyrZ); p.print(", ");
+      p.print("magX: "); p.print(((ICMData *)data)->magX); p.print(", ");
+      p.print("magY: "); p.print(((ICMData *)data)->magY); p.print(", ");
+      p.print("magZ: "); p.print(((ICMData *)data)->magZ); p.print(", ");
+      p.print("temp: "); p.print(((ICMData *)data)->temp); p.println();
     }
 
   private:
