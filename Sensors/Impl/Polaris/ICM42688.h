@@ -30,32 +30,26 @@ class ICM42688_ : public Sensor {
         p.print("yGyr: "); p.print(((ICM42688Data *)data)->yGyr, 4); p.print(", ");
         p.print("zGyr: "); p.print(((ICM42688Data *)data)->zGyr, 4); p.println();
     };
+
   private:
     ICM42688 icm;
 
     bool init_impl() override {
-      if (icm.begin() < 0) {
-        return false;
-      }
-      if (icm.setAccelFS(ICM42688::gpm16) < 0) {
-        return false;
-      }
-      if (icm.setGyroFS(ICM42688::dps2000) < 0) {
-        return false;
-      }
+        return icm.begin() > 0 && icm.setAccelFS(ICM42688::gpm16) > 0 &&
+               icm.setGyroFS(ICM42688::dps2000) > 0;
     }
 
     void *poll() override {
-      icm.getAGT();
+        icm.getAGT();
 
-      ((ICM42688Data *)data)->xAcc = icm.accX();
-      ((ICM42688Data *)data)->yAcc = icm.accY();
-      ((ICM42688Data *)data)->zAcc = icm.accZ();
+        ((ICM42688Data *)data)->xAcc = icm.accX();
+        ((ICM42688Data *)data)->yAcc = icm.accY();
+        ((ICM42688Data *)data)->zAcc = icm.accZ();
 
-      ((ICM42688Data *)data)->xGyr = icm.gyrX();
-      ((ICM42688Data *)data)->yGyr = icm.gyrY();
-      ((ICM42688Data *)data)->zGyr = icm.gyrZ();
+        ((ICM42688Data *)data)->xGyr = icm.gyrX();
+        ((ICM42688Data *)data)->yGyr = icm.gyrY();
+        ((ICM42688Data *)data)->zGyr = icm.gyrZ();
 
-      return data;
+        return data;
     }
 };
