@@ -14,6 +14,12 @@ class MMC5983 : public Sensor {
   public:
     MMC5983() : Sensor(sizeof(MMC5983Data), 40), mag() {}
 
+    void debugPrint(Print& p) {
+      p.print("magX: "); p.print(((MMC5983Data *)data)->magX); p.print(", ");
+      p.print("magY: "); p.print(((MMC5983Data *)data)->magY); p.print(", ");
+      p.print("magZ: "); p.print(((MMC5983Data *)data)->magZ); p.println();
+    }
+
   private:
     SFE_MMC5983MA mag;
 

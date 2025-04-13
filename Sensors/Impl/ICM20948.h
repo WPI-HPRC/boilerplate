@@ -36,7 +36,7 @@ class ICM20948 : public Sensor {
     Adafruit_ICM20948 icm;
 
     bool init_impl() override {
-        if (!icm.begin_I2C()) {
+        if (!icm.begin_I2C(0x68)) {
             return false;
         }
         return true;
