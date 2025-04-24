@@ -14,10 +14,20 @@ class MMC5983 : public Sensor {
   public:
     MMC5983() : Sensor(sizeof(MMC5983Data), 40), mag() {}
 
-    void debugPrint(Print& p) {
-      p.print("magX: "); p.print(((MMC5983Data *)data)->magX); p.print(", ");
-      p.print("magY: "); p.print(((MMC5983Data *)data)->magY); p.print(", ");
-      p.print("magZ: "); p.print(((MMC5983Data *)data)->magZ); p.println();
+    void debugPrint(Print& p) override {
+      p.print("magX: "); p.print(((MMC5983Data *)data)->magX, 4); p.print(", ");
+      p.print("magY: "); p.print(((MMC5983Data *)data)->magY, 4); p.print(", ");
+      p.print("magZ: "); p.print(((MMC5983Data *)data)->magZ, 4); p.println();
+    }
+
+    void logCsvHeader(Print& p) override {
+      p.print("magX,magY,magZ");
+    }
+
+    void logCsvRow(Print& p) override {
+      p.print(((MMC5983Data *)data)->magX, 4); p.print(",");
+      p.print(((MMC5983Data *)data)->magY, 4); p.print(",");
+      p.print(((MMC5983Data *)data)->magZ, 4);
     }
 
   private:

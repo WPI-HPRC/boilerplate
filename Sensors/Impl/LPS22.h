@@ -8,6 +8,7 @@
 
 struct LPS22Data {
     double pressure;
+    double temperature;
     double altitude;
 };
 
@@ -17,9 +18,20 @@ class LPS22 : public Sensor {
 
     LPS22Data getData() { return *(LPS22Data *)data; }
 
-    void debugPrint(Print& p) {
+    void debugPrint(Print& p) override {
         p.print("pressure: "); p.print(((LPS22Data *)data)->pressure, 4); p.print(", ");
+        p.print("pressure: "); p.print(((LPS22Data *)data)->temperature, 4); p.print(", ");
         p.print("altitude: "); p.print(((LPS22Data *)data)->altitude, 4); p.println();
+    }
+
+    void logCsvHeader(Print &p) override {
+        p.print("pressure,temperature,altitude");
+    }
+
+    void logCsvRow(Print &p) override {
+        p.print(((LPS22Data *)data)->pressure, 4); p.print(",");
+        p.print(((LPS22Data *)data)->temperature, 4); p.print(",");
+        p.print(((LPS22Data *)data)->altitude, 4);
     }
 
   private:
@@ -34,9 +46,10 @@ class LPS22 : public Sensor {
     }
 
     void *poll() override {
-        sensors_event_t pressure;
-        lps.getEvent(&pressure, nullptr);
+        sensors_event_t pressure, temperature;
+        lps.getEvent(&pressure, &temperature);
         ((LPS22Data *)data)->pressure = pressure.pressure;
+        ((LPS22Data *)data)->temperature = temperature.temperature;
         ((LPS22Data *)data)->altitude = solveAltitude(pressure.pressure);
 
         return data;

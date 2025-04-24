@@ -29,8 +29,8 @@ constexpr uint8_t D2_OSR = 0x50; // 0101 0000 = 256 oversampling Temperature
 
 struct MS5611Data {
     float pressure;
-    float altitude;
     float temperature;
+    float altitude;
 };
 
 class MS5611 : public Sensor {
@@ -39,9 +39,20 @@ class MS5611 : public Sensor {
 
     MS5611Data getData() { return *(MS5611Data *)data; }
 
-    void debugPrint(Print &p) {
+    void debugPrint(Print &p) override {
         p.print("pressure: "); p.print(((MS5611Data *)data)->pressure, 4); p.print(", ");
+        p.print("temperature: "); p.print(((MS5611Data *)data)->temperature, 4); p.print(", ");
         p.print("altitude: "); p.print(((MS5611Data *)data)->altitude, 4); p.println();
+    }
+
+    void logCsvHeader(Print &p) override {
+        p.print("pressure,temperature,altitude");
+    }
+
+    void logCsvRow(Print& p) override {
+        p.print(((MS5611Data *)data)->pressure, 4); p.print(",");
+        p.print(((MS5611Data *)data)->temperature, 4); p.print(",");
+        p.print(((MS5611Data *)data)->altitude, 4);
     }
 
   private:

@@ -5,6 +5,7 @@
 #pragma once
 
 #include "../../Services/Time.h"
+#include "Print.h"
 #include <cstdlib>
 
 class Sensor {
@@ -51,6 +52,10 @@ class Sensor {
      * @return long, the polling period of the sensor in millis
      */
     long getPollingPeriod();
+
+    virtual void debugPrint(Print&) = 0;
+    virtual void logCsvHeader(Print&) = 0;
+    virtual void logCsvRow(Print&) = 0;
 
     virtual ~Sensor() = default;
 };

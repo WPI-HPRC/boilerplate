@@ -6,13 +6,13 @@
 #include <ICM42688.h>
 
 struct ICM42688Data {
-    double xAcc;
-    double yAcc;
-    double zAcc;
+    double accelX;
+    double accelY;
+    double accelZ;
 
-    double xGyr;
-    double yGyr;
-    double zGyr;
+    double gyrX;
+    double gyrY;
+    double gyrZ;
 };
 
 class ICM42688_ : public Sensor {
@@ -21,15 +21,29 @@ class ICM42688_ : public Sensor {
 
     ICM42688Data getData() { return *(ICM42688Data *)data; }
 
-    void debugPrint(Print &p) {
-        p.print("xAcc: "); p.print(((ICM42688Data *)data)->xAcc, 4); p.print(", ");
-        p.print("yAcc: "); p.print(((ICM42688Data *)data)->yAcc, 4); p.print(", ");
-        p.print("zAcc: "); p.print(((ICM42688Data *)data)->zAcc, 4); p.print(", ");
+    void debugPrint(Print &p) override {
+        p.print("accelX: "); p.print(((ICM42688Data *)data)->accelX, 4); p.print(", ");
+        p.print("accelY: "); p.print(((ICM42688Data *)data)->accelY, 4); p.print(", ");
+        p.print("accelZ: "); p.print(((ICM42688Data *)data)->accelZ, 4); p.print(", ");
 
-        p.print("xGyr: "); p.print(((ICM42688Data *)data)->xGyr, 4); p.print(", ");
-        p.print("yGyr: "); p.print(((ICM42688Data *)data)->yGyr, 4); p.print(", ");
-        p.print("zGyr: "); p.print(((ICM42688Data *)data)->zGyr, 4); p.println();
-    };
+        p.print("gyrX: "); p.print(((ICM42688Data *)data)->gyrX, 4); p.print(", ");
+        p.print("gyrY: "); p.print(((ICM42688Data *)data)->gyrY, 4); p.print(", ");
+        p.print("gyrZ: "); p.print(((ICM42688Data *)data)->gyrZ, 4); p.println();
+    }
+
+    void logCsvHeader(Print& p) override {
+      p.print("accelX,accelY,accelZ,gyrX,gyrY,gyrZ");
+    }
+
+    void logCsvRow(Print &p) override {
+        p.print(((ICM42688Data *)data)->accelX, 4); p.print(",");
+        p.print(((ICM42688Data *)data)->accelY, 4); p.print(",");
+        p.print(((ICM42688Data *)data)->accelZ, 4); p.print(",");
+
+        p.print(((ICM42688Data *)data)->gyrX, 4); p.print(",");
+        p.print(((ICM42688Data *)data)->gyrY, 4); p.print(",");
+        p.print(((ICM42688Data *)data)->gyrZ, 4);
+    }
 
   private:
     ICM42688 icm;
@@ -42,13 +56,13 @@ class ICM42688_ : public Sensor {
     void *poll() override {
         icm.getAGT();
 
-        ((ICM42688Data *)data)->xAcc = icm.accX();
-        ((ICM42688Data *)data)->yAcc = icm.accY();
-        ((ICM42688Data *)data)->zAcc = icm.accZ();
+        ((ICM42688Data *)data)->accelX = icm.accX();
+        ((ICM42688Data *)data)->accelY = icm.accY();
+        ((ICM42688Data *)data)->accelZ = icm.accZ();
 
-        ((ICM42688Data *)data)->xGyr = icm.gyrX();
-        ((ICM42688Data *)data)->yGyr = icm.gyrY();
-        ((ICM42688Data *)data)->zGyr = icm.gyrZ();
+        ((ICM42688Data *)data)->gyrX = icm.gyrX();
+        ((ICM42688Data *)data)->gyrY = icm.gyrY();
+        ((ICM42688Data *)data)->gyrZ = icm.gyrZ();
 
         return data;
     }
