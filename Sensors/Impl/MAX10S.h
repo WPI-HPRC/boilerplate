@@ -21,6 +21,8 @@ class MAX10S : public Sensor {
      public:
           MAX10S() : Sensor(sizeof(MAX10SData), 25), GPS() {} // This gps initialization defaults to i2c
 
+          MAX10SData getData() { return *(MAX10SData *)data; }
+
           void debugPrint(Print& p) override {
                p.print("lat: "); p.print(((MAX10SData *)data)->lat); p.print(", ");
                p.print("lon: "); p.print(((MAX10SData *)data)->lon); p.print(", ");
