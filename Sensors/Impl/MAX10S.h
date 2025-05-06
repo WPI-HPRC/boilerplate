@@ -65,7 +65,7 @@ class MAX10S : public Sensor {
                return false;
           }
 
-          void* poll() override {
+          void poll() override {
                ((MAX10SData*)data)->gpsLockType = GPS.getFixType();
                ((MAX10SData*)data)->lat = GPS.getLatitude();
                ((MAX10SData*)data)->lon = GPS.getLongitude();
@@ -76,7 +76,5 @@ class MAX10S : public Sensor {
                ((MAX10SData*)data)->velD = GPS.getNedDownVel();
                ((MAX10SData*)data)->epochTime = GPS.getUnixEpoch();
                ((MAX10SData*)data)->satellites = GPS.getSIV(); // Satellites In View
-
-               return data;
           }
 };

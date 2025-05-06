@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "../../Services/Time.h"
 #include "Print.h"
 #include <cstdlib>
 
@@ -14,12 +13,15 @@ class Sensor {
     void *data = nullptr;
     long pollingPeriod;
 
-    virtual void *poll() = 0;
+    /**
+     * @brief Polls the sensor.
+     * @note _Must_ set fields in struct pointed to by `data`
+     */
+    virtual void poll() = 0;
     virtual bool init_impl() = 0;
 
     /**
-     * @param data allocated pointer to store sensor data in.
-     * Must be `sensorDataBytes()` bytes long.
+     * @param dataSize Must be sizeof the struct pointed to by `data`
      */
     Sensor(size_t dataSize, long pollingPeriod)
         : data(malloc(dataSize)), pollingPeriod(pollingPeriod) {}
@@ -53,9 +55,9 @@ class Sensor {
      */
     long getPollingPeriod();
 
-    virtual void debugPrint(Print&) = 0;
-    virtual void logCsvHeader(Print&) = 0;
-    virtual void logCsvRow(Print&) = 0;
+    virtual void debugPrint(Print &) = 0;
+    virtual void logCsvHeader(Print &) = 0;
+    virtual void logCsvRow(Print &) = 0;
 
     virtual ~Sensor() = default;
 };

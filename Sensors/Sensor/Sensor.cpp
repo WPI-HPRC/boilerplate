@@ -12,7 +12,7 @@ bool Sensor::init() {
 void Sensor::update(long currentTime) {
     if (initStatus) {
         lastTimeRead = currentTime;
-        data = poll();
+        poll();
     }
 }
 

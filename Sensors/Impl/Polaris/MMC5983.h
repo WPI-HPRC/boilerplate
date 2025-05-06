@@ -42,7 +42,7 @@ class MMC5983 : public Sensor {
       return false;
     }
 
-    void *poll() override {
+    void poll() override {
       uint32_t rawX = mag.getMeasurementX();
       uint32_t rawY = mag.getMeasurementY();
       uint32_t rawZ = mag.getMeasurementZ();
@@ -57,7 +57,5 @@ class MMC5983 : public Sensor {
       ((MMC5983Data *)data)->magX = scaledX * 8.0;
       ((MMC5983Data *)data)->magY = scaledY * 8.0;
       ((MMC5983Data *)data)->magZ = scaledZ * 8.0;
-
-      return data;
     }
 };

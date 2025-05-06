@@ -45,14 +45,12 @@ class LPS22 : public Sensor {
         return true;
     }
 
-    void *poll() override {
+    void poll() override {
         sensors_event_t pressure, temperature;
         lps.getEvent(&pressure, &temperature);
         ((LPS22Data *)data)->pressure = pressure.pressure;
         ((LPS22Data *)data)->temperature = temperature.temperature;
         ((LPS22Data *)data)->altitude = solveAltitude(pressure.pressure);
-
-        return data;
     }
 
     double solveAltitude(double pressure) {

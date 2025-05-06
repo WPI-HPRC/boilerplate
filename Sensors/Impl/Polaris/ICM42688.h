@@ -53,7 +53,7 @@ class ICM42688_ : public Sensor {
                icm.setGyroFS(ICM42688::dps2000) > 0;
     }
 
-    void *poll() override {
+    void poll() override {
         icm.getAGT();
 
         ((ICM42688Data *)data)->accelX = icm.accX();
@@ -63,7 +63,5 @@ class ICM42688_ : public Sensor {
         ((ICM42688Data *)data)->gyrX = icm.gyrX();
         ((ICM42688Data *)data)->gyrY = icm.gyrY();
         ((ICM42688Data *)data)->gyrZ = icm.gyrZ();
-
-        return data;
     }
 };

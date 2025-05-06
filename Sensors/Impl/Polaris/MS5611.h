@@ -77,7 +77,7 @@ class MS5611 : public Sensor {
         return true;
     }
 
-    void *poll() override {
+    void poll() override {
         sendCommand(D1_OSR);
         // 600 us delay for 256 oversampling ratio change as per datasheet, this
         // is what the datasheet says to be the max ADC conversion time for 256
@@ -117,8 +117,6 @@ class MS5611 : public Sensor {
         ((MS5611Data *)data)->pressure = (float)P / 100.0;
         ((MS5611Data *)data)->temperature = (float)TEMP / 100.0;
         ((MS5611Data *)data)->altitude = solveAltitude(((MS5611Data *)data)->pressure);
-
-        return data;
     }
 
     bool sendCommand(uint8_t command) {

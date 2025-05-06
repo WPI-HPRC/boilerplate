@@ -68,7 +68,7 @@ class ASM330 : public Sensor {
         // feel like there should be some check at the end that it works as well
     }
 
-    void *poll() override {
+    void poll() override {
         static int32_t accelerometer[3] = {};
         static int32_t gyroscope[3] = {};
         AccGyr.Get_X_Axes(accelerometer);
@@ -81,8 +81,5 @@ class ASM330 : public Sensor {
         ((ASM330Data *)data)->gyrX = (float)gyroscope[0] / 1000.0;
         ((ASM330Data *)data)->gyrY = (float)gyroscope[1] / 1000.0;
         ((ASM330Data *)data)->gyrZ = (float)gyroscope[2] / 1000.0;
-
-        return data;
-
     }
 };

@@ -67,7 +67,7 @@ class ICM20948 : public Sensor {
         return true;
     }
 
-    void *poll() override {
+    void poll() override {
         sensors_event_t accel, gyr, mag, temp;
 
         icm.getEvent(&accel, &gyr, &temp, &mag);
@@ -85,7 +85,5 @@ class ICM20948 : public Sensor {
         ((ICMData *)data)->magZ = mag.magnetic.z;
 
         ((ICMData *)data)->temp = temp.temperature;
-
-        return data;
     }
 };
