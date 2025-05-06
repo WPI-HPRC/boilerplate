@@ -20,7 +20,7 @@ class LPS22 : public Sensor {
 
     void debugPrint(Print& p) override {
         p.print("pressure: "); p.print(((LPS22Data *)data)->pressure, 4); p.print(", ");
-        p.print("pressure: "); p.print(((LPS22Data *)data)->temperature, 4); p.print(", ");
+        p.print("temperature: "); p.print(((LPS22Data *)data)->temperature, 4); p.print(", ");
         p.print("altitude: "); p.print(((LPS22Data *)data)->altitude, 4); p.println();
     }
 
