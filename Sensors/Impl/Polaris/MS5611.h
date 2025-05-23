@@ -37,12 +37,15 @@ class MS5611 : public Sensor {
   public:
     MS5611(uint8_t addr = 0x77) : Sensor(sizeof(MS5611Data), 40), addr(addr) {}
 
-    MS5611Data getData() { return *(MS5611Data *)data; }
+    const TimedPointer<MS5611Data> getData() const {
+        return static_cast<TimedPointer<MS5611Data>>(data);
+    }
 
+    // clang-format off
     void debugPrint(Print &p) override {
-        p.print("pressure: "); p.print(((MS5611Data *)data)->pressure, 4); p.print(", ");
-        p.print("temperature: "); p.print(((MS5611Data *)data)->temperature, 4); p.print(", ");
-        p.print("altitude: "); p.print(((MS5611Data *)data)->altitude, 4); p.println();
+        p.print("pressure: "); p.print(getData()->pressure, 4); p.print(", ");
+        p.print("temperature: "); p.print(getData()->temperature, 4); p.print(", ");
+        p.print("altitude: "); p.print(getData()->altitude, 4); p.println();
     }
 
     void logCsvHeader(Print &p) override {
@@ -50,10 +53,11 @@ class MS5611 : public Sensor {
     }
 
     void logCsvRow(Print& p) override {
-        p.print(((MS5611Data *)data)->pressure, 4); p.print(",");
-        p.print(((MS5611Data *)data)->temperature, 4); p.print(",");
-        p.print(((MS5611Data *)data)->altitude, 4);
+        p.print(getData()->pressure, 4); p.print(",");
+        p.print(getData()->temperature, 4); p.print(",");
+        p.print(getData()->altitude, 4);
     }
+    // clang-format on
 
   private:
     uint8_t addr;
@@ -66,6 +70,10 @@ class MS5611 : public Sensor {
         uint16_t C5 = 0;
         uint16_t C6 = 0;
     } calibrationData;
+
+    TimedPointer<MS5611Data> setData() {
+        return static_cast<TimedPointer<MS5611Data>>(data);
+    }
 
     bool init_impl() override {
         if (!readCalibrationData())
@@ -114,9 +122,9 @@ class MS5611 : public Sensor {
         int64_t SENS = (int64_t)calibrationData.C1 * (1ul << 15) +
                        (int64_t)dT * (int64_t)calibrationData.C3 / (1l << 8);
         int32_t P = (int32_t)((D1 * SENS / (1ul << 21) - OFF) / (1ul << 15));
-        ((MS5611Data *)data)->pressure = (float)P / 100.0;
-        ((MS5611Data *)data)->temperature = (float)TEMP / 100.0;
-        ((MS5611Data *)data)->altitude = solveAltitude(((MS5611Data *)data)->pressure);
+        setData()->pressure = (float)P / 100.0;
+        setData()->temperature = (float)TEMP / 100.0;
+        setData()->altitude = solveAltitude(getData()->pressure);
     }
 
     bool sendCommand(uint8_t command) {
@@ -187,16 +195,18 @@ class MS5611 : public Sensor {
 
     double solveAltitude(double pressure) {
         // physical parameters for model
-        const double pb = 101325;   // [Pa] pressure at sea level
-        const double Tb = 288.15;   // [K] temperature at seal level
-        const double Lb = -0.0065;  // [K/m] standard temperature lapse rate
-        const double hb = 0;        // [m] height at bottom of atmospheric layer (sea level)
+        const double pb = 101325;  // [Pa] pressure at sea level
+        const double Tb = 288.15;  // [K] temperature at seal level
+        const double Lb = -0.0065; // [K/m] standard temperature lapse rate
+        const double hb =
+            0; // [m] height at bottom of atmospheric layer (sea level)
         const double R = 8.31432;   // [N*m/mol*K] universal gas constant
         const double g0 = 9.80665;  // [m/s^2] Earth standard gravity
         const double M = 0.0289644; // [kg/mol] molar mass of Earth's air
 
         double pressure_Pa = pressure * 100;
 
-        return hb + (Tb / Lb) * (pow((pressure_Pa / pb), (-R * Lb / (g0 * M))) - 1);
+        return hb +
+               (Tb / Lb) * (pow((pressure_Pa / pb), (-R * Lb / (g0 * M))) - 1);
     }
 };

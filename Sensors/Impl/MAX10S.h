@@ -1,80 +1,91 @@
 #pragma once
 
 #include "../Sensor/Sensor.h"
-#include <SparkFun_u-blox_GNSS_v3.h>
 #include "Print.h"
+#include <SparkFun_u-blox_GNSS_v3.h>
 
 struct MAX10SData {
-     float lat = 0.0;
-     float lon = 0.0;
-     float altMSL = 0.0;
-     float altEllipsoid = 0.0;
-     int32_t velN = 0;
-     int32_t velE = 0;
-     int32_t velD = 0;
-     uint32_t epochTime = 0;
-     uint8_t satellites = 0;
-     uint8_t gpsLockType = 0;
+    float lat = 0.0;
+    float lon = 0.0;
+    float altMSL = 0.0;
+    float altEllipsoid = 0.0;
+    int32_t velN = 0;
+    int32_t velE = 0;
+    int32_t velD = 0;
+    uint32_t epochTime = 0;
+    uint8_t satellites = 0;
+    uint8_t gpsLockType = 0;
 };
 
 class MAX10S : public Sensor {
-     public:
-          MAX10S() : Sensor(sizeof(MAX10SData), 25), GPS() {} // This gps initialization defaults to i2c
+  public:
+    MAX10S()
+        : Sensor(sizeof(MAX10SData), 25), GPS() {
+    } // This gps initialization defaults to i2c
 
-          MAX10SData getData() { return *(MAX10SData *)data; }
+    const TimedPointer<MAX10SData> getData() const {
+        return static_cast<TimedPointer<MAX10SData>>(data);
+    }
 
-          void debugPrint(Print& p) override {
-               p.print("lat: "); p.print(((MAX10SData *)data)->lat); p.print(", ");
-               p.print("lon: "); p.print(((MAX10SData *)data)->lon); p.print(", ");
-               p.print("altMSL: "); p.print(((MAX10SData *)data)->altMSL); p.print(", ");
-               p.print("altEll: "); p.print(((MAX10SData *)data)->altEllipsoid); p.print(", ");
-               p.print("velN: "); p.print(((MAX10SData *)data)->velN); p.print(", ");
-               p.print("velE: "); p.print(((MAX10SData *)data)->velE); p.print(", ");
-               p.print("velD: "); p.print(((MAX10SData *)data)->velD); p.print(", ");
-               p.print("epochTime: "); p.print(((MAX10SData *)data)->epochTime); p.print(", ");
-               p.print("satellites: "); p.print(((MAX10SData *)data)->satellites); p.print(", ");
-               p.print("gpsLockType: "); p.print(((MAX10SData *)data)->gpsLockType); p.println();
-          }
+    // clang-format off
+    void debugPrint(Print& p) override {
+       p.print("lat: "); p.print(getData()->lat); p.print(", ");
+       p.print("lon: "); p.print(getData()->lon); p.print(", ");
+       p.print("altMSL: "); p.print(getData()->altMSL); p.print(", ");
+       p.print("altEll: "); p.print(getData()->altEllipsoid); p.print(", ");
+       p.print("velN: "); p.print(getData()->velN); p.print(", ");
+       p.print("velE: "); p.print(getData()->velE); p.print(", ");
+       p.print("velD: "); p.print(getData()->velD); p.print(", ");
+       p.print("epochTime: "); p.print(getData()->epochTime); p.print(", ");
+       p.print("satellites: "); p.print(getData()->satellites); p.print(", ");
+       p.print("gpsLockType: "); p.print(getData()->gpsLockType); p.println();
+    }
 
-          void logCsvHeader(Print& p) override {
-               p.print("lat,lon,altMSL,altEll,velN,velE,velD,epochTime,satellites,gpsLockType");
-          }
+    void logCsvHeader(Print& p) override {
+       p.print("lat,lon,altMSL,altEll,velN,velE,velD,epochTime,satellites,gpsLockType");
+    }
 
-          void logCsvRow(Print& p) override {
-               p.print(((MAX10SData *)data)->lat); p.print(",");
-               p.print(((MAX10SData *)data)->lon); p.print(",");
-               p.print(((MAX10SData *)data)->altMSL); p.print(",");
-               p.print(((MAX10SData *)data)->altEllipsoid); p.print(",");
-               p.print(((MAX10SData *)data)->velN); p.print(",");
-               p.print(((MAX10SData *)data)->velE); p.print(",");
-               p.print(((MAX10SData *)data)->velD); p.print(",");
-               p.print(((MAX10SData *)data)->epochTime); p.print(",");
-               p.print(((MAX10SData *)data)->satellites); p.print(",");
-               p.print(((MAX10SData *)data)->gpsLockType);
-          }
+    void logCsvRow(Print& p) override {
+       p.print(getData()->lat); p.print(",");
+       p.print(getData()->lon); p.print(",");
+       p.print(getData()->altMSL); p.print(",");
+       p.print(getData()->altEllipsoid); p.print(",");
+       p.print(getData()->velN); p.print(",");
+       p.print(getData()->velE); p.print(",");
+       p.print(getData()->velD); p.print(",");
+       p.print(getData()->epochTime); p.print(",");
+       p.print(getData()->satellites); p.print(",");
+       p.print(getData()->gpsLockType);
+    }
+    // clang-format on
 
-     private:
-          SFE_UBLOX_GNSS GPS;
-          bool init_impl () override {
-               if (GPS.begin()) {
-                    // GPS.setI2CpollingWait(40);
-                    GPS.setNavigationFrequency(40);
-                    GPS.setAutoPVT(true);
-                    return true;
-               }
-               return false;
-          }
+  private:
+    SFE_UBLOX_GNSS GPS;
 
-          void poll() override {
-               ((MAX10SData*)data)->gpsLockType = GPS.getFixType();
-               ((MAX10SData*)data)->lat = GPS.getLatitude();
-               ((MAX10SData*)data)->lon = GPS.getLongitude();
-               ((MAX10SData*)data)->altMSL = GPS.getAltitudeMSL();
-               ((MAX10SData*)data)->altEllipsoid = GPS.getAltitude();
-               ((MAX10SData*)data)->velN = GPS.getNedNorthVel();
-               ((MAX10SData*)data)->velE = GPS.getNedEastVel();
-               ((MAX10SData*)data)->velD = GPS.getNedDownVel();
-               ((MAX10SData*)data)->epochTime = GPS.getUnixEpoch();
-               ((MAX10SData*)data)->satellites = GPS.getSIV(); // Satellites In View
-          }
+    TimedPointer<MAX10SData> setData() {
+        return static_cast<TimedPointer<MAX10SData>>(data);
+    }
+
+    bool init_impl() override {
+        if (GPS.begin()) {
+            // GPS.setI2CpollingWait(40);
+            GPS.setNavigationFrequency(40);
+            GPS.setAutoPVT(true);
+            return true;
+        }
+        return false;
+    }
+
+    void poll() override {
+        setData()->gpsLockType = GPS.getFixType();
+        setData()->lat = GPS.getLatitude();
+        setData()->lon = GPS.getLongitude();
+        setData()->altMSL = GPS.getAltitudeMSL();
+        setData()->altEllipsoid = GPS.getAltitude();
+        setData()->velN = GPS.getNedNorthVel();
+        setData()->velE = GPS.getNedEastVel();
+        setData()->velD = GPS.getNedDownVel();
+        setData()->epochTime = GPS.getUnixEpoch();
+        setData()->satellites = GPS.getSIV(); // Satellites In View
+    }
 };

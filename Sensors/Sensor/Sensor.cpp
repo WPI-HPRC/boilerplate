@@ -9,15 +9,8 @@ bool Sensor::init() {
     return initStatus;
 }
 
-void Sensor::update(long currentTime) {
-    if (initStatus) {
-        lastTimeRead = currentTime;
-        poll();
-    }
-}
-
-long Sensor::getLastTimeRead() { return lastTimeRead; }
+uint32_t Sensor::getLastTimePolled() { return data.getLastUpdated(); }
 
 bool Sensor::getInitStatus() { return initStatus; }
 
-long Sensor::getPollingPeriod() { return pollingPeriod; }
+uint32_t Sensor::getPollingPeriod() { return pollingPeriod; }

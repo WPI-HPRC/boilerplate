@@ -19,9 +19,9 @@ template <typename MillisFn, size_t N> class SensorManager {
         for (size_t i = 0; i < N; i++) {
             if (sensors[i]->getInitStatus()) {
                 long currentTime = this->millis();
-                if (currentTime - sensors[i]->getLastTimeRead() >=
+                if (currentTime - sensors[i]->getLastTimePolled() >=
                     sensors[i]->getPollingPeriod()) {
-                    sensors[i]->update(currentTime);
+                    sensors[i]->poll();
                 }
             }
         }

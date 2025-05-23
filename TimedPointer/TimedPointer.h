@@ -34,7 +34,7 @@ template <> class TimedPointer<void> {
     */
     const void *operator*() const { return ptr; }
 
-    uint32_t getLastUpdated() { return *lastUpdated; }
+    uint32_t getLastUpdated() const { return *lastUpdated; }
 
   private:
     void *ptr;
@@ -54,6 +54,11 @@ template <typename T> class TimedPointer {
         : ptr(const_cast<T *>(static_cast<const T *>(other.ptr))),
           lastUpdated(other.lastUpdated) {}
 
+    //! @brief Use static_cast instead of this function.
+    TimedPointer(const TimedPointer<void> &other)
+        : ptr(const_cast<T *>(static_cast<const T *>(other.ptr))),
+          lastUpdated(other.lastUpdated) {}
+
     T *operator->() {
         *lastUpdated = millis();
         return ptr;
@@ -66,7 +71,7 @@ template <typename T> class TimedPointer {
     const T *operator->() const { return ptr; }
     const T &operator*() const { return *ptr; }
 
-    uint32_t getLastUpdated() { return *lastUpdated; }
+    uint32_t getLastUpdated() const { return *lastUpdated; }
 
   private:
     T *ptr;
