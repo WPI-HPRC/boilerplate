@@ -6,9 +6,12 @@
 
 #include "../Sensor/Sensor.h"
 
-template <typename MillisFn, unsigned int N> class SensorManager {
+template <typename MillisFn, size_t N> class SensorManager {
   public:
-    SensorManager<MillisFn, N>(Sensor *sensors[N], MillisFn millis)
+    // NOTE: the `sensors field` being declared as Sensor * (&&sensors)[N] is to
+    // force the compiler to not decay the array into a poiner, and therefore
+    // allow template argument deduction to work.
+    SensorManager<MillisFn, N>(Sensor *(&sensors)[N], MillisFn millis)
         : sensors(sensors), millis(millis) {}
 
     // read the sensors
