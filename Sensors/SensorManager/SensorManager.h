@@ -8,7 +8,7 @@
 
 template <typename MillisFn, size_t N> class SensorManager {
   public:
-    // NOTE: the `sensors field` being declared as Sensor * (&&sensors)[N] is to
+    // NOTE: the `sensors field` being declared as Sensor * (&sensors)[N] is to
     // force the compiler to not decay the array into a poiner, and therefore
     // allow template argument deduction to work.
     SensorManager<MillisFn, N>(Sensor *(&sensors)[N], MillisFn millis)
@@ -18,7 +18,7 @@ template <typename MillisFn, size_t N> class SensorManager {
     void loop() {
         for (size_t i = 0; i < N; i++) {
             if (sensors[i]->getInitStatus()) {
-                long currentTime = this->millis();
+                uint32_t currentTime = this->millis();
                 if (currentTime - sensors[i]->getLastTimePolled() >=
                     sensors[i]->getPollingPeriod()) {
                     sensors[i]->poll();
@@ -39,5 +39,5 @@ template <typename MillisFn, size_t N> class SensorManager {
   private:
     Sensor **sensors;
     MillisFn millis; // time
-    long long currentTime = 0;
+    uint32_t currentTime = 0;
 };
