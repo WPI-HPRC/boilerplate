@@ -39,14 +39,14 @@ class ASM330 : public Sensor {
         p.print("ASMaccelX,ASMaccelY,ASMaccelZ,ASMgyrX,ASMgyrY,ASMgyrZ");
     }
 
-    void logCsvRow(Print& p) override {
-        p.print(getData()->accelX, 4); p.print(",");
-        p.print(getData()->accelY, 4); p.print(",");
-        p.print(getData()->accelZ, 4); p.print(",");
+    void logCsvRow(Print& p, uint32_t lastLoggedAt = 0) override {
+        IF_NEW(p.print(getData()->accelX, 4)); p.print(",");
+        IF_NEW(p.print(getData()->accelY, 4)); p.print(",");
+        IF_NEW(p.print(getData()->accelZ, 4)); p.print(",");
 
-        p.print(getData()->gyrX, 4); p.print(",");
-        p.print(getData()->gyrY, 4); p.print(",");
-        p.print(getData()->gyrZ, 4);
+        IF_NEW(p.print(getData()->gyrX, 4)); p.print(",");
+        IF_NEW(p.print(getData()->gyrY, 4)); p.print(",");
+        IF_NEW(p.print(getData()->gyrZ, 4));
     }
     // clang-format on
 
