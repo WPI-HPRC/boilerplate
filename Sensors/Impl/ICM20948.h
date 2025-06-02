@@ -41,17 +41,17 @@ class ICM20948 : public Sensor {
       p.print("ICMaccelX,ICMaccelY,ICMaccelZ,ICMgyrX,ICMgyrY,ICMgyrZ,magX,magY,magZ,ICMtemp");
     }
 
-    void logCsvRow(Print &p) override {
-      p.print(getData()->accelX, 4); p.print(",");
-      p.print(getData()->accelY, 4); p.print(",");
-      p.print(getData()->accelZ, 4); p.print(",");
-      p.print(getData()->gyrX, 4); p.print(",");
-      p.print(getData()->gyrY, 4); p.print(",");
-      p.print(getData()->gyrZ, 4); p.print(",");
-      p.print(getData()->magX, 4); p.print(",");
-      p.print(getData()->magY, 4); p.print(",");
-      p.print(getData()->magZ, 4); p.print(",");
-      p.print(getData()->temp, 4);
+    void logCsvRow(Print &p, uint32_t lastLoggedAt = 0) override {
+      IF_NEW(p.print(getData()->accelX, 4)); p.print(",");
+      IF_NEW(p.print(getData()->accelY, 4)); p.print(",");
+      IF_NEW(p.print(getData()->accelZ, 4)); p.print(",");
+      IF_NEW(p.print(getData()->gyrX, 4)); p.print(",");
+      IF_NEW(p.print(getData()->gyrY, 4)); p.print(",");
+      IF_NEW(p.print(getData()->gyrZ, 4)); p.print(",");
+      IF_NEW(p.print(getData()->magX, 4)); p.print(",");
+      IF_NEW(p.print(getData()->magY, 4)); p.print(",");
+      IF_NEW(p.print(getData()->magZ, 4)); p.print(",");
+      IF_NEW(p.print(getData()->temp, 4));
     }
     // clang-format on
 

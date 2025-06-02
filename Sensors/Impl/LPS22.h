@@ -31,10 +31,10 @@ class LPS22 : public Sensor {
         p.print("pressure,temperature,altitude");
     }
 
-    void logCsvRow(Print &p) override {
-        p.print(getData()->pressure, 4); p.print(",");
-        p.print(getData()->temperature, 4); p.print(",");
-        p.print(getData()->altitude, 4);
+    void logCsvRow(Print &p, uint32_t lastLoggedAt = 0) override {
+        IF_NEW(p.print(getData()->pressure, 4)); p.print(",");
+        IF_NEW(p.print(getData()->temperature, 4)); p.print(",");
+        IF_NEW(p.print(getData()->altitude, 4));
     }
     // clang-format on
 

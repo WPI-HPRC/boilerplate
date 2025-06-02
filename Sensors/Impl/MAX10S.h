@@ -45,17 +45,17 @@ class MAX10S : public Sensor {
        p.print("lat,lon,altMSL,altEll,velN,velE,velD,epochTime,satellites,gpsLockType");
     }
 
-    void logCsvRow(Print& p) override {
-       p.print(getData()->lat); p.print(",");
-       p.print(getData()->lon); p.print(",");
-       p.print(getData()->altMSL); p.print(",");
-       p.print(getData()->altEllipsoid); p.print(",");
-       p.print(getData()->velN); p.print(",");
-       p.print(getData()->velE); p.print(",");
-       p.print(getData()->velD); p.print(",");
-       p.print(getData()->epochTime); p.print(",");
-       p.print(getData()->satellites); p.print(",");
-       p.print(getData()->gpsLockType);
+    void logCsvRow(Print& p, uint32_t lastLoggedAt = 0) override {
+       IF_NEW(p.print(getData()->lat)); p.print(",");
+       IF_NEW(p.print(getData()->lon)); p.print(",");
+       IF_NEW(p.print(getData()->altMSL)); p.print(",");
+       IF_NEW(p.print(getData()->altEllipsoid)); p.print(",");
+       IF_NEW(p.print(getData()->velN)); p.print(",");
+       IF_NEW(p.print(getData()->velE)); p.print(",");
+       IF_NEW(p.print(getData()->velD)); p.print(",");
+       IF_NEW(p.print(getData()->epochTime)); p.print(",");
+       IF_NEW(p.print(getData()->satellites)); p.print(",");
+       IF_NEW(p.print(getData()->gpsLockType));
     }
     // clang-format on
 
