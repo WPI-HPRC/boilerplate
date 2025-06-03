@@ -5,8 +5,6 @@
 #include "boilerplate/Sensors/Sensor/Sensor.h"
 #include <Arduino.h>
 
-#define DEBUG
-
 PVStateEstimator::PVStateEstimator(const TimedPointer<LPS22Data> baroData,
                  const TimedPointer<ICMData> accelData,
                  const TimedPointer<MAX10SData> gpsData,

@@ -43,7 +43,7 @@ AttStateEstimator::AttStateEstimator(const TimedPointer<ICMData> magData, float 
     for(uint8_t idx : AttKFInds::magBias) {
         Q(idx, idx) = powf(0.1f, 2);
     }
-
+#ifdef DEBUG
     Serial.println("<----- Process Noise ----->");
     for (int i = 0; i < Q.Rows; i++) {
         for (int j = 0; j < Q.Cols; j++) {
@@ -59,6 +59,7 @@ AttStateEstimator::AttStateEstimator(const TimedPointer<ICMData> magData, float 
         }
         Serial.println("");
     }
+#endif
 }
 
 void AttStateEstimator::init() {
@@ -313,6 +314,7 @@ void AttStateEstimator::applyGravUpdate(BLA::Matrix<13,1> &x_in, BLA::Matrix<3,1
 
     BLA::Matrix<3,1> y = z_grav - h_grav;
 
+#ifdef DEBUG
     // Print innovation to teleplot three line series
     Serial.print(">Grav Innovation X: ");
     Serial.println(y(0));
@@ -320,6 +322,7 @@ void AttStateEstimator::applyGravUpdate(BLA::Matrix<13,1> &x_in, BLA::Matrix<3,1
     Serial.println(y(1));
     Serial.print(">Grav Innovation Z: ");
     Serial.println(y(2));
+#endif
     
     x = x_in + K * (z_grav - h_grav);
 
@@ -389,6 +392,7 @@ void AttStateEstimator::applyMagUpdate(BLA::Matrix<13,1> &x_in, BLA::Matrix<3,1>
     float S = S_mat(0,0) + R_mag;  // R_mag is yaw measurement variance [rad^2]
     BLA::Matrix<13,1> K = (P_min * H_yaw_T) * (1.0f / S);
 
+#ifdef DEBUG
     // Print innovation to teleplot
     Serial.print(">Yaw Innovation: ");
     Serial.println(yaw_err);
@@ -397,6 +401,7 @@ void AttStateEstimator::applyMagUpdate(BLA::Matrix<13,1> &x_in, BLA::Matrix<3,1>
     Serial.println(yaw_meas);
     Serial.print(">Yaw Pred: ");
     Serial.println(yaw_pred);
+#endif
 
     // Update state
     x = x_in + K * yaw_err;
