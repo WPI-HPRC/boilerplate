@@ -86,10 +86,10 @@ BLA::Matrix<3,1> PVStateEstimator::body2ned(BLA::Matrix<13,1> orientation, float
         2 * (qx * qz - qw * qy), 2 * (qw * qx + qy * qz), qw*qw - qx*qx - qy*qy + qz*qz
     };
 
-    BLA::Matrix<3,1> grav = {0,0,-9.81}; 
+    BLA::Matrix<3,1> grav = {0,0,1}; 
     BLA::Matrix<3,1> accel_body = {accelX, accelY, accelZ}; 
     BLA::Matrix<3,1> accel_ned = rotm * accel_body; 
-    return accel_ned - grav; //account for gravity, assumes accel in m/s^2
+    return accel_ned - grav; //account for gravity, assumes accel in g
 }
 
 /*Converts predicted state from lla to ECEF*/

@@ -125,9 +125,9 @@ BLA::Matrix<13,1> AttStateEstimator::onLoop(bool inPrelaunch) {
     float gyrY = magData->gyrY;
     float gyrZ = magData->gyrZ;
 
-    float aclX = magData->accelX / g;
-    float aclY = magData->accelY / g;
-    float aclZ = magData->accelZ / g;
+    float aclX = magData->accelX;
+    float aclY = magData->accelY;
+    float aclZ = magData->accelZ;
 
     float magX = magData->magX;
     float magY = magData->magY;
