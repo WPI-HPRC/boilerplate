@@ -20,7 +20,7 @@ class PVStateEstimator {
     PVStateEstimator(const TimedPointer<LPS22Data>,
                      const TimedPointer<ICMData>,
                      const TimedPointer<MAX10SData>, 
-                     MAX10S, float dt); 
+                     float dt); 
 
     void init(BLA::Matrix<6, 1> initialPV, BLA::Matrix<13,1> initialQuat); 
     

@@ -5,10 +5,12 @@
 #include "boilerplate/Sensors/Sensor/Sensor.h"
 #include <Arduino.h>
 
+#define DEBUG
+
 PVStateEstimator::PVStateEstimator(const TimedPointer<LPS22Data> baroData,
                  const TimedPointer<ICMData> accelData,
                  const TimedPointer<MAX10SData> gpsData,
-                 MAX10S gps, float dt): gps(gps), baroData(baroData), accelData(accelData), gpsData(gpsData), dt(dt) {
+                 float dt): baroData(baroData), accelData(accelData), gpsData(gpsData), dt(dt) {
 
     // clang-format off
     F = {
@@ -158,9 +160,9 @@ BLA::Matrix<6,1> PVStateEstimator::onLoop() {
     // Propogate Covariance
     P = F * P * BLA::MatrixTranspose<BLA::Matrix<6, 6>>(F) + Q;
 
-    if(lastGPSlogged < gps.getLastTimePolled()){ 
+    if(lastGPSlogged < gpsData.getLastUpdated()){ 
 
-        lastGPSlogged = gps.getLastTimePolled(); 
+        lastGPSlogged = gpsData.getLastUpdated(); 
 
        // Convert barometer to correct units 
         float alt = baroData->altitude; 
@@ -175,6 +177,17 @@ BLA::Matrix<6,1> PVStateEstimator::onLoop() {
     }
    
     //x = lla2ecef(x); 
+
+    #if defined(DEBUG)
+        Serial.println("Position X: " + String(x(0))); 
+        Serial.println("Position Y: " + String(x(1)));
+        Serial.println("Position Z: " + String(x(2)));
+        Serial.println("Velocity X: " + String(x(3)));
+        Serial.println("Velocity Y: " + String(x(4)));
+        Serial.println("Velocity Z: " + String(x(5))+ "\n");
+      
+    #endif 
+
     return x; 
 }
 
