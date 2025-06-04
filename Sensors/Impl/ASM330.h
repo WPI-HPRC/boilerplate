@@ -3,6 +3,7 @@
 #include "../Sensor/Sensor.h"
 #include "ASM330LHHSensor.h"
 #include "Print.h"
+#include "boilerplate/Logging/Loggable.h"
 #include <Arduino.h>
 
 struct ASM330Data {
@@ -15,45 +16,32 @@ struct ASM330Data {
     float gyrZ;
 };
 
-class ASM330 : public Sensor {
+#define ASM330_LOG_DESC(X)                                                            \
+    X(0, "ASMaccelX", p.print(getData()->accelX, 3))                           \
+    X(1, "ASMaccelY", p.print(getData()->accelY, 3))                           \
+    X(2, "ASMaccelZ", p.print(getData()->accelZ, 3))                           \
+    X(3, "ASMgyrX", p.print(getData()->gyrX, 3))                               \
+    X(4, "ASMgyrY", p.print(getData()->gyrY, 3))                               \
+    X(5, "ASMgyrZ", p.print(getData()->gyrZ, 3))
+
+class ASM330 : public Sensor, public Loggable {
   public:
     ASM330()
-        : Sensor(sizeof(ASM330Data), 0), AccGyr(&Wire, ASM330LHH_I2C_ADD_H) {}
+        : Sensor(sizeof(ASM330Data), 0), Loggable(NUM_FIELDS(ASM330_LOG_DESC)),
+          AccGyr(&Wire, ASM330LHH_I2C_ADD_H) {}
 
     const TimedPointer<ASM330Data> getData() const {
         return static_cast<TimedPointer<ASM330Data>>(data);
     }
 
-    // clang-format off
-    void debugPrint(Print& p) override {
-        p.print("accelX: "); p.print(getData()->accelX, 4); p.print(", ");
-        p.print("accelY: "); p.print(getData()->accelY, 4); p.print(", ");
-        p.print("accelZ: "); p.print(getData()->accelZ, 4); p.print(", ");
-
-        p.print("gyrX: "); p.print(getData()->gyrX, 4); p.print(", ");
-        p.print("gyrY: "); p.print(getData()->gyrY, 4); p.print(", ");
-        p.print("gyrZ: "); p.print(getData()->gyrZ, 4); p.println();
-    };
-
-    void logCsvHeader(Print& p) override {
-        p.print("ASMaccelX,ASMaccelY,ASMaccelZ,ASMgyrX,ASMgyrY,ASMgyrZ");
-    }
-
-    void logCsvRow(Print& p, uint32_t lastLoggedAt = 0) override {
-        IF_NEW(p.print(getData()->accelX, 4)); p.print(",");
-        IF_NEW(p.print(getData()->accelY, 4)); p.print(",");
-        IF_NEW(p.print(getData()->accelZ, 4)); p.print(",");
-
-        IF_NEW(p.print(getData()->gyrX, 4)); p.print(",");
-        IF_NEW(p.print(getData()->gyrY, 4)); p.print(",");
-        IF_NEW(p.print(getData()->gyrZ, 4));
-    }
-    // clang-format on
-
   private:
     TimedPointer<ASM330Data> setData() {
         return static_cast<TimedPointer<ASM330Data>>(data);
     }
+
+    MAKE_LOGGABLE(ASM330_LOG_DESC)
+
+    uint32_t dataUpdatedAt() override { return getLastTimePolled(); }
 
     ASM330LHHSensor AccGyr;
     bool init_impl() override {

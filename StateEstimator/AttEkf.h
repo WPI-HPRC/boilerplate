@@ -2,6 +2,7 @@
 
 #include "BasicLinearAlgebra.h"
 
+#include "boilerplate/Logging/Loggable.h"
 #include "boilerplate/Sensors/Impl/ICM20948.h"
 #include "boilerplate/TimedPointer/TimedPointer.h"
 #include "kfConsts.h"
@@ -33,6 +34,37 @@ constexpr uint8_t mb_y = 11;
 constexpr uint8_t mb_z = 12;
 constexpr std::array<uint8_t, 3> magBias = {mb_x, mb_y, mb_z};
 }; // namespace AttKFInds
+
+#define ATTKF_LOG_DESC(X)                                                      \
+    X(0, "w", p.print(state(AttKFInds::q_w), 4))                               \
+    X(1, "i", p.print(state(AttKFInds::q_x), 4))                               \
+    X(2, "j", p.print(state(AttKFInds::q_y), 4))                               \
+    X(3, "k", p.print(state(AttKFInds::q_z), 4))
+
+class AttEkfLogger : public Loggable {
+  public:
+    AttEkfLogger() : Loggable(NUM_FIELDS(ATTKF_LOG_DESC)) {}
+
+    void newState(BLA::Matrix<13, 1> s) {
+      initialized = true;
+      state = s;
+      updatedAt = millis();
+    }
+
+    const BLA::Matrix<13, 1>& getState() { return state; }
+
+  private:
+    BLA::Matrix<13, 1> state;
+    uint32_t updatedAt = 0;
+    bool initialized = false;
+
+    MAKE_LOGGABLE(ATTKF_LOG_DESC)
+
+    uint32_t dataUpdatedAt() override {
+      if (!initialized) return 0; // Data will not be loggged
+      return updatedAt;
+    }
+};
 
 /**
  * @name AttStateEstimator

@@ -2,11 +2,12 @@
 
 #include "../Sensor/Sensor.h"
 #include "Print.h"
+#include "boilerplate/Logging/Loggable.h"
 #include <SparkFun_u-blox_GNSS_v3.h>
 
 struct MAX10SData {
-    float lat = 0.0;
-    float lon = 0.0;
+    int32_t lat = 0;
+    int32_t lon = 0;
     float altMSL = 0.0;
     float altEllipsoid = 0.0;
     int32_t ecefX = 0;
@@ -20,56 +21,37 @@ struct MAX10SData {
     uint8_t gpsLockType = 0;
 };
 
-class MAX10S : public Sensor {
+#define MAX10S_LOG_DESC(X)                                                            \
+    X(0, "lat", p.print(getData()->lat))                                       \
+    X(1, "lon", p.print(getData()->lon))                                       \
+    X(2, "altMSL", p.print(getData()->altMSL, 3))                                 \
+    X(3, "altEll", p.print(getData()->altEllipsoid, 3))                     \
+    X(4, "ecefX", p.print(getData()->ecefX))                                   \
+    X(5, "ecefY", p.print(getData()->ecefY))                                   \
+    X(6, "ecefZ", p.print(getData()->ecefZ))                                   \
+    X(7, "velN", p.print(getData()->velN))                                     \
+    X(8, "velE", p.print(getData()->velE))                                     \
+    X(9, "velD", p.print(getData()->velD))                                     \
+    X(10, "epochTime", p.print(getData()->epochTime))                          \
+    X(11, "satellites", p.print(getData()->satellites))                        \
+    X(12, "gpsLockType", p.print(getData()->gpsLockType))
+
+class MAX10S : public Sensor, public Loggable {
   public:
     MAX10S()
-        : Sensor(sizeof(MAX10SData), 25), GPS() {
-    } // This gps initialization defaults to i2c
+        : Sensor(sizeof(MAX10SData), 25), Loggable(NUM_FIELDS(MAX10S_LOG_DESC)),
+          GPS() {} // This gps initialization defaults to i2c
 
     const TimedPointer<MAX10SData> getData() const {
         return static_cast<TimedPointer<MAX10SData>>(data);
     }
 
-    // clang-format off
-    void debugPrint(Print& p) override {
-       p.print("lat: "); p.print(getData()->lat); p.print(", ");
-       p.print("lon: "); p.print(getData()->lon); p.print(", ");
-       p.print("altMSL: "); p.print(getData()->altMSL); p.print(", ");
-       p.print("altEll: "); p.print(getData()->altEllipsoid); p.print(", ");
-       p.print("ecefX: "); p.print(getData()->ecefX); p.print(", ");
-       p.print("ecefY: "); p.print(getData()->ecefY); p.print(", ");
-       p.print("ecefZ: "); p.print(getData()->ecefZ); p.print(", ");
-       p.print("velN: "); p.print(getData()->velN); p.print(", ");
-       p.print("velE: "); p.print(getData()->velE); p.print(", ");
-       p.print("velD: "); p.print(getData()->velD); p.print(", ");
-       p.print("epochTime: "); p.print(getData()->epochTime); p.print(", ");
-       p.print("satellites: "); p.print(getData()->satellites); p.print(", ");
-       p.print("gpsLockType: "); p.print(getData()->gpsLockType); p.println();
-    }
-
-    void logCsvHeader(Print& p) override {
-       p.print("lat,lon,altMSL,altEll,ecefX,ecefY,ecefZ,velN,velE,velD,epochTime,satellites,gpsLockType");
-    }
-
-    void logCsvRow(Print& p, uint32_t lastLoggedAt = 0) override {
-       IF_NEW(p.print(getData()->lat)); p.print(",");
-       IF_NEW(p.print(getData()->lon)); p.print(",");
-       IF_NEW(p.print(getData()->altMSL)); p.print(",");
-       IF_NEW(p.print(getData()->altEllipsoid)); p.print(",");
-       IF_NEW(p.print(getData()->ecefX)); p.print(",");
-       IF_NEW(p.print(getData()->ecefY)); p.print(",");
-       IF_NEW(p.print(getData()->ecefZ)); p.print(",");
-       IF_NEW(p.print(getData()->velN)); p.print(",");
-       IF_NEW(p.print(getData()->velE)); p.print(",");
-       IF_NEW(p.print(getData()->velD)); p.print(",");
-       IF_NEW(p.print(getData()->epochTime)); p.print(",");
-       IF_NEW(p.print(getData()->satellites)); p.print(",");
-       IF_NEW(p.print(getData()->gpsLockType));
-    }
-    // clang-format on
-
   private:
     SFE_UBLOX_GNSS GPS;
+
+    MAKE_LOGGABLE(MAX10S_LOG_DESC)
+
+    uint32_t dataUpdatedAt() override { return getLastTimePolled(); }
 
     TimedPointer<MAX10SData> setData() {
         return static_cast<TimedPointer<MAX10SData>>(data);

@@ -8,8 +8,6 @@
 #include "../../TimedPointer/TimedPointer.h"
 #include <cstdlib>
 
-#define IF_NEW(body) if (lastLoggedAt < getLastTimePolled()) { body; }
-
 class Sensor {
   protected:
     TimedPointer<void> data;
@@ -46,10 +44,6 @@ class Sensor {
      * @return long, the polling period of the sensor in millis
      */
     uint32_t getPollingPeriod();
-
-    virtual void debugPrint(Print &) = 0;
-    virtual void logCsvHeader(Print &) = 0;
-    virtual void logCsvRow(Print &, uint32_t lastLoggedAt) = 0;
 
     virtual ~Sensor() = default;
 };
