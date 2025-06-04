@@ -11,7 +11,6 @@
 constexpr static double a = 6378137.0;           // WGS-84 semi-major axis
 constexpr static double f = 1.0 / 298.257223563; // flattening
 constexpr static double e2 = f * (2 - f);        // eccentricity squared
-constexpr static double pi = 3.14159265358979323846;
 
 class PVStateEstimator {
   public:
