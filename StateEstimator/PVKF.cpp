@@ -84,17 +84,18 @@ BLA::Matrix<3,1> PVStateEstimator::body2ned(BLA::Matrix<13,1> orientation, float
         2 * (qx * qz - qw * qy), 2 * (qw * qx + qy * qz), qw*qw - qx*qx - qy*qy + qz*qz
     };
 
-    BLA::Matrix<3,1> grav = {0,0,-g}; 
+    // Check axes
+    static BLA::Matrix<3,1> grav = {0,0,g}; 
     BLA::Matrix<3,1> accel_body = {accelX, accelY, accelZ}; 
     BLA::Matrix<3,1> accel_ned = g * rotm * accel_body; 
-    return accel_ned - grav; //account for gravity, assumes accel in m/s^2
+    return accel_ned + grav; //account for gravity, assumes accel in m/s^2
 }
 
 /*Converts predicted state from lla to ECEF*/
 BLA::Matrix<3,1> PVStateEstimator::lla2ecef(BLA::Matrix<3,1> lla){
 
-    float lat = lla(0) * PI / 180.0; // Convert to radians 
-    float lon = lla(1) * PI / 180.0; // Convert to radians 
+    float lat = lla(0) * DEG_TO_RAD; // Convert to radians 
+    float lon = lla(1) * DEG_TO_RAD; // Convert to radians 
     float alt = lla(2); 
 
     // Convert reference lla to ecef first 
@@ -111,8 +112,8 @@ BLA::Matrix<3,1> PVStateEstimator::lla2ecef(BLA::Matrix<3,1> lla){
 } 
 
 BLA::Matrix<3,3> PVStateEstimator::getRotM(BLA::Matrix<3,1> lla){
-    float lat = lla(0) * PI / 180.0; // Convert to radians 
-    float lon = lla(1) * PI / 180.0; // Convert to radians 
+    float lat = lla(0) * DEG_TO_RAD; // Convert to radians 
+    float lon = lla(1) * DEG_TO_RAD; // Convert to radians 
 
     BLA::Matrix<3,3> Rot = {
         (float)(-sin(lat) * cos(lon)), -sin(lon), -cos(lat) * cos(lon),
@@ -123,7 +124,7 @@ BLA::Matrix<3,3> PVStateEstimator::getRotM(BLA::Matrix<3,1> lla){
     return Rot;
 }
 
-/*Converts predicted state from NED to lla*/
+/*Converts predicted state from NED to ECEF*/
 BLA::Matrix<6,1> PVStateEstimator::ned2ecef(BLA::Matrix<6,1> state) { // change so just gps readings 
     BLA::Matrix<3,1> ref_lla = {initialPV(0),initialPV(1),initialPV(2)}; 
     BLA::Matrix<3,1> ref_ecef = lla2ecef(ref_lla);
@@ -152,11 +153,11 @@ BLA::Matrix<6,1> PVStateEstimator::onLoop() {
     
     /*Prediction Step*/
     // Use the measurement model to predict the next state 
-    BLA::Matrix<6,1> x_ned = F*x + G*accel_ned; // Noise needs to be added here (w matrix)
-    x = ned2ecef(x_ned); 
+    BLA::Matrix<6,1> x_ned = F*x + G*accel_ned; // FIXME: Convert things here
+    x = ned2ecef(x_ned);
 
     // Propogate Covariance
-    P = F * P * BLA::MatrixTranspose<BLA::Matrix<6, 6>>(F) + Q;
+    P = F * P * BLA::MatrixTranspose(F) + Q;
 
     if(lastGPSlogged < gpsData.getLastUpdated()){ 
 

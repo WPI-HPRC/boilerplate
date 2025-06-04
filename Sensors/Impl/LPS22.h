@@ -14,7 +14,7 @@ struct LPS22Data {
 
 class LPS22 : public Sensor {
   public:
-    LPS22() : Sensor(sizeof(LPS22Data), 40), lps() {}
+    LPS22() : Sensor(sizeof(LPS22Data), 20), lps() {}
 
     const TimedPointer<LPS22Data> getData() const {
         return static_cast<TimedPointer<LPS22Data>>(data);
@@ -49,7 +49,7 @@ class LPS22 : public Sensor {
         if (!lps.begin_I2C(0x5c)) {
             return false;
         }
-        lps.setDataRate(LPS22_RATE_25_HZ);
+        lps.setDataRate(LPS22_RATE_50_HZ);
         return true;
     }
 

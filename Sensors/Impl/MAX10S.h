@@ -9,6 +9,9 @@ struct MAX10SData {
     float lon = 0.0;
     float altMSL = 0.0;
     float altEllipsoid = 0.0;
+    int32_t ecefX = 0;
+    int32_t ecefY = 0;
+    int32_t ecefZ = 0;
     int32_t velN = 0;
     int32_t velE = 0;
     int32_t velD = 0;
@@ -33,6 +36,9 @@ class MAX10S : public Sensor {
        p.print("lon: "); p.print(getData()->lon); p.print(", ");
        p.print("altMSL: "); p.print(getData()->altMSL); p.print(", ");
        p.print("altEll: "); p.print(getData()->altEllipsoid); p.print(", ");
+       p.print("ecefX: "); p.print(getData()->ecefX); p.print(", ");
+       p.print("ecefY: "); p.print(getData()->ecefY); p.print(", ");
+       p.print("ecefZ: "); p.print(getData()->ecefZ); p.print(", ");
        p.print("velN: "); p.print(getData()->velN); p.print(", ");
        p.print("velE: "); p.print(getData()->velE); p.print(", ");
        p.print("velD: "); p.print(getData()->velD); p.print(", ");
@@ -42,7 +48,7 @@ class MAX10S : public Sensor {
     }
 
     void logCsvHeader(Print& p) override {
-       p.print("lat,lon,altMSL,altEll,velN,velE,velD,epochTime,satellites,gpsLockType");
+       p.print("lat,lon,altMSL,altEll,ecefX,ecefY,ecefZ,velN,velE,velD,epochTime,satellites,gpsLockType");
     }
 
     void logCsvRow(Print& p, uint32_t lastLoggedAt = 0) override {
@@ -50,6 +56,9 @@ class MAX10S : public Sensor {
        IF_NEW(p.print(getData()->lon)); p.print(",");
        IF_NEW(p.print(getData()->altMSL)); p.print(",");
        IF_NEW(p.print(getData()->altEllipsoid)); p.print(",");
+       IF_NEW(p.print(getData()->ecefX)); p.print(",");
+       IF_NEW(p.print(getData()->ecefY)); p.print(",");
+       IF_NEW(p.print(getData()->ecefZ)); p.print(",");
        IF_NEW(p.print(getData()->velN)); p.print(",");
        IF_NEW(p.print(getData()->velE)); p.print(",");
        IF_NEW(p.print(getData()->velD)); p.print(",");
@@ -80,8 +89,11 @@ class MAX10S : public Sensor {
         setData()->gpsLockType = GPS.getFixType();
         setData()->lat = GPS.getLatitude();
         setData()->lon = GPS.getLongitude();
-        setData()->altMSL = GPS.getAltitudeMSL();
-        setData()->altEllipsoid = GPS.getAltitude();
+        setData()->ecefX = GPS.getHighResECEFX();
+        setData()->ecefY = GPS.getHighResECEFY();
+        setData()->ecefZ = GPS.getHighResECEFZ();
+        setData()->altMSL = (float)GPS.getAltitudeMSL() / 1000.0;
+        setData()->altEllipsoid = (float)GPS.getAltitude() / 1000.0;
         setData()->velN = GPS.getNedNorthVel();
         setData()->velE = GPS.getNedEastVel();
         setData()->velD = GPS.getNedDownVel();

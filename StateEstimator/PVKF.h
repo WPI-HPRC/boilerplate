@@ -36,7 +36,6 @@ class PVStateEstimator {
     const TimedPointer<LPS22Data> baroData;
     const TimedPointer<ICMData> accelData;
     const TimedPointer<MAX10SData> gpsData;
-    MAX10S gps; 
 
     // State vectors
     BLA::Matrix<6, 1> initialPV; // Initial Position 
@@ -53,7 +52,7 @@ class PVStateEstimator {
     BLA::Matrix<6, 6> Q;
     BLA::Matrix<3, 3> R;
 
-    // F and B Matrices
+    // F and G Matrices
     BLA::Matrix<6, 6> F;
 
     BLA::Matrix<6, 3> G;
