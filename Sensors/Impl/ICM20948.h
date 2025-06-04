@@ -2,6 +2,7 @@
 
 #include "../Sensor/Sensor.h"
 #include "Adafruit_Sensor.h"
+#include "boilerplate/Logging/Loggable.h"
 #include "boilerplate/StateEstimator/kfConsts.h"
 #include <Adafruit_ICM20948.h>
 #include <Adafruit_ICM20X.h>
@@ -14,50 +15,38 @@ struct ICMData {
     float temp;
 };
 
+#define ICM_LOG_DESC(X)                                                            \
+    X(0, "ICMaccelX", p.print(getData()->accelX, 4))                           \
+    X(1, "ICMaccelY", p.print(getData()->accelY, 4))                           \
+    X(2, "ICMaccelZ", p.print(getData()->accelZ, 4))                           \
+    X(3, "ICMgyrX", p.print(getData()->gyrX, 4))                               \
+    X(4, "ICMgyrY", p.print(getData()->gyrY, 4))                               \
+    X(5, "ICMgyrZ", p.print(getData()->gyrZ, 4))                               \
+    X(6, "ICMmagX", p.print(getData()->magX, 4))                               \
+    X(7, "ICMmagY", p.print(getData()->magY, 4))                               \
+    X(8, "ICMmagZ", p.print(getData()->magZ, 4))                               \
+    X(9, "ICMtemp", p.print(getData()->temp, 4))
+
 #define ODR 40
 
-class ICM20948 : public Sensor {
+class ICM20948 : public Sensor, public Loggable {
   public:
-    ICM20948() : Sensor(sizeof(ICMData), 1000 / ODR), icm() {}
+    ICM20948()
+        : Sensor(sizeof(ICMData), 1000 / ODR), Loggable(NUM_FIELDS(ICM_LOG_DESC)),
+          icm() {}
 
     const TimedPointer<ICMData> getData() const {
         return static_cast<TimedPointer<ICMData>>(data);
     }
 
-    // clang-format off
-    void debugPrint(Print& p) override {
-      p.print("accelX: "); p.print(getData()->accelX, 4); p.print(", ");
-      p.print("accelY: "); p.print(getData()->accelY, 4); p.print(", ");
-      p.print("accelZ: "); p.print(getData()->accelZ, 4); p.print(", ");
-      p.print("gyrX: "); p.print(getData()->gyrX, 4); p.print(", ");
-      p.print("gyrY: "); p.print(getData()->gyrY, 4); p.print(", ");
-      p.print("gyrZ: "); p.print(getData()->gyrZ, 4); p.print(", ");
-      p.print("magX: "); p.print(getData()->magX, 4); p.print(", ");
-      p.print("magY: "); p.print(getData()->magY, 4); p.print(", ");
-      p.print("magZ: "); p.print(getData()->magZ, 4); p.print(", ");
-      p.print("temp: "); p.print(getData()->temp, 4); p.println();
-    }
-
-    void logCsvHeader(Print& p) override {
-      p.print("ICMaccelX,ICMaccelY,ICMaccelZ,ICMgyrX,ICMgyrY,ICMgyrZ,magX,magY,magZ,ICMtemp");
-    }
-
-    void logCsvRow(Print &p, uint32_t lastLoggedAt = 0) override {
-      IF_NEW(p.print(getData()->accelX, 4)); p.print(",");
-      IF_NEW(p.print(getData()->accelY, 4)); p.print(",");
-      IF_NEW(p.print(getData()->accelZ, 4)); p.print(",");
-      IF_NEW(p.print(getData()->gyrX, 4)); p.print(",");
-      IF_NEW(p.print(getData()->gyrY, 4)); p.print(",");
-      IF_NEW(p.print(getData()->gyrZ, 4)); p.print(",");
-      IF_NEW(p.print(getData()->magX, 4)); p.print(",");
-      IF_NEW(p.print(getData()->magY, 4)); p.print(",");
-      IF_NEW(p.print(getData()->magZ, 4)); p.print(",");
-      IF_NEW(p.print(getData()->temp, 4));
-    }
-    // clang-format on
-
   private:
     Adafruit_ICM20948 icm;
+
+    MAKE_LOGGABLE(ICM_LOG_DESC)
+
+    uint32_t dataUpdatedAt() override {
+        return getLastTimePolled();
+    }
 
     TimedPointer<ICMData> setData() {
         return static_cast<TimedPointer<ICMData>>(data);

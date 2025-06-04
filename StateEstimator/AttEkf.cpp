@@ -1,5 +1,4 @@
 #include "AttEkf.h"
-#include "impl/NotSoBasicLinearAlgebra.h"
 #include <Arduino.h>
 
 AttStateEstimator::AttStateEstimator(const TimedPointer<ICMData> magData, float dt) : magData(magData), dt(dt) {

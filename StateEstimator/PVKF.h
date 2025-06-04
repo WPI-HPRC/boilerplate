@@ -1,11 +1,45 @@
 #pragma once
 
 #include "BasicLinearAlgebra.h"
+#include "boilerplate/Logging/Loggable.h"
 #include "boilerplate/Sensors/Impl/ICM20948.h"
 #include "boilerplate/Sensors/Impl/LPS22.h"
 #include "boilerplate/Sensors/Impl/MAX10S.h"
 #include "kfConsts.h"
 #include <cstdint>
+
+#define PVKF_LOG_DESC(X)                                                            \
+    X(0, "posX", p.print(state(0), 4))                                             \
+    X(1, "posY", p.print(state(1), 4))                                             \
+    X(2, "posZ", p.print(state(2), 4))                                             \
+    X(3, "velX", p.print(state(3), 4))                                             \
+    X(4, "velY", p.print(state(4), 4))                                             \
+    X(5, "velZ", p.print(state(5), 4))
+
+class PVEkfLogger : public Loggable {
+  public:
+    PVEkfLogger() : Loggable(NUM_FIELDS(PVKF_LOG_DESC)) {}
+
+    void newState(BLA::Matrix<6, 1> s) {
+      initialized = true;
+      state = s;
+      updatedAt = millis();
+    }
+
+    const BLA::Matrix<6, 1>& getState() { return state; }
+
+  private:
+    BLA::Matrix<6, 1> state;
+    uint32_t updatedAt = 0;
+    bool initialized = false;
+
+    MAKE_LOGGABLE(PVKF_LOG_DESC)
+
+    uint32_t dataUpdatedAt() override {
+      if (!initialized) return 0; // Data will not be logged
+      return updatedAt;
+    }
+};
 
 // Helper Constants
 constexpr static double a = 6378137.0;           // WGS-84 semi-major axis
@@ -26,7 +60,6 @@ class PVStateEstimator {
     BLA::Matrix<6,1> onLoop(); 
 
   private:
-
     // Loop time
     float dt = 0.0f;
     // Last GPS logged

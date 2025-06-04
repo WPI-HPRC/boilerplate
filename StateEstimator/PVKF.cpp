@@ -1,14 +1,14 @@
 #if 1
 #include "PVKF.h"
-#include "impl/NotSoBasicLinearAlgebra.h"
-#include <boilerplate/Sensors/SensorManager/SensorManager.h>
-#include "boilerplate/Sensors/Sensor/Sensor.h"
 #include <Arduino.h>
+#include <boilerplate/Sensors/SensorManager/SensorManager.h>
 
 PVStateEstimator::PVStateEstimator(const TimedPointer<LPS22Data> baroData,
-                 const TimedPointer<ICMData> accelData,
-                 const TimedPointer<MAX10SData> gpsData,
-                 float dt): baroData(baroData), accelData(accelData), gpsData(gpsData), dt(dt) {
+                                   const TimedPointer<ICMData> accelData,
+                                   const TimedPointer<MAX10SData> gpsData,
+                                   float dt)
+    : baroData(baroData), accelData(accelData),
+      gpsData(gpsData), dt(dt) {
 
     // clang-format off
     F = {
@@ -166,7 +166,7 @@ BLA::Matrix<6,1> PVStateEstimator::onLoop() {
        // Convert barometer to correct units 
         float alt = baroData->altitude; 
         // Compile z Matrix 
-        BLA::Matrix<3,1> z = {gpsData->lat, gpsData->lon, alt}; 
+        BLA::Matrix<3,1> z = {(float)gpsData->lat, (float)gpsData->lon, alt}; 
 
         //Convert to m
         z = lla2ecef(z); 
