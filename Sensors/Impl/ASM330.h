@@ -46,8 +46,8 @@ class ASM330 : public Sensor, public Loggable {
     ASM330LHHSensor AccGyr;
     bool init_impl() override {
         if (AccGyr.begin() == 0) {
-            AccGyr.Set_X_ODR(52.0);
-            AccGyr.Set_G_ODR(52.0);
+            AccGyr.Set_X_ODR(26.0);
+            AccGyr.Set_G_ODR(26.0);
             AccGyr.Set_X_FS(16);
             AccGyr.Set_G_FS(2000);
             AccGyr.Enable_X();

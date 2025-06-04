@@ -48,6 +48,8 @@ class Loggable {
             }
         }
 
+        p.println();
+
         return dataUpdatedAt();
     }
 
