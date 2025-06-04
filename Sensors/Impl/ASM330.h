@@ -82,12 +82,14 @@ class ASM330 : public Sensor {
         AccGyr.Get_X_Axes(accelerometer);
         AccGyr.Get_G_Axes(gyroscope);
 
-        setData()->accelX = (float)accelerometer[0] / 1000.0;
-        setData()->accelY = (float)accelerometer[1] / 1000.0;
+        // X and Y axes rotated to match ICM orientation
+        setData()->accelX = -(float)accelerometer[1] / 1000.0;
+        setData()->accelY = (float)accelerometer[0] / 1000.0;
         setData()->accelZ = (float)accelerometer[2] / 1000.0;
 
-        setData()->gyrX = (float)gyroscope[0] / 1000.0;
-        setData()->gyrY = (float)gyroscope[1] / 1000.0;
+        // X and Y axes rotated to match ICM orientation
+        setData()->gyrX = -(float)gyroscope[1] / 1000.0;
+        setData()->gyrY = (float)gyroscope[0] / 1000.0;
         setData()->gyrZ = (float)gyroscope[2] / 1000.0;
     }
 };

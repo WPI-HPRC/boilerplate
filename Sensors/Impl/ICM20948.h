@@ -2,6 +2,7 @@
 
 #include "../Sensor/Sensor.h"
 #include "Adafruit_Sensor.h"
+#include "boilerplate/StateEstimator/kfConsts.h"
 #include <Adafruit_ICM20948.h>
 #include <Adafruit_ICM20X.h>
 #include <Arduino.h>
@@ -82,9 +83,9 @@ class ICM20948 : public Sensor {
 
         icm.getEvent(&accel, &gyr, &temp, &mag);
 
-        setData()->accelX = accel.acceleration.x;
-        setData()->accelY = accel.acceleration.y;
-        setData()->accelZ = accel.acceleration.z;
+        setData()->accelX = accel.acceleration.x / g;
+        setData()->accelY = accel.acceleration.y / g;
+        setData()->accelZ = accel.acceleration.z / g;
 
         setData()->gyrX = gyr.gyro.x;
         setData()->gyrY = gyr.gyro.y;
