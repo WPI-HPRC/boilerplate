@@ -8,8 +8,8 @@
 #include <SparkFun_u-blox_GNSS_v3.h>
 
 struct MAX10SData {
-    int32_t lat = 0;
-    int32_t lon = 0;
+    float lat = 0;
+    float lon = 0;
     float altMSL = 0.0;
     float altEllipsoid = 0.0;
     int32_t velN = 0;
@@ -21,8 +21,8 @@ struct MAX10SData {
 };
 
 #define MAX10S_LOG_DESC(X)                                                     \
-    X(0, "lat", p.print(getData()->lat))                                       \
-    X(1, "lon", p.print(getData()->lon))                                       \
+    X(0, "lat", p.print(getData()->lat, 7))                                       \
+    X(1, "lon", p.print(getData()->lon, 7))                                       \
     X(2, "altMSL", p.print(getData()->altMSL, 3))                              \
     X(3, "altEll", p.print(getData()->altEllipsoid, 3))                        \
     X(4, "velN", p.print(getData()->velN))                                     \
@@ -64,8 +64,8 @@ class MAX10S : public Sensor, public Loggable {
 
     void poll() override {
         setData()->gpsLockType = GPS.getFixType();
-        setData()->lat = GPS.getLatitude();
-        setData()->lon = GPS.getLongitude();
+        setData()->lat = (float)GPS.getLatitude() / 1e7;
+        setData()->lon = (float)GPS.getLongitude() / 1e7;
         setData()->altMSL = (float)GPS.getAltitudeMSL() / 1000.0;
         setData()->altEllipsoid = (float)GPS.getAltitude() / 1000.0;
         setData()->velN = GPS.getNedNorthVel();
