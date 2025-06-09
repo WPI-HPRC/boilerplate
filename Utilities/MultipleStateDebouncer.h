@@ -1,8 +1,8 @@
 #pragma once
 
-class Debouncer {
+class MultipleStateDebouncer {
   public:
-    Debouncer(long timeHigh, int numStates) : timeHigh(timeHigh), numStates(numStates) {}
+    MultipleStateDebouncer(long timeHigh, int numStates) : timeHigh(timeHigh), numStates(numStates) {}
 
     int update(long state, long now) {
       if (state != lastState) {
