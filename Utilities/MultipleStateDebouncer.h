@@ -1,10 +1,11 @@
 #pragma once
 
+template <typename T>
 class MultipleStateDebouncer {
   public:
     MultipleStateDebouncer(long timeHigh, int numStates) : timeHigh(timeHigh), numStates(numStates) {}
 
-    int update(long state, long now) {
+    int update(T state, long now) {
       if (state != lastState) {
         lastTime = -1;
         return -1;
@@ -22,5 +23,5 @@ class MultipleStateDebouncer {
     long timeHigh;
     long lastTime = 0;
     long numStates;
-    long lastState;
+    T lastState;
 };
