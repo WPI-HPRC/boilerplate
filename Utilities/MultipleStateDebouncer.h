@@ -3,18 +3,18 @@
 template <typename T>
 class MultipleStateDebouncer {
   public:
-    MultipleStateDebouncer(long timeHigh, int numStates) : timeHigh(timeHigh), numStates(numStates) {}
+    MultipleStateDebouncer(long timeHigh, int numStates, T errorState) : timeHigh(timeHigh), numStates(numStates), errorState(errorState) {}
 
-    int update(T state, long now) {
+    T update(T state, long now) {
       if (state != lastState) {
         lastTime = -1;
-        return -1;
+        return errorState;
       } else {
         if (lastTime == -1) lastTime = now;
         if (now - lastTime >= timeHigh) {
           return lastState;
         } else {
-          return -1;
+          return errorState;
         }
       }
     }
@@ -24,4 +24,5 @@ class MultipleStateDebouncer {
     long lastTime = 0;
     long numStates;
     T lastState;
+    T errorState;
 };
