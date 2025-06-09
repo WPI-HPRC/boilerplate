@@ -5,7 +5,7 @@ class RunningExpAverage {
     public:
         RunningExpAverage(T alpha) : alpha(alpha) {}
 
-        void init(T initalVal) {
+        void init(T initialVal) {
             val = initialVal;
         }
 
