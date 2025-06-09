@@ -3,9 +3,13 @@
 template <typename T>
 class RunningExpAverage {
     public:
-        RunningExpAverage(T alpha) : alpha(alpha) {}
+        RunningExpAverage(T alpha) : alpha(alpha), isInit(false) {}
 
-        void init(T initialVal) {
+        bool init(T initialVal) {
+            if (isInit) {
+                return true;
+            }
+            isInit = true;
             val = initialVal;
         }
 
@@ -20,4 +24,5 @@ class RunningExpAverage {
     private:
         T alpha;
         T val;
+        bool isInit;
 };
