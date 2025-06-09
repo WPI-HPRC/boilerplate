@@ -20,24 +20,7 @@ public:
      * Initializes internal counters and sum to zero.
      */
     TimeAverage()
-        : sum(T{}), count(0), index(0) {}
-
-    /**
-     * @brief Fill the buffer with an initial value.
-     *
-     * Sets every entry in the circular buffer to @p initialVal,
-     * and adjusts the running sum and sample count accordingly.
-     *
-     * @param initialVal Value to initialize each buffer element with.
-     */
-    void init(const T& initialVal) {
-        for (std::size_t i = 0; i < N; ++i) {
-            buffer[i] = initialVal;
-        }
-        sum = initialVal * static_cast<T>(N);
-        count = N;    ///< Buffer is now full
-        index = 0;    ///< Next write will overwrite buffer[0]
-    }
+        : sum(T{}), count(0), index(0), bufferFull(false) {}
 
     /**
      * @brief Insert a new sample and update the moving average.
@@ -49,10 +32,13 @@ public:
      * @param newVal The new sample value to include in the average.
      */
     void update(const T& newVal) {
-        if (count < N) {
+        if (!bufferFull) {
             buffer[index] = newVal;
             sum += newVal;
             count++;
+            if (count >= N) {
+                bufferFull = true;
+            }
         } else {
             sum -= buffer[index];
             buffer[index] = newVal;
@@ -60,6 +46,27 @@ public:
         }
         index = (index + 1) % N;
     }
+
+    /**
+     * @brief clears buffer and current count of values in the buffer
+     */
+
+     void clearBuffer() {
+        bufferFull = false;
+        count = 0;
+        sum = 0;
+     }
+
+    /**
+     * @brief Checks if the buffer is full for the given size
+     * 
+     * If the buffer has not been filled with values for the given N, returns false
+     * 
+     */
+
+     bool isBufferSaturated() {
+        return bufferFull;
+     }
 
     /**
      * @brief Retrieve the current moving average.
@@ -80,4 +87,5 @@ private:
     std::size_t count;      /**< Number of valid samples (<= N) */
     std::size_t index;      /**< Next write index (0..N-1) */
     T sum;                  /**< Running sum of buffer contents */
+    bool bufferFull;        /**< bool if the buffer has been filled with independent values */
 };
