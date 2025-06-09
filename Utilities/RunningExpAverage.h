@@ -5,16 +5,14 @@ class RunningExpAverage {
     public:
         RunningExpAverage(T alpha) : alpha(alpha), isInit(false) {}
 
-        bool init(T initialVal) {
-            if (isInit) {
-                return true;
-            }
-            isInit = true;
-            val = initialVal;
-        }
-
         void update(T newVal) {
-            val = alpha * newVal + (1 - alpha) * val;
+            if (isInit){
+                val = alpha * newVal + (1 - alpha) * val;
+            }
+            else {
+                val = newVal;
+                isInit = true;
+            }
         }
 
         T getAvg() {
