@@ -42,6 +42,8 @@
                       + kd * derivative;
  
          // clamp
+        output += outMin; //makes the PID act between the minimum PWM vel write and the max; necceassry fix since we are trying to write position but output our effort as velocity
+
          if (output > outMax) output = outMax;
          else if (output < outMin) output = outMin;
  
