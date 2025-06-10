@@ -23,7 +23,7 @@
       * @param measured  Measured velocity (same units).
       * @return float  Control output, clamped to [outMin, outMax].
       */
-     float compute(float setpoint, float measured, float currTime) {
+     float compute(float setpoint, float measured, long currTime) {
          float error = setpoint - measured;
          float dt = currTime - lastTime;
  
@@ -60,7 +60,7 @@
  
  private:
      float kp, ki, kd;
-     float lastTime;
+     long lastTime;
      float outMin, outMax;
      float integral, lastError;
  };
