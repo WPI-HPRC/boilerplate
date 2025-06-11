@@ -1,6 +1,8 @@
 #include "AttEkf.h"
 #include <Arduino.h>
 
+// #define DBG
+
 AttStateEstimator::AttStateEstimator(const TimedPointer<ICMData> magData, float dt) : magData(magData), dt(dt) {
     // Initialize Error Covariance
 
@@ -11,9 +13,15 @@ AttStateEstimator::AttStateEstimator(const TimedPointer<ICMData> magData, float 
     for(uint8_t idx : AttKFInds::gyroBias) {
         P(idx, idx) = powf(icm20948_const::gyro_VRW, 2.0f);
     }
+    // P(AttKFInds::gb_x, AttKFInds::gb_x) = 0.0000068469;
+    // P(AttKFInds::gb_y, AttKFInds::gb_y) = 0.0000076689;
+    // P(AttKFInds::gb_z, AttKFInds::gb_z) = 0.0000076652;
     for(uint8_t idx: AttKFInds::accelBias) {
         P(idx, idx) = powf(icm20948_const::accelXY_VRW, 2.0f);
     }
+    // P(AttKFInds::ab_x, AttKFInds::ab_x) = 0.0000095337;
+    // P(AttKFInds::ab_y, AttKFInds::ab_y) = 0.0000102062;
+    // P(AttKFInds::ab_z, AttKFInds::ab_z) = 0.0000108632;
     for(uint8_t idx : AttKFInds::magBias) {
         // P(idx, idx) = icm20948_const.magXYZ_var;
         P(idx, idx) = powf(0.1f, 2);
@@ -42,7 +50,7 @@ AttStateEstimator::AttStateEstimator(const TimedPointer<ICMData> magData, float 
     for(uint8_t idx : AttKFInds::magBias) {
         Q(idx, idx) = powf(0.1f, 2);
     }
-#ifdef DEBUG
+#ifdef DBG
     Serial.println("<----- Process Noise ----->");
     for (int i = 0; i < Q.Rows; i++) {
         for (int j = 0; j < Q.Cols; j++) {
@@ -154,7 +162,7 @@ BLA::Matrix<13,1> AttStateEstimator::onLoop(bool inPrelaunch) {
     BLA::Matrix<13,13> phi = I_13 + F * dt;
 
     // Predict Error Covariance
-    P_min = phi * F * BLA::MatrixTranspose<BLA::Matrix<13,13>>(phi) + Q;
+    P_min = phi * P * BLA::MatrixTranspose<BLA::Matrix<13,13>>(phi) + Q;
 
     x = x_min;
 
@@ -302,9 +310,9 @@ void AttStateEstimator::applyGravUpdate(BLA::Matrix<13,1> &x_in, BLA::Matrix<3,1
     float abz = x_in(AttKFInds::ab_z);
 
     BLA::Matrix<3, 13> H_grav = {
-         2*qy, -2*qz,  2*qw, -2*qx, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        -2*qx, -2*qw, -2*qz, -2*qy, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        -4*qw,  0,     0,    -4*qz, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         2*qy, -2*qz,  2*qw, -2*qx, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+        -2*qx, -2*qw, -2*qz, -2*qy, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+        -4*qw,  0,     0,    -4*qz, 0, 0, 0, 0, 0, 1, 0, 0, 0,
     };
 
     BLA::Matrix<3,3> S = H_grav * P_min * BLA::MatrixTranspose<BLA::Matrix<3,13>>(H_grav) + R_grav;
@@ -313,7 +321,7 @@ void AttStateEstimator::applyGravUpdate(BLA::Matrix<13,1> &x_in, BLA::Matrix<3,1
 
     BLA::Matrix<3,1> y = z_grav - h_grav;
 
-#ifdef DEBUG
+#ifdef DBG
     // Print innovation to teleplot three line series
     Serial.print(">Grav Innovation X: ");
     Serial.println(y(0));
@@ -391,7 +399,7 @@ void AttStateEstimator::applyMagUpdate(BLA::Matrix<13,1> &x_in, BLA::Matrix<3,1>
     float S = S_mat(0,0) + R_mag;  // R_mag is yaw measurement variance [rad^2]
     BLA::Matrix<13,1> K = (P_min * H_yaw_T) * (1.0f / S);
 
-#ifdef DEBUG
+#ifdef DBG
     // Print innovation to teleplot
     Serial.print(">Yaw Innovation: ");
     Serial.println(yaw_err);
