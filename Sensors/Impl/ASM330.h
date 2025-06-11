@@ -26,9 +26,9 @@ struct ASM330Data {
 
 class ASM330 : public Sensor, public Loggable {
   public:
-    ASM330()
+    ASM330(bool inPayload = false)
         : Sensor(sizeof(ASM330Data), 0), Loggable(NUM_FIELDS(ASM330_LOG_DESC)),
-          AccGyr(&Wire, ASM330LHH_I2C_ADD_H) {}
+          AccGyr(&Wire, ASM330LHH_I2C_ADD_H), inPayload(inPayload) {}
 
     const TimedPointer<ASM330Data> getData() const {
         return static_cast<TimedPointer<ASM330Data>>(data);
@@ -40,6 +40,8 @@ class ASM330 : public Sensor, public Loggable {
     }
 
     MAKE_LOGGABLE(ASM330_LOG_DESC)
+
+    bool inPayload;
 
     uint32_t dataUpdatedAt() override { return getLastTimePolled(); }
 
@@ -71,13 +73,32 @@ class ASM330 : public Sensor, public Loggable {
         AccGyr.Get_G_Axes(gyroscope);
 
         // X and Y axes rotated to match ICM orientation
-        setData()->accelX = -(float)accelerometer[1] / 1000.0;
-        setData()->accelY = (float)accelerometer[0] / 1000.0;
-        setData()->accelZ = (float)accelerometer[2] / 1000.0;
+        float aX = -(float)accelerometer[1] / 1000.0;
+        float aY = (float)accelerometer[0] / 1000.0;
+        float aZ = (float)accelerometer[2] / 1000.0;
 
         // X and Y axes rotated to match ICM orientation
-        setData()->gyrX = -(float)gyroscope[1] / 1000.0;
-        setData()->gyrY = (float)gyroscope[0] / 1000.0;
-        setData()->gyrZ = (float)gyroscope[2] / 1000.0;
+        float gX = -(float)gyroscope[1] / 1000.0;
+        float gY = (float)gyroscope[0] / 1000.0;
+        float gZ = (float)gyroscope[2] / 1000.0;
+
+        if (inPayload) {
+            // Axes rotated to match rocket (z up)
+            setData()->accelX = aX;
+            setData()->accelY = aZ;
+            setData()->accelZ = -aY;
+
+            setData()->gyrX = gX;
+            setData()->gyrY = gZ;
+            setData()->gyrZ = -gY;
+        } else {
+            setData()->accelX = aX;
+            setData()->accelY = aY;
+            setData()->accelZ = aZ;
+
+            setData()->gyrX = gX;
+            setData()->gyrY = gY;
+            setData()->gyrZ = gZ;
+        }
     }
 };

@@ -31,9 +31,9 @@ struct ICMData {
 
 class ICM20948 : public Sensor, public Loggable {
   public:
-    ICM20948()
+    ICM20948(bool inPayload = false)
         : Sensor(sizeof(ICMData), 1000 / ODR), Loggable(NUM_FIELDS(ICM_LOG_DESC)),
-          icm() {}
+          icm(), inPayload(inPayload) {}
 
     const TimedPointer<ICMData> getData() const {
         return static_cast<TimedPointer<ICMData>>(data);
@@ -43,6 +43,8 @@ class ICM20948 : public Sensor, public Loggable {
     Adafruit_ICM20948 icm;
 
     MAKE_LOGGABLE(ICM_LOG_DESC)
+
+    bool inPayload;
 
     uint32_t dataUpdatedAt() override {
         return getLastTimePolled();
@@ -72,17 +74,31 @@ class ICM20948 : public Sensor, public Loggable {
 
         icm.getEvent(&accel, &gyr, &temp, &mag);
 
-        setData()->accelX = accel.acceleration.x / g;
-        setData()->accelY = accel.acceleration.y / g;
-        setData()->accelZ = accel.acceleration.z / g;
+        float aX = accel.acceleration.x / g;
+        float aY = accel.acceleration.y / g;
+        float aZ = accel.acceleration.z / g;
 
-        setData()->gyrX = gyr.gyro.x;
-        setData()->gyrY = gyr.gyro.y;
-        setData()->gyrZ = gyr.gyro.z;
+        float gX = gyr.gyro.x;
+        float gY = gyr.gyro.y;
+        float gZ = gyr.gyro.z;
 
-        setData()->magX = mag.magnetic.x;
-        setData()->magY = mag.magnetic.y;
-        setData()->magZ = mag.magnetic.z;
+        float mX = mag.magnetic.x;
+        float mY = mag.magnetic.y;
+        float mZ = mag.magnetic.z;
+
+        if (inPayload) {
+            setData()->accelX = aX;
+            setData()->accelY = aZ;
+            setData()->accelZ = -aY;
+
+            setData()->gyrX = gX;
+            setData()->gyrY = gZ;
+            setData()->gyrZ = -gY;
+
+            setData()->magX = mX;
+            setData()->magY = mZ;
+            setData()->magZ = -mY;
+        }
 
         setData()->temp = temp.temperature;
     }
