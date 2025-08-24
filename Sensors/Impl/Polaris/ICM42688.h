@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../../Sensor/Sensor.h"
+#include "../../boilerplate/Logging/Loggable.h"
+#include "boilerplate/StateEstimator/kfConsts.h"
 #include "Print.h"
 #include <Arduino.h>
 #include <ICM42688.h>
@@ -15,38 +17,36 @@ struct ICM42688Data {
     double gyrZ;
 };
 
-class ICM42688_ : public Sensor {
+#define ICM_LOG_DESC(X)                                                            \
+    X(0, "ICMaccelX", p.print(getData()->accelX, 4))                           \
+    X(1, "ICMaccelY", p.print(getData()->accelY, 4))                           \
+    X(2, "ICMaccelZ", p.print(getData()->accelZ, 4))                           \
+    X(3, "ICMgyrX", p.print(getData()->gyrX, 4))                               \
+    X(4, "ICMgyrY", p.print(getData()->gyrY, 4))                               \
+    X(5, "ICMgyrZ", p.print(getData()->gyrZ, 4))                               
+
+
+#define ODR 40
+
+class ICM42688_ : public Sensor, public Loggable {
   public:
-    ICM42688_() : Sensor(sizeof(ICM42688Data), 40), icm(Wire, 0x68) {}
+    ICM42688_() : Sensor(sizeof(ICM42688Data), ODR), icm(Wire, 0x68),
+     Loggable(NUM_FIELDS(ICM_LOG_DESC)) {}
 
-    ICM42688Data getData() { return *(ICM42688Data *)data; }
-
-    void debugPrint(Print &p) override {
-        p.print("accelX: "); p.print(((ICM42688Data *)data)->accelX, 4); p.print(", ");
-        p.print("accelY: "); p.print(((ICM42688Data *)data)->accelY, 4); p.print(", ");
-        p.print("accelZ: "); p.print(((ICM42688Data *)data)->accelZ, 4); p.print(", ");
-
-        p.print("gyrX: "); p.print(((ICM42688Data *)data)->gyrX, 4); p.print(", ");
-        p.print("gyrY: "); p.print(((ICM42688Data *)data)->gyrY, 4); p.print(", ");
-        p.print("gyrZ: "); p.print(((ICM42688Data *)data)->gyrZ, 4); p.println();
-    }
-
-    void logCsvHeader(Print& p) override {
-      p.print("accelX,accelY,accelZ,gyrX,gyrY,gyrZ");
-    }
-
-    void logCsvRow(Print &p) override {
-        p.print(((ICM42688Data *)data)->accelX, 4); p.print(",");
-        p.print(((ICM42688Data *)data)->accelY, 4); p.print(",");
-        p.print(((ICM42688Data *)data)->accelZ, 4); p.print(",");
-
-        p.print(((ICM42688Data *)data)->gyrX, 4); p.print(",");
-        p.print(((ICM42688Data *)data)->gyrY, 4); p.print(",");
-        p.print(((ICM42688Data *)data)->gyrZ, 4);
+    const TimedPointer<ICM42688Data> getData() const {
+        return static_cast<TimedPointer<ICM42688Data>>(data);
     }
 
   private:
     ICM42688 icm;
+
+    MAKE_LOGGABLE(ICM_LOG_DESC)
+
+    TimedPointer<ICM42688Data> setData() {
+        return static_cast<TimedPointer<ICM42688Data>>(data);
+    }
+
+    uint32_t dataUpdatedAt() override { return getLastTimePolled(); }
 
     bool init_impl() override {
         return icm.begin() > 0 && icm.setAccelFS(ICM42688::gpm16) > 0 &&
@@ -56,12 +56,12 @@ class ICM42688_ : public Sensor {
     void poll() override {
         icm.getAGT();
 
-        ((ICM42688Data *)data)->accelX = icm.accX();
-        ((ICM42688Data *)data)->accelY = icm.accY();
-        ((ICM42688Data *)data)->accelZ = icm.accZ();
+        setData()->accelX = icm.accX() / g; // Convert to gs from m/s^2
+        setData()->accelY = icm.accY() / g;
+        setData()->accelZ = icm.accZ() / g;
 
-        ((ICM42688Data *)data)->gyrX = icm.gyrX();
-        ((ICM42688Data *)data)->gyrY = icm.gyrY();
-        ((ICM42688Data *)data)->gyrZ = icm.gyrZ();
+        setData()->gyrX = icm.gyrX(); // Already in dps
+        setData()->gyrY = icm.gyrY();
+        setData()->gyrZ = icm.gyrZ();
     }
 };

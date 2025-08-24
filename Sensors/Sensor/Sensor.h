@@ -18,6 +18,7 @@ class Sensor {
 
     /**
      * @param dataSize Must be sizeof the struct pointed to by `data`
+     * @param pollingPeriod Sometimes in ms, sometimes in Hz. Check specific hardware for what unit to use
      */
     Sensor(size_t dataSize, uint32_t pollingPeriod)
         : data(dataSize), pollingPeriod(pollingPeriod) {}

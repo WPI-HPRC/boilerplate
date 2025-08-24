@@ -6,6 +6,7 @@
 */
 
 #include "../../Sensor/Sensor.h"
+#include "../../boilerplate/Logging/Loggable.h"
 #include "Print.h"
 #include <Arduino.h>
 #include <Wire.h>
@@ -33,34 +34,25 @@ struct MS5611Data {
     float altitude;
 };
 
-class MS5611 : public Sensor {
+#define MS5611_LOG_DESC(X)                                                            \
+    X(0, "MS5611pressure", p.print(getData()->pressure, 4))                     \
+    X(1, "MS5611temperature", p.print(getData()->temperature, 4))               \
+    X(2, "MS5611altitude", p.print(getData()->altitude, 4))
+
+#define ODR 40
+
+class MS5611 : public Sensor, public Loggable {
   public:
-    MS5611(uint8_t addr = 0x77) : Sensor(sizeof(MS5611Data), 40), addr(addr) {}
+    MS5611(uint8_t addr = 0x77) : Sensor(sizeof(MS5611Data), ODR), addr(addr), Loggable(NUM_FIELDS(MS5611_LOG_DESC)) {}
 
     const TimedPointer<MS5611Data> getData() const {
         return static_cast<TimedPointer<MS5611Data>>(data);
     }
 
-    // clang-format off
-    void debugPrint(Print &p) override {
-        p.print("pressure: "); p.print(getData()->pressure, 4); p.print(", ");
-        p.print("temperature: "); p.print(getData()->temperature, 4); p.print(", ");
-        p.print("altitude: "); p.print(getData()->altitude, 4); p.println();
-    }
-
-    void logCsvHeader(Print &p) override {
-        p.print("pressure,temperature,altitude");
-    }
-
-    void logCsvRow(Print& p) override {
-        p.print(getData()->pressure, 4); p.print(",");
-        p.print(getData()->temperature, 4); p.print(",");
-        p.print(getData()->altitude, 4);
-    }
-    // clang-format on
-
   private:
     uint8_t addr;
+
+    MAKE_LOGGABLE(MS5611_LOG_DESC)
 
     struct {
         uint16_t C1 = 0;
@@ -74,6 +66,8 @@ class MS5611 : public Sensor {
     TimedPointer<MS5611Data> setData() {
         return static_cast<TimedPointer<MS5611Data>>(data);
     }
+
+    uint32_t dataUpdatedAt() override { return getLastTimePolled(); }
 
     bool init_impl() override {
         if (!readCalibrationData())
