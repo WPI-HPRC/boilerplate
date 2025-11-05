@@ -1,5 +1,6 @@
 #include "AttMEKF.h"
 #include <Arduino.h>
+#include <QuaternionUtils.h>
 
 AttStateEstimator::AttStateEstimator(const TimedPointer<ICMData> magData, float dt) : magData(magData), dt(dt) {
     P.Fill(0.0f);
@@ -117,6 +118,7 @@ void AttStateEstimator::init(){
     lastTimeMag  = millis();
 }
 
+
 BLA::Matrix<13,1> AttStateEstimator::onLoop(bool inPrelaunch) {
     // Read data from sensors and convert values
     
@@ -137,11 +139,7 @@ BLA::Matrix<13,1> AttStateEstimator::onLoop(bool inPrelaunch) {
     BLA::Matrix<3,1> m_b = {magX, magY, magZ}; // [uT]
 
     // Update u_prev if first iteration
-    if(!hasPassedGo) {
-        u_prev = u;
-
-        hasPassedGo = true;
-    }
+    
 
     // x_min = x + predictionFunction(x, u) * dt;
     x_min = propRK4(u);
@@ -178,3 +176,35 @@ BLA::Matrix<13,1> AttStateEstimator::onLoop(bool inPrelaunch) {
 
     return x;
 }
+
+BLA::Matrix<13,1> AttStateEstimator::propGyro(BLA::Matrix<3,1> u) 
+{
+    float p = u(0) - x(AttKFInds::gb_x);
+    float q = u(1) - x(AttKFInds::gb_y);
+    float r = u(2) - x(AttKFInds::gb_z);
+
+    BLA::Matrix<3,1> gyr = {p*dt, q*dt, r*dt};
+
+    BLA::Matrix<3,1> rotVecNorm = BLA::Norm(gyr);
+    BLA::Matrix<3,1> axis = gyr / rotVecNorm;
+    BLA::Matrix<3,1> dq = 
+    {
+        cosf(rotVecNorm(0)/2.0f)
+        axis(0) * sinf(rotVecNorm(0)/2.0f),
+        axis(1) * sinf(rotVecNorm(0)/2.0f),
+        axis(2) * sinf(rotVecNorm(0)/2.0f),
+    };
+
+    BLA::Matrix<4,1> q = 
+    {
+        x(AttKFInds::q_w),
+        x(AttKFInds::q_x),
+        x(AttKFInds::q_y),
+        x(AttKFInds::q_z)
+    };
+
+    BLA::Matrix<4,1> q = QuaternionUtils::quatMultiply(q, dq);
+
+    BLA:Matrix<4,1> qNorm = q / BLA::Norm(q);
+
+
