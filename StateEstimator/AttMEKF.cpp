@@ -206,5 +206,12 @@ BLA::Matrix<13,1> AttStateEstimator::propGyro(BLA::Matrix<3,1> u)
     BLA::Matrix<4,1> q = QuaternionUtils::quatMultiply(q, dq);
 
     BLA:Matrix<4,1> qNorm = q / BLA::Norm(q);
+}
 
+BLA::Matrix<13, 1> AttStateEstimator::predictionFunction(BLA::Matrix<3, 1> u) {
+    BLA::Matrix<12, 12> F;
+    F = F.Fill(0);
+
+    F()
+}
 
