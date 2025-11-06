@@ -7,6 +7,9 @@ namespace QuaternionUtils {
     // quat SHOULD be normalized
     BLA::Matrix<3,3> quatToRot(const BLA::Matrix<13,1>& quat);
 
+    // Quaternion to DCM
+    BLA::Matrix<3, 3> quat2DCM(const BLA::Matrix<13, 1> &quat)
+
     // Get the up vector from the rotation matrix for the payload
     // In NED coordinates, this will be the second column of the rotation matrix
     BLA::Matrix<3,1> getUpVector(const BLA::Matrix<3,3>& rot);
@@ -18,4 +21,13 @@ namespace QuaternionUtils {
     // Get the right vector from the rotation matrix for the payload
     // NED coord == first col
     BLA::Matrix<3,1> getRightVector(const BLA::Matrix<3,3>& rot);
+
+    // Get skew symmetric of a 3x1 vector
+    BLA::Matrix<3, 1> skewSymmetric(const BLA::Matrix<3, 1> &vec);
+
+    // Rotation vector to quaternion
+    BLA::Matrix<4, 1> rotVec2Quat(const BLA::Matrix<3, 1> &vec);
+
+    // Quaternion multiply
+    BLA::Matrix<4, 1> quatMultiply(const BLA::Matrix<4, 1> &p, const BLA::Matrix<4, 1> &q)
 }
