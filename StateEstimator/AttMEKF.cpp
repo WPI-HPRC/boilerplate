@@ -209,8 +209,28 @@ BLA::Matrix<13,1> AttStateEstimator::propGyro(BLA::Matrix<3,1> u)
 }
 
 BLA::Matrix<13, 1> AttStateEstimator::predictionFunction(BLA::Matrix<3, 1> u) {
+    float gyrX = magData->gyrX;
+    float gyrY = magData->gyrY;
+    float gyrZ = magData->gyrZ;
+
+    float aclX = magData->accelX;
+    float aclY = magData->accelY;
+    float aclZ = magData->accelZ;
+
+    float magX = magData->magX;
+    float magY = magData->magY;
+    float magZ = magData->magZ;
+
+    BLA::Matrix<3, 1, float> gyroMag = {gyrX, gyrY, gyrZ};
+    
+    BLA::Matrix<3,3, float> gyroSkew = QuaternionUtils::skewSymmetric(gyroMag);
+
     BLA::Matrix<12, 12> F;
     F = F.Fill(0);
+
+    skewQ = QuaternionUtils::skewSymmetric()
+
+    F(0, 0) = -1 * QuaternionUtils::skewSymmetric()
 
     F()
 }
