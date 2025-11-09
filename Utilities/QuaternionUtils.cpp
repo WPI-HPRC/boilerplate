@@ -106,4 +106,12 @@ BLA::Matrix<4, 1> QuaternionUtils::quatMultiply(const BLA::Matrix<4, 1> &p, cons
 
 }
 
+BLA::Matrix<4, 1> quatConjugate(const BLA::Matrix<4, 1> &p){
+    BLA::Matrix<4, 1> quat;
+    quat(0, 0) = p(0);
+    quat(1, 0) = -1 * p(1);
+    quat(2, 0) = -1 * p(2);
+    quat(3, 0) = -1 * p(3);
 
+    return quat;
+}

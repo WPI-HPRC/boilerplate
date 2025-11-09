@@ -306,11 +306,27 @@ BLA::Matrix<12, 12> AttStateEstimator::measurementFunction(BLA::Matrix<3, 1> u, 
         residual.subMatrix<3, 1>(0, 0) = accelVec;
         residual.subMatrix<3, 1>(3, 0) = magVec;
         residual = residual - h;
+
+        BLA::Matrix<6, 6> R;
+        R = R.fill(0);
+        R(0, 0) = 67;
+        R(1, 1) = 67;
+        R(2, 2) = 67;
+        R(3 ,3) = 67;
+        R(4, 4) = 67;
+        R(5, 5) = 67
+
     }
     else{
         BLA::Matrix<3, 12> H = H_mag;
         BLA::Matrix<3, 1> h = mag_h;
         BLA::Matrix<3, 1> residual = magVec - h;
+
+        BLA::Matrix<3, 3> R;
+        R = R.fill(0);
+        R(0, 0) = 67;
+        R(1, 1) = 67;
+        R(2, 2) = 67;
     }
 
     

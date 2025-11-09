@@ -30,4 +30,8 @@ namespace QuaternionUtils {
 
     // Quaternion multiply
     BLA::Matrix<4, 1> quatMultiply(const BLA::Matrix<4, 1> &p, const BLA::Matrix<4, 1> &q)
+
+    //Quaternion Conjugate
+    BLA::Matrix<4, 1> quatConjugate(const BLA::Matrix<4, 1> &p)
+
 }

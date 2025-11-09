@@ -12,7 +12,7 @@
  * @name AttKfInds
  * @brief Struct holding the indices of the Attitude EKF
  */
-namespace AttKFInds {
+namespace AttMEKFInds {
 constexpr uint8_t q_w = 0;
 constexpr uint8_t q_x = 1;
 constexpr uint8_t q_y = 2;
@@ -135,6 +135,8 @@ class AttStateEstimator {
     // Identity Matrices
     BLA::Matrix<13, 13> I_13 = BLA::Eye<13, 13>();
     BLA::Matrix<3, 3> I_3 = BLA::Eye<3, 3>();
+    BLA::Matrix<12, 12> I_12 = BLA::Eye<12, 12>();
+
 
     // Gravity Update
     // BLA::Matrix<3,3> R_grav = BLA::Eye<3>() * asm330_const.accelXYZ_var;
