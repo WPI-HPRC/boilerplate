@@ -1,0 +1,206 @@
+#pragma once
+
+#include "BasicLinearAlgebra.h"
+
+#include "boilerplate/Logging/Loggable.h"
+#include "boilerplate/Sensors/Impl/ICM20948.h"
+#include "boilerplate/Sensors/Impl/LPS22.h"
+#include "boilerplate/Sensors/Impl/MAX10S.h"
+#include "boilerplate/TimedPointer/TimedPointer.h"
+#include "kfConsts.h"
+#include <cstdint>
+
+/**
+ * @name QMEKfInds
+ * @brief Struct holding the indices of the total QMEKF
+ */
+namespace QMEKFInds {
+constexpr uint8_t q_w = 0;
+constexpr uint8_t q_x = 1;
+constexpr uint8_t q_y = 2;
+constexpr uint8_t q_z = 3;
+constexpr std::array<uint8_t, 4> quat = {q_w, q_x, q_y, q_z};
+
+constexpr utint8_t v_x = 4;
+constexpr utint8_t v_y = 5;
+constexpr utint8_t v_z = 6;
+constexpr std::array<uint8_t, 4> vel = {v_x, v_y, v_z};
+
+constexpr utint8_t p_x = 7;
+constexpr utint8_t p_y = 8;
+constexpr utint8_t p_z = 9;
+constexpr std::array<uint8_t, 4> pos = {p_x, p_y, p_z};
+
+constexpr uint8_t gb_x = 10;
+constexpr uint8_t gb_y = 11;
+constexpr uint8_t gb_z = 12;
+constexpr std::array<uint8_t, 3> gyroBias = {gb_x, gb_y, gb_z};
+
+constexpr uint8_t ab_x = 13;
+constexpr uint8_t ab_y = 14;
+constexpr uint8_t ab_z = 15;
+constexpr std::array<uint8_t, 3> accelBias = {ab_x, ab_y, ab_z};
+
+constexpr uint8_t mb_x = 16;
+constexpr uint8_t mb_y = 17;
+constexpr uint8_t mb_z = 18;
+constexpr std::array<uint8_t, 3> magBias = {mb_x, mb_y, mb_z};
+
+constexpr uint8_t bb_z = 19;
+constexpr std::array<uint8_t, 1> baroBias = {bb_z};
+}; // namespace QMEKFInds
+
+#define QMEKF_LOG_DESC(X)                                                      \
+    X(0, "w", p.print(state(AttKFInds::q_w), 4))                               \
+    X(1, "i", p.print(state(AttKFInds::q_x), 4))                               \
+    X(2, "j", p.print(state(AttKFInds::q_y), 4))                               \
+    X(3, "k", p.print(state(AttKFInds::q_z), 4))                               \
+	X(4, "v_x", p.print(state(AttKFInds::v_x), 4))                             \
+    X(5, "v_y", p.print(state(AttKFInds::v_y), 4))                             \
+    X(6, "v_z", p.print(state(AttKFInds::v_z), 4))                             \
+    X(7, "p_x", p.print(state(AttKFInds::p_x), 4))                             \
+	X(8, "p_y", p.print(state(AttKFInds::p_y), 4))                             \
+    X(9, "p_z", p.print(state(AttKFInds::p_z), 4))                             \
+
+
+class QMEKFLogger : public Loggable {
+  public:
+    QMEKFLogger() : Loggable(NUM_FIELDS(QMEKF_LOG_DESC)) {}
+
+    void newState(BLA::Matrix<20, 1> s) {
+      initialized = true;
+      state = s;
+      updatedAt = millis();
+    }
+
+    const BLA::Matrix<20, 1>& getState() { return state; }
+
+  private:
+    BLA::Matrix<20, 1> state;
+    uint32_t updatedAt = 0;
+    bool initialized = false;
+
+    MAKE_LOGGABLE(QMEKF_LOG_DESC)
+
+    uint32_t dataUpdatedAt() override {
+      if (!initialized) return 0; // Data will not be loggged
+      return updatedAt;
+    }
+};
+
+
+
+
+/**
+ * @name QMEKFStateEstimator
+ * @author QMEKF team
+ * @brief Attitude and Position/Velocity estimation. See matlab simulation for details
+ */
+class AttStateEstimator {
+
+  public:
+    AttStateEstimator(const TimedPointer<ICMData>, float dt);
+
+    /**
+     * @name init
+     * @author @frostydev99
+     * @param x_0 - Initial State
+     * @param dt  - Discrete time step
+     */
+    void init();
+
+    /**
+     * @name onLoop
+     * @author @frostydev99
+     * @brief Run Every Loop
+     * @paragraph This method should run every loop of the expected prediction
+     * update rate given by dt
+     */
+    BLA::Matrix<20, 1> onLoop(int state);
+
+  private:
+    const TimedPointer<ICMData> imuData;
+
+    // Prediction Functions
+    BLA::Matrix<20, 1> predictionFunction(BLA::Matrix<20, 1> x,
+                                          BLA::Matrix<3, 1> gyro,
+										  BLA::Matrix<3, 1> accel);
+    BLA::Matrix<19, 19> predictionJacobian(BLA::Matrix<20, 1> x,
+										  BLA::Matrix<3, 1> gyro,
+										  BLA::Matrix<3, 1> accel);
+
+    // Update Functions
+    void applyAccelUpdate(BLA::Matrix<20, 1> &x, BLA::Matrix<3, 1> a_b);
+
+    void applyMagUpdate(BLA::Matrix<13, 1> &x, BLA::Matrix<3, 1> m_b);
+	
+	void applyGPSUpdate(BLA::Matrix<20, 1> &x, BLA::Matrix<3, 1> gps);
+	
+	void applyBaroUpdate(BLA::Matrix<20, 1> &x, baro);
+
+    /**
+     * @name propRK4
+     * @author @frostydev99
+     * @brief Runs a RKF propagation algorithm to predict state
+     * @param u - [3x1] Vector of gyro readings
+     */
+    BLA::Matrix<20, 1> propRK4(BLA::Matrix<3, 1> gyro);
+
+    float dt = 0.0f;
+
+    // State Vector Allocation
+    BLA::Matrix<20, 1> x_min;
+
+    BLA::Matrix<20, 1> x;
+
+    // Error Covariance Allocation
+    BLA::Matrix<19, 19> P;
+
+    BLA::Matrix<19, 19> P_min;
+
+    // Process Noise Covariance Allocation
+    BLA::Matrix<19, 19> Q;
+
+    // Previous control input
+    BLA::Matrix<3, 1> u_prev = {0, 0, 0};
+
+    // Identity Matrices
+    BLA::Matrix<20, 20> I_20 = BLA::Eye<20, 20>();
+	BLA::Matrix<19, 19> I_19 = BLA::Eye<19, 19>();
+    BLA::Matrix<3, 3> I_3 = BLA::Eye<3, 3>();
+
+    // Gravity Update
+    // BLA::Matrix<3,3> R_grav = BLA::Eye<3>() * asm330_const.accelXYZ_var;
+
+    // clang-format off
+    BLA::Matrix<3, 3> R_accel = {
+        (asm330_const::accelXY_var * 9.8) + 0.01, 0, 0,
+        0, (asm330_const::accelXY_var * 9.8) + 0.01, 0,
+        0, 0, (asm330_const::accelZ_var * 9.8) + 0.01
+    };
+    // clang-format on
+
+    // BLA::Matrix<3,3> R_mag = I_3 * icm20948_const.magXYZ_var;
+    float R_mag = icm20948_const::magXYZ_var;
+
+	BLA::Matrix<5, 1> lastTimes = {0, 0, 0, 0, 0};
+	
+	// In the format defined above, how often to run stuff
+	BLA::Matrix<5, 1> frequencies = {
+		100,
+		300,
+		400,
+		2000,
+		1000,};
+
+template <size_t N, size_t M>
+BLA::Matrix<M, 1> extractSub(const BLA::Matrix<N, 1> &x,
+                             const std::array<uint8_t, M> &inds) {
+    BLA::Matrix<M, 1> sub;
+    for (int i = 0; i < M; i++) {
+        sub(i) = x(inds[i]);
+    }
+    return sub;
+}
+
+BLA::Matrix<3, 3> quat2rot(const BLA::Matrix<4, 1> &q);
