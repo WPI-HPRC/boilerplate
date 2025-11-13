@@ -188,6 +188,19 @@ class AttStateEstimator {
         0, (asm330_const::accelXY_var * 9.8) + 0.01, 0,
         0, 0, (asm330_const::accelZ_var * 9.8) + 0.01
     };
+
+    BLA::Matrix<10, 1> R_all = {
+      pow(sqrt(asm330_const::accelXY_var) * 9.8, 2),
+      pow(sqrt(asm330_const::accelXY_var) * 9.8, 2),
+      pow(sqrt(asm330_const::accelZ_var) * 9.8, 2),
+      magXYZ_var,
+      magXYZ_var,
+      magXYZ_var,
+      gpsXYZ_var,
+      gpsXYZ_var,
+      gpsXYZ_var,
+      baro_var
+    }
     // clang-format on
 
     // BLA::Matrix<3,3> R_mag = I_3 * icm20948_const.magXYZ_var;

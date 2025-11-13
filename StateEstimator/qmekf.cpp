@@ -397,8 +397,18 @@ BLA::Matrix<20, 1> AttStateEstimator::run_mag_update(BLA::Matrix<3, 1> mag_meas)
 
     h_mag = QuaternionUtils::quat2DCM(q) * igrm_model;
 
-    R = 
+    BLA::Matrix<3, 3> R = subMatrix(R_all); // IDK something
+
+    EKFCalcErrorInject(oldState, oldP, mag_meas, H_mag, h_mag, R);
 
 
 
 }
+
+BLA::Matrix<20, 1> AttStateEstimator::run_mag_update(BLA::Matrix<20, 1> oldState, BLA::Matrix<19, 19> oldP, BLA::Matrix sens_reading, BLA::Matrix H_matrix, BLA::Matrix h, BLA::Matrix R) {
+    residual = sens - h_matrix;
+
+    S = H_matrix
+
+}
+
