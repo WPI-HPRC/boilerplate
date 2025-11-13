@@ -243,7 +243,7 @@ BLA::Matrix<12, 12> AttStateEstimator::predictionFunction(float dt) {
     F()
 
     BLA::Matrix<12, 12> phi;
-    P = P.Fill(0);
+    phi = phi.Fill(0);
 
     phi = I_12 + (F * dt) + (0.5 * F * F * pow(dt, 2));
 }

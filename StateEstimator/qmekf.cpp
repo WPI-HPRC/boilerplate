@@ -5,7 +5,7 @@
 
 
 
-StateEstimator::StateEstimator(const TimedPointer<ICMData> imuData, float dt) : imuData(imuData), dt(dt) {
+StateEstimator::StateEstimator(const TimedPointer<ICMData> IMUData, float dt) : IMUData(IMUData), dt(dt) {
     P.Fill(0.0f);
     for(uint8_t idx : AttKFInds::quat) {
         P(idx, idx) = 1e-8;
@@ -80,9 +80,9 @@ void StateEstimator::init(){
 	// Abhay TODO: Replace w/ TRIAD once we verify this works
     // Accelerometer
     BLA::Matrix<3,1> a_b = {
-        imuData->accelX,
-        imuData->accelY,
-        imuData->accelZ
+        IMUData->accelX,
+        IMUData->accelY,
+        IMUData->accelZ
     };
     a_b = a_b / BLA::Norm(a_b);
 
@@ -95,9 +95,9 @@ void StateEstimator::init(){
 
     // Magnetometer
     BLA::Matrix<3,1> m_b = {
-        imuData->magX,
-        imuData->magY,
-        imuData->magZ
+        IMUData->magX,
+        IMUData->magY,
+        IMUData->magZ
     };
 
     // Tilt compensation
@@ -141,17 +141,17 @@ void StateEstimator::init(){
 BLA::Matrix<20,1> stateEstimator::onLoop(int state) {
     // Read data from sensors and convert values
     
-    float gyrX = imuData->gyrX;
-    float gyrY = imuData->gyrY;
-    float gyrZ = imuData->gyrZ;
+    float gyrX = IMUData->gyrX;
+    float gyrY = IMUData->gyrY;
+    float gyrZ = IMUData->gyrZ;
 
-    float aclX = imuData->accelX;
-    float aclY = imuData->accelY;
-    float aclZ = imuData->accelZ;
+    float aclX = IMUData->accelX;
+    float aclY = IMUData->accelY;
+    float aclZ = IMUData->accelZ;
 
-    float magX = imuData->magX;
-    float magY = imuData->magY;
-    float magZ = imuData->magZ;
+    float magX = IMUData->magX;
+    float magY = IMUData->magY;
+    float magZ = IMUData->magZ;
 	
 	// TODO get in the GPS data and baro data from somewhere
     BLA::Matrix<3,1> gyro = {gyrX, gyrY, gyrZ};   // [rad/s]
@@ -224,7 +224,7 @@ BLA::Matrix<20,1> stateEstimator::onLoop(int state) {
     return x;
 }
 
-BLA::Matrix<13,1> StateEstimator::fastIMUProp(BLA::Matrix<3,1> gyro,
+BLA::Matrix<20,1> StateEstimator::fastIMUProp(BLA::Matrix<3,1> gyro,
 											BLA::Matrix<3, 1> accel,
 											att_dt,
 											pv_dt) {
@@ -275,16 +275,16 @@ BLA::Matrix<13,1> StateEstimator::fastIMUProp(BLA::Matrix<3,1> gyro,
 
 BLA::Matrix<19, 1> AttStateEstimator::predictionFunction(BLA::Matrix<3, 1> u, BLA::Matrix<3, 1> accel) {
     
-    float gyrX = magData->gyrX;
-    float gyrY = magData->gyrY;
-    float gyrZ = magData->gyrZ;   
+    float gyrX = IMUData->gyrX;
+    float gyrY = IMUData->gyrY;
+    float gyrZ = IMUData->gyrZ;   
     
     BLA::Matrix<3, 1> gyroVec = {gyrX, gyrY, gyrZ};
     BLA::Matrix<3,3> gyroSkew = QuaternionUtils::skewSymmetric(gyroVec);
 
-    float aclX = magData->accelX;
-    float aclY = magData->accelY;
-    float aclZ = magData->accelZ;
+    float aclX = IMUData->accelX;
+    float aclY = IMUData->accelY;
+    float aclZ = IMUData->accelZ;
 
     BLA::Matrix<3, 1> accelVec = {accelX, accelY, accelZ};
     BLA::Matrix<3,3> accelSkew = QuaternionUtils::skewSymmetric(accelVec);
@@ -298,20 +298,59 @@ BLA::Matrix<19, 1> AttStateEstimator::predictionFunction(BLA::Matrix<3, 1> u, BL
     }
     
     BLA::Matrix<3, 3> rotMatrix = QuaternionUtils::quatToRot(q);
-    
+
+    BLA::Matrix<19, 19> F;
+    F = F.Fill(0);
+
     //Row 1 - 3
     F.subMatrix<3, 3>(0, QMEKFInds::q_w) = -1 * gyroSkew; 
     F.subMatrix<3, 3>(0, QMEKFInds::gb_x) = -1 * I_3;
 
     //Row 4 - 6
-    F.subMatrix<3, 3>(QMEKFInds::v_x - 1, QMEKF::Inds::q_w) = -1 * rotMatrix * accelSkew;
-    F.subMatrix<3, 3>(QMEKFInds::v_x - 1, QMEKF::Inds::ab_x) = -1 * rotMatrix;
+    F.subMatrix<3, 3>(QMEKFInds::v_x - 1, QMEKFInds::q_w) = -1 * rotMatrix * accelSkew;
+    F.subMatrix<3, 3>(QMEKFInds::v_x - 1, QMEKFInds::ab_x) = -1 * rotMatrix;
 
     //Row 7 - 9
-    F.subMatrix
-
-    BLA::Matrix<19, 19> F;
-    F = F.Fill(0);
+    F.subMatrix<3, 3>(QMEKDInds::P_x -1, 3) = I_3;
 
     F()
+    
+    BLA::Matrix<19, 19> phi;
+    phi = phi.Fill(0);
+
+    phi = I_19 + (F * dt) + (0.5 * F * F * pow(dt, 2));
+}
+
+BLA::Matrix<20, 1> AttStateEstimator::run_accel_update(BLA::Matrix<3,1> mag_meas)
+{
+    BLA::Matrix<4,1> q = 
+    {
+        x(AttMEKFInds::q_w),
+        x(AttMEKFInds::q_x),
+        x(AttMEKFInds::q_y),
+        x(AttMEKFInds::q_z),
+    }
+}
+
+BLA::Matrix<20, 1> AttStateEstimator::run_mag_update(BLA::Matrix<3, 1> mag_meas) {
+    // TODO input igrm model somehow figure out
+    BLA::Matrix<4, 1> q =
+    {
+        x(AttMEKFInds::q_w),
+        x(AttMEKFInds::q_x),
+        x(AttMEKFInds::q_y),
+        x(AttMEKFInds::q_z)
+    };
+
+    BLA::Matrix<3, 20> H_mag;
+    H_mag = H_mag.Fill(0);
+    H_mag.subMatrix<3, 3>(0, 0) = QuaternionUtils::quat2DCM(q) * igrm_model;
+    H_mag.subMatrix<3, 3>(0, QMEKFInds::gb_x) = I_3;
+
+    h_mag = QuaternionUtils::quat2DCM(q) * igrm_model;
+
+    R = 
+
+
+
 }
