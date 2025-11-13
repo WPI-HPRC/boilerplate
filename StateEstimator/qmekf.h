@@ -50,9 +50,11 @@ constexpr uint8_t bb_z = 19;
 constexpr std::array<uint8_t, 1> baroBias = {bb_z};
 
 constexpr float gyro_var = 0.0051;
-constexpr float accel_var = pow(4.9 * pow(10, -5) * 9.9, 2);
+constexpr float gyro_bias_var = pow(pow(4.9, -5) * 9.8, 2);
 
+constexpr float accel_var = pow(4.9 * pow(10, -5) * 9.9, 2);
 constexpr float accel_bias_var = pow(0.00098 * 9.8, 2);
+
 constexpr float mag_bias_var = 25;
 constexpr float baro_bias_var = pow(7.5, 2);
 

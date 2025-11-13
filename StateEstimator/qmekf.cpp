@@ -319,6 +319,54 @@ BLA::Matrix<19, 1> AttStateEstimator::predictionFunction(BLA::Matrix<3, 1> u, BL
     phi = phi.Fill(0);
 
     phi = I_19 + (F * dt) + (0.5 * F * F * pow(dt, 2));
+
+    BLA::Matrix<19, 19> Q_d;
+    Q_d = Q_d.Fill(0);
+
+    BLA::Matrix<3, 3> gyro_var_diag;
+    gyro_var_diag = gyro_var_diag.Fill(0);
+    gyro_var_diag(0, 0) = QMEKFInds::gyro_var;
+    gyro_var_diag(1, 1) = QMEKFInds::gyro_var;
+    gryo_var_diag(2, 2) = QMEKFInds::gyro_var;
+
+    BLA::Matrix<3, 3> gyro_bias_var_diag;
+    gyro_bias_var_diag = gyro_bias_var_diag.Fill(0);
+    gyro_bias_var_diag(0, 0) = QMEKFInds::gyro_bias_var;
+    gyro_bias_var_diag(1, 1) = QMEKFInds::gyro_bias_var;
+    gyro_bias_var_diag(2, 2) = QMEKFInds::gyro_bias_var;
+
+    BLA::Matrix<3, 3> accel_bias_var_diag;
+    accel_bias_var_diag = accel_bias_var_diag.Fill(0);
+    accel_bias_var_diag(0, 0) = QMEKFInds::accel_bias_var;
+    accel_bias_var_diag(1, 1) = QMEKFInds::accel_bias_var;
+    accel_bias_var_diag(2, 2) = QMEKFInds::accel_bias_var;
+
+    Q_d.subMatrix<3, 3>(QMEKFInds::q_w, QMEKFInds::q_w) = (gyro_var_diag * dt) + (gyro_bias_var_diag * (pow(dt, 3) / 10));
+    Q_d.subMatrix<3, 3>(QMEKFInds::q_w, 9) = -1 * gyro_bias_var_diag * (pow(dt, 2) / 2);
+
+    Q_d.subMatrix<3 ,3>(3, 3) = QMEKF::Inds::R_Grav * dt + aaccel_bias_var_diag * (pow(dt, 3) / 3);
+    Q_d.subMatrix<3, 3>(3, 6) = accel_bias_var_diag * (pow(dt ,4) / 8.0) + QMEKFInds::R_grav * (pow(dt, 2) / 2.0);
+    Q_d.subMatrix<3, 3>(3, 10) = -1.0 * accel_bias_var_diag * (pow(dt, 2) / 2.0);
+
+    Q_d.subMatrix<3, 3>(6, 3) = QMEKFInds::R_grav * (pow(dt, 2) / 2) + accel_bias_var_diag * (pow(dt, 4) / 8.0);
+    Q_d.subMatrix<3, 3>(6, 6) = QMEKFInds::R_grav * (pow(dt, 3) / 3.0) + accel_bias_var_diag * (pow(dt, 5) / 20.0);
+    Q_d.subMatrix<3, 3>(6, 10) = -1.0 * accel_bias_var_diag * (pow(dt, 3) / 6.0);
+
+    Q_d.subMatix<3, 3>(9, 0) = -1.0 * gyro_bias_var_diag * (pow(dt, 2) / 2.0);
+    Q_d.subMatrix<3, 3>(9, 9) = gyro_bias_var_diag * (pow(dt, 2) / 2.0);
+
+    Q_d.subMatrix<3, 3>(12, 3) = -1.0 * accel_bias_var_diag * (pow(dt, 2) / 2.0);
+    Q_d.subMatrix<3, 3>(12, 6) = -1.0 * accel_bias_var_diag * (pow(dt, 2) / 2.0);
+    Q_d.subMatrix<3, 3>(12, 12) = accel_bias_var_diag * dt;
+
+    Q_d(15, 15) = mag_bias_var * dt;
+
+    Q_d(18, 18) = baro_bias_var * dt;
+
+    BLA::Matrix<19, 19> P;
+    
+    P = phi * P_ * phi + Q_D;
+
 }
 
 BLA::Matrix<20, 1> AttStateEstimator::run_accel_update(BLA::Matrix<3,1> mag_meas)
