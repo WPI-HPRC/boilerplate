@@ -138,7 +138,7 @@ void StateEstimator::init(){
 }
 
 
-BLA::Matrix<20,1> tateEstimator::onLoop(int state) {
+BLA::Matrix<20,1> stateEstimator::onLoop(int state) {
     // Read data from sensors and convert values
     
     float gyrX = imuData->gyrX;
@@ -273,9 +273,44 @@ BLA::Matrix<13,1> StateEstimator::fastIMUProp(BLA::Matrix<3,1> gyro,
 	x(QMEKFInds::p_z) = p(2);
 }
 
-BLA::Matrix<19, 1> AttStateEstimator::predictionFunction(BLA::Matrix<3, 1> u,
-															BLA::Matrix<3, 1> accel) {
-    BLA::Matrix<12, 12> F;
+BLA::Matrix<19, 1> AttStateEstimator::predictionFunction(BLA::Matrix<3, 1> u, BLA::Matrix<3, 1> accel) {
+    
+    float gyrX = magData->gyrX;
+    float gyrY = magData->gyrY;
+    float gyrZ = magData->gyrZ;   
+    
+    BLA::Matrix<3, 1> gyroVec = {gyrX, gyrY, gyrZ};
+    BLA::Matrix<3,3> gyroSkew = QuaternionUtils::skewSymmetric(gyroVec);
+
+    float aclX = magData->accelX;
+    float aclY = magData->accelY;
+    float aclZ = magData->accelZ;
+
+    BLA::Matrix<3, 1> accelVec = {accelX, accelY, accelZ};
+    BLA::Matrix<3,3> accelSkew = QuaternionUtils::skewSymmetric(accelVec);
+
+    BLA::Matrix<4, 1> q =
+    {
+    x(AttMEKFInds::q_w),
+    x(AttMEKFInds::q_x),
+    x(AttMEKFInds::q_y),
+    x(AttMEKFInds::q_z)
+    }
+    
+    BLA::Matrix<3, 3> rotMatrix = QuaternionUtils::quatToRot(q);
+    
+    //Row 1 - 3
+    F.subMatrix<3, 3>(0, QMEKFInds::q_w) = -1 * gyroSkew; 
+    F.subMatrix<3, 3>(0, QMEKFInds::gb_x) = -1 * I_3;
+
+    //Row 4 - 6
+    F.subMatrix<3, 3>(QMEKFInds::v_x - 1, QMEKF::Inds::q_w) = -1 * rotMatrix * accelSkew;
+    F.subMatrix<3, 3>(QMEKFInds::v_x - 1, QMEKF::Inds::ab_x) = -1 * rotMatrix;
+
+    //Row 7 - 9
+    F.subMatrix
+
+    BLA::Matrix<19, 19> F;
     F = F.Fill(0);
 
     F()

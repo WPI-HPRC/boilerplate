@@ -20,7 +20,7 @@ constexpr uint8_t q_z = 3;
 constexpr std::array<uint8_t, 4> quat = {q_w, q_x, q_y, q_z};
 
 constexpr uint8_t gb_x = 4;
-constexpr uint8_t gb_y = 5;
+constexpr uint8_t gb_y = 5; 
 constexpr uint8_t gb_z = 6;
 constexpr std::array<uint8_t, 3> gyroBias = {gb_x, gb_y, gb_z};
 

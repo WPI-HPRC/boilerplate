@@ -314,7 +314,7 @@ BLA::Matrix<12, 12> AttStateEstimator::measurementFunction(BLA::Matrix<3, 1> u, 
         R(2, 2) = 67;
         R(3 ,3) = 67;
         R(4, 4) = 67;
-        R(5, 5) = 67
+        R(5, 5) = 67;
 
     }
     else{
