@@ -21,14 +21,14 @@ constexpr uint8_t q_y = 2;
 constexpr uint8_t q_z = 3;
 constexpr std::array<uint8_t, 4> quat = {q_w, q_x, q_y, q_z};
 
-constexpr utint8_t v_x = 4;
-constexpr utint8_t v_y = 5;
-constexpr utint8_t v_z = 6;
+constexpr uint8_t v_x = 4;
+constexpr uint8_t v_y = 5;
+constexpr uint8_t v_z = 6;
 constexpr std::array<uint8_t, 4> vel = {v_x, v_y, v_z};
 
-constexpr utint8_t p_x = 7;
-constexpr utint8_t p_y = 8;
-constexpr utint8_t p_z = 9;
+constexpr uint8_t p_x = 7;
+constexpr uint8_t p_y = 8;
+constexpr uint8_t p_z = 9;
 constexpr std::array<uint8_t, 4> pos = {p_x, p_y, p_z};
 
 constexpr uint8_t gb_x = 10;
@@ -155,7 +155,7 @@ class StateEstimator {
 	
 	  void run_baro_update(BLA::Matrix<20, 1> &x, BLA::Matrix<1, 1> baro);
 
-    void EKFCalcErrorInject(BLA::Matrix<20, 1> &oldState, BLA::Matrix<19, 19> oldP, BLA::Matrix sens_reading, BLA::Matrix H_matrix, BLA::Matrix h, BLA::Matrix R);
+    void EKFCalcErrorInject(BLA::Matrix<20, 1> &oldState, BLA::Matrix<19, 19> &oldP, BLA::Matrix<3, 1> &sens_reading, BLA::Matrix<3, 20> H_matrix, BLA::Matrix<3, 1> h, BLA::Matrix<3, 3> R);
 
     // State Vector Allocation
     BLA::Matrix<20, 1> x_min;
@@ -180,13 +180,13 @@ class StateEstimator {
       pow(sqrt(asm330_const::accelXY_var) * 9.8, 2),
       pow(sqrt(asm330_const::accelXY_var) * 9.8, 2),
       pow(sqrt(asm330_const::accelZ_var) * 9.8, 2),
-      magXYZ_var,
-      magXYZ_var,
-      magXYZ_var,
-      gpsXYZ_var,
-      gpsXYZ_var,
-      gpsXYZ_var,
-      baro_var
+      icm20948_const::magXYZ_var,
+      icm20948_const::magXYZ_var,
+      icm20948_const::magXYZ_var,
+      Max10S_const::gpsXYZ_var,
+      Max10S_const::gpsXYZ_var,
+      Max10S_const::gpsXYZ_var,
+      Max10S_const::baro_var
     }
 
 

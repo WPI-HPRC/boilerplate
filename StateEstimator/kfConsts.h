@@ -31,7 +31,11 @@ constexpr float gyro_VRW = 8.33e-4f;          // [rad/s/sqrt(Hz)]
 constexpr float magXYZ_var = square(0.7263f); // [uT]
 constexpr float quatVar = 0.3;                // Idk Guess
 
-constexpr float gpsXYZ_var = square(2.0); // [m] idk guess
-constexpr float baro_var = square(7.5); // [P] idk guess
 
 }; // namespace icm20948_const
+
+
+namespace Max10S_const {
+    constexpr float gpsXYZ_var = square(2.0); // [m] idk guess
+    constexpr float baro_var = square(7.5); // [P] idk guess
+}

@@ -195,10 +195,10 @@ BLA::Matrix<20,1> stateEstimator::onLoop(int state) {
     
 	if(run_priori) {
 		// TODO eventually implement RK4 here, but I don't understand it yet
-		lastAttUpdate = BLA::max(lastTimes(0), lastTimes(1), lastTimes(2)); // Maximum of the lastTimes(0, 1, 2)
-		lastPVUpdate = BLA::max(lastTimes(0), lastTimes(3), lastTimes(4)); // Maximum of the lastTimes(0, 3, 4)
-		dt_att = millis() - lastAttUpdate;
-		dt_pv = millis() - lastPVUpdate;
+		float lastAttUpdate = BLA::max(lastTimes(0), lastTimes(1), lastTimes(2)); // Maximum of the lastTimes(0, 1, 2)
+		float lastPVUpdate = BLA::max(lastTimes(0), lastTimes(3), lastTimes(4)); // Maximum of the lastTimes(0, 3, 4)
+		float dt_att = millis() - lastAttUpdate;
+		float dt_pv = millis() - lastPVUpdate;
 		
 		x = fastIMUProp(gyro, accel, dt_att, dt_pv);
 		
