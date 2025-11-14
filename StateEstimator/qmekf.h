@@ -58,6 +58,11 @@ constexpr float accel_bias_var = pow(0.00098 * 9.8, 2);
 constexpr float mag_bias_var = 25;
 constexpr float baro_bias_var = pow(7.5, 2);
 
+constexpr BLA::Matrix<3, 1> normal_i = {0, 0, -9.8037}; // [m/s^2]
+constexpr BLA::Matrix<3, 1> g_i = {0, 0, 9.8037}; // [m/s^2]
+constexpr BLA::Matrix<3, 1> m_i = {19.98311, -4.87166Z, 46.99861}; // [uT]
+constexpr BLA::Matrix<3, 1> launch_ecef = {2312321, 213123213, 21312321};
+
 }; // namespace QMEKFInds
 
 #define QMEKF_LOG_DESC(X)                                                      \

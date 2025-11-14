@@ -106,6 +106,8 @@ BLA::Matrix<4, 1> QuaternionUtils::quatMultiply(const BLA::Matrix<4, 1> &p, cons
 
 }
 
+BLA::Matrix<3, 1> QuaternionUtils::ecef2ned(const BLA::Matrix<3, 1> ecef_meas, )
+
 BLA::Matrix<4, 1> quatConjugate(const BLA::Matrix<4, 1> &p){
     BLA::Matrix<4, 1> quat;
     quat(0, 0) = p(0);
