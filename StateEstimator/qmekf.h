@@ -58,13 +58,6 @@ constexpr float accel_bias_var = pow(0.00098 * 9.8, 2);
 constexpr float mag_bias_var = 25;
 constexpr float baro_bias_var = pow(7.5, 2);
 
-const BLA::Matrix<3, 1> normal_i = {0, 0, -9.8037}; // [m/s^2]
-const BLA::Matrix<3, 1> g_i = {0, 0, 9.8037}; // [m/s^2]
-const BLA::Matrix<3, 1> m_i = {18.659605, -4.540227, 49.09786}; // [uT] Kids rocket params
-const BLA::Matrix<3, 1> launch_ecef = {1311800, -4337300, 4473600}; // [m] // asuming 0 above surface
-const BLA::Matrix<3, 1> launch_lla = {44.825070, -73.171726, 0}; // [whatever tf units are in (deg, deg, m)]
-const BLA::Matrix<2, 1> launch_ll = {launch_lla(0), launch_lla(1)};
-const BLA::Matrix <3, 3> R_ET = QuaternionUtils::dcm_ned2ecef(launch_ll);
 
 }; // namespace QMEKFInds
 
@@ -149,15 +142,16 @@ class StateEstimator {
 		// 								  BLA::Matrix<3, 1> accel);
 
     BLA::Matrix<20,1> fastIMUProp(BLA::Matrix<3,1> gyro, BLA::Matrix<3, 1> accel, float att_dt, float pv_dt);
+    BLA::Matrix<19, 1> predictionFunction(BLA::Matrix<19, 19> P_, BLA::Matrix<3, 1> accelVec, BLA::Matrix<3, 1> gyroVec, float dt);
 
     // Update Functions
-    void run_accel_update(BLA::Matrix<20, 1> &x, BLA::Matrix<3, 1> a_b);
+    void runAccelUpdate(BLA::Matrix<20, 1> &x, BLA::Matrix<3, 1> a_b);
 
-    void run_mag_update(BLA::Matrix<20, 1> &x, BLA::Matrix<3, 1> m_b);
+    void runMagUpdate(BLA::Matrix<20, 1> &x, BLA::Matrix<3, 1> m_b);
 	
-	  void run_gps_update(BLA::Matrix<20, 1> &x, BLA::Matrix<3, 1> gps);
+	  void runGPSUpdate(BLA::Matrix<20, 1> &x, BLA::Matrix<3, 1> gps);
 	
-	  void run_baro_update(BLA::Matrix<20, 1> &x, BLA::Matrix<1, 1> baro);
+	  // void runBaroUpdate(BLA::Matrix<20, 1> &x, BLA::Matrix<1, 1> baro);
 
     void EKFCalcErrorInject(BLA::Matrix<20, 1> &oldState, BLA::Matrix<19, 19> &oldP, BLA::Matrix<3, 1> &sens_reading, BLA::Matrix<3, 20> H_matrix, BLA::Matrix<3, 1> h, BLA::Matrix<3, 3> R);
 
@@ -205,9 +199,17 @@ class StateEstimator {
 		1000};
 
   BLA::Matrix<3,1> gyro_prev;
-  BLA::Matrix<3,1> accel_pref;
+  BLA::Matrix<3,1> accel_prev;
   BLA::Matrix<3,1> mag_prev;
   BLA::Matrix<3,1> gps_prev;
+
+  BLA::Matrix<3, 1> normal_i = {0, 0, -9.8037}; // [m/s^2]
+  BLA::Matrix<3, 1> g_i = {0, 0, 9.8037}; // [m/s^2]
+  BLA::Matrix<3, 1> m_i = {18.659605, -4.540227, 49.09786}; // [uT] Kids rocket params
+  BLA::Matrix<3, 1> launch_ecef = {1311800, -4337300, 4473600}; // [m] // asuming 0 above surface
+  BLA::Matrix<3, 1> launch_lla = {44.825070, -73.171726, 0}; // [whatever tf units are in (deg, deg, m)]
+  BLA::Matrix<2, 1> launch_ll = {launch_lla(0), launch_lla(1)};
+  BLA::Matrix<3, 3> R_ET = QuaternionUtils::dcm_ned2ecef(launch_ll);
 
 template <size_t N, size_t M>
 BLA::Matrix<M, 1> extractSub(const BLA::Matrix<N, 1> &x,

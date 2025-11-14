@@ -142,7 +142,7 @@ void StateEstimator::init(BLA::Matrix<3, 1> LLA){
     this->x_min = x;
 
     // Set launch site LLA/ECEF
-    launch_ecef = lla2ecef(LLA);
+    launch_ecef = QuaternionUtils::lla2ecef(LLA);
     launch_lla = LLA;
     R_ET = QuaternionUtils::dcm_ned2ecef(launch_lla(0), launch_lla(1));
 
@@ -176,7 +176,7 @@ BLA::Matrix<20,1> StateEstimator::onLoop(int state) {
 	// Remove biases from each measurement
 	BLA::Matrix<3,1> unbiased_gyro = {gyro(0) - x(QMEKFInds::gb_x), gyro(1) - x(QMEKFInds::gb_y), gyro(2) - x(QMEKFInds::gb_z)};
 	BLA::Matrix<3,1> unbiased_accel = {accel(0) - x(QMEKFInds::ab_x), accel(1) - x(QMEKFInds::ab_y), accel(2) - x(QMEKFInds::ab_z)};
-	BLA::Matrix<3,1> umbiased_mag = {mag(0) - x(QMEKFInds::mb_x), mag(1) - x(QMEKFInds::mb_y), mag(2) - x(QMEKFInds::mb_z)};
+	BLA::Matrix<3,1> unbiased_mag = {mag(0) - x(QMEKFInds::mb_x), mag(1) - x(QMEKFInds::mb_y), mag(2) - x(QMEKFInds::mb_z)};
 	// BLA::Matrix<1,1> unbiased_baro = {baro(0) - x(20)};
 	
 	
@@ -207,17 +207,17 @@ BLA::Matrix<20,1> StateEstimator::onLoop(int state) {
 	}
 	
 	if (run_accel_update) {
-		run_accel_update();
+		runAccelUpdate();
 		lastTimes(1) = millis();
 	}
 	
 	if (run_mag_update) {
-		run_mag_update();
+		runMagUpdate();
 		lastTimes(2) = millis();
 	}
 	
 	if (run_gps_update) {
-		run_gps_update(QuaternionUtils::lla2ecef(gpsData));
+		runGPSUpdate(QuaternionUtils::lla2ecef(gpsData));
 		lastTimes(3) = millis();
 	}
 	
@@ -230,7 +230,7 @@ BLA::Matrix<20,1> StateEstimator::onLoop(int state) {
     gyro_prev = unbiased_gyro;
     accel_prev = unbiased_accel;
     mag_prev = unbiased_mag;
-    gps_prev = gps;
+    gps_prev = gpsData;
     // baro_prev = unbiased_baro;
 
     return x;
@@ -238,16 +238,13 @@ BLA::Matrix<20,1> StateEstimator::onLoop(int state) {
 
 BLA::Matrix<20,1> StateEstimator::fastIMUProp(BLA::Matrix<3,1> gyro, BLA::Matrix<3, 1> accel, float att_dt, float pv_dt) {
 												
-	g = [0, 0, 9.80603]
 	// TODO change to from world model when go to ECEF
-	
-	
     BLA::Matrix<3,1> gyro_int = {gyro(0)*att_dt, gyro(1)*att_dt, gyro(2)*att_dt};
     BLA::Matrix<3,1> rotVecNorm = BLA::Norm(gyro_int);
-    BLA::Matrix<3,1> axis = gyro_int / rotVecNorm;
+    BLA::Matrix<3,1> axis = {gyro_int(0) / rotVecNorm, gyro_int(1) / rotVecNorm, gyro_int(2) / rotVecNorm};
     BLA::Matrix<3,1> dq = 
     {
-        cos(rotVecNorm(0)/2.0f)
+        cos(rotVecNorm(0)/2.0f),
         axis(0) * sinf(rotVecNorm(0)/2.0f),
         axis(1) * sinf(rotVecNorm(0)/2.0f),
         axis(2) * sinf(rotVecNorm(0)/2.0f),
@@ -257,14 +254,14 @@ BLA::Matrix<20,1> StateEstimator::fastIMUProp(BLA::Matrix<3,1> gyro, BLA::Matrix
         x(QMEKFInds::q_w),
         x(QMEKFInds::q_x),
         x(QMEKFInds::q_y),
-        x(QMEKFInds::q_z)
+        x(QMEKFInds::q_z),
     };
-    BLA::Matrix<4,1> q = QuaternionUtils::quatMultiply(q, dq);
-    BLA:Matrix<4,1> qNorm = q / BLA::Norm(q);
+    q = QuaternionUtils::quatMultiply(q, dq);
+    BLA::Matrix<4,1> qNorm = {q(0) / BLA::Norm(q), q(1) / BLA::Norm(q), q(2) / BLA::Norm(q), q(3) / BLA::Norm(q)};
 	
 	
 	
-	BLA::Matrix<3,1> v_dot = QuaternionUtils::quatToRot(q) * accel + QMEKFInds::g_i;
+	BLA::Matrix<3,1> v_dot = QuaternionUtils::quatToRot(q) * accel + g_i;
 	BLA::Matrix<3,1> old_v = {
 		x(QMEKFInds::v_x), x(QMEKFInds::v_y), x(QMEKFInds::v_z)
 	}
@@ -366,7 +363,7 @@ BLA::Matrix<19, 1> StateEstimator::predictionFunction(BLA::Matrix<19, 19> P_, BL
 
 }
 
-BLA::Matrix<20, 1> StateEstimator::run_accel_update(BLA::Matrix<3,1> accel_meas)
+BLA::Matrix<20, 1> StateEstimator::runAccelUpdate(BLA::Matrix<3,1> accel_meas)
 {
     BLA::Matrix<4,1> q = 
     {
@@ -389,7 +386,7 @@ BLA::Matrix<20, 1> StateEstimator::run_accel_update(BLA::Matrix<3,1> accel_meas)
     
 }
 
-BLA::Matrix<20, 1> StateEstimator::run_mag_update(BLA::Matrix<3, 1> mag_meas) {
+BLA::Matrix<20, 1> StateEstimator::runMagUpdate(BLA::Matrix<3, 1> mag_meas) {
     // TODO input igrm model somehow figure out
     BLA::Matrix<4, 1> q =
     {
@@ -412,7 +409,7 @@ BLA::Matrix<20, 1> StateEstimator::run_mag_update(BLA::Matrix<3, 1> mag_meas) {
     
 }
 
-BLA::Matrix<20, 1> StateEstimator::run_gps_update(BLA::Matrix<3, 1> gps_meas_ecef) {
+BLA::Matrix<20, 1> StateEstimator::runGPSUpdate(BLA::Matrix<3, 1> gps_meas_ecef) {
     BLA::Matrix<3, 1> pos_ned = QuaternionUtils::ecef2ned(gps_meas_ecef, launch_ecef, R_ET);
 
     BLA::Matrix<3, 20> H_gps;
