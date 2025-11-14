@@ -139,31 +139,23 @@ class AttStateEstimator {
     const TimedPointer<ICMData> imuData;
 
     // Prediction Functions
-    BLA::Matrix<20, 1> predictionFunction(BLA::Matrix<20, 1> x,
-                                          BLA::Matrix<3, 1> gyro,
-										  BLA::Matrix<3, 1> accel);
-    BLA::Matrix<19, 19> predictionJacobian(BLA::Matrix<20, 1> x,
-										  BLA::Matrix<3, 1> gyro,
-										  BLA::Matrix<3, 1> accel);
+    // BLA::Matrix<20, 1> predictionFunction(BLA::Matrix<20, 1> x,
+    //                                       BLA::Matrix<3, 1> gyro,
+		// 								  BLA::Matrix<3, 1> accel);
+    // BLA::Matrix<19, 19> predictionJacobian(BLA::Matrix<20, 1> x,
+		// 								  BLA::Matrix<3, 1> gyro,
+		// 								  BLA::Matrix<3, 1> accel);
 
     // Update Functions
-    void applyAccelUpdate(BLA::Matrix<20, 1> &x, BLA::Matrix<3, 1> a_b);
+    void run_accel_update(BLA::Matrix<20, 1> &x, BLA::Matrix<3, 1> a_b);
 
-    void applyMagUpdate(BLA::Matrix<13, 1> &x, BLA::Matrix<3, 1> m_b);
+    void run_mag_update(BLA::Matrix<20, 1> &x, BLA::Matrix<3, 1> m_b);
 	
-	void applyGPSUpdate(BLA::Matrix<20, 1> &x, BLA::Matrix<3, 1> gps);
+	  void run_gps_update(BLA::Matrix<20, 1> &x, BLA::Matrix<3, 1> gps);
 	
-	void applyBaroUpdate(BLA::Matrix<20, 1> &x, baro);
+	  void run_baro_update(BLA::Matrix<20, 1> &x, BLA::Matrix<1, 1> baro);
 
-    /**
-     * @name propRK4
-     * @author @frostydev99
-     * @brief Runs a RKF propagation algorithm to predict state
-     * @param u - [3x1] Vector of gyro readings
-     */
-    BLA::Matrix<20, 1> propRK4(BLA::Matrix<3, 1> gyro);
-
-    float dt = 0.0f;
+    void EKFCalcErrorInject(BLA::Matrix<20, 1> &oldState, BLA::Matrix<19, 19> oldP, BLA::Matrix sens_reading, BLA::Matrix H_matrix, BLA::Matrix h, BLA::Matrix R);
 
     // State Vector Allocation
     BLA::Matrix<20, 1> x_min;
@@ -178,23 +170,11 @@ class AttStateEstimator {
     // Process Noise Covariance Allocation
     BLA::Matrix<19, 19> Q;
 
-    // Previous control input
-    BLA::Matrix<3, 1> u_prev = {0, 0, 0};
-
     // Identity Matrices
     BLA::Matrix<20, 20> I_20 = BLA::Eye<20, 20>();
-	BLA::Matrix<19, 19> I_19 = BLA::Eye<19, 19>();
+	  BLA::Matrix<19, 19> I_19 = BLA::Eye<19, 19>();
     BLA::Matrix<3, 3> I_3 = BLA::Eye<3, 3>();
 
-    // Gravity Update
-    // BLA::Matrix<3,3> R_grav = BLA::Eye<3>() * asm330_const.accelXYZ_var;
-
-    // clang-format off
-    BLA::Matrix<3, 3> R_accel = {
-        (asm330_const::accelXY_var * 9.8) + 0.01, 0, 0,
-        0, (asm330_const::accelXY_var * 9.8) + 0.01, 0,
-        0, 0, (asm330_const::accelZ_var * 9.8) + 0.01
-    };
 
     BLA::Matrix<10, 1> R_all = {
       pow(sqrt(asm330_const::accelXY_var) * 9.8, 2),
@@ -208,10 +188,7 @@ class AttStateEstimator {
       gpsXYZ_var,
       baro_var
     }
-    // clang-format on
 
-    // BLA::Matrix<3,3> R_mag = I_3 * icm20948_const.magXYZ_var;
-    float R_mag = icm20948_const::magXYZ_var;
 
 	BLA::Matrix<5, 1> lastTimes = {0, 0, 0, 0, 0};
 	

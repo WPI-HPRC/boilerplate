@@ -77,7 +77,6 @@ StateEstimator::StateEstimator(const TimedPointer<ICMData> IMUData, float dt) : 
 
 }
 void StateEstimator::init(){
-	// Abhay TODO: Replace w/ TRIAD once we verify this works
     // Accelerometer
     BLA::Matrix<3,1> a_b = {
         IMUData->accelX,
@@ -154,18 +153,20 @@ BLA::Matrix<20,1> stateEstimator::onLoop(int state) {
     float magX = IMUData->magX;
     float magY = IMUData->magY;
     float magZ = IMUData->magZ;
+    
+    // float gpsX = GPSData->gpsX; TODO
 	
 	// TODO get in the GPS data and baro data from somewhere
     BLA::Matrix<3,1> gyro = {gyrX, gyrY, gyrZ};   // [rad/s]
-    BLA::Matrix<3,1> accel = {aclX, aclY, aclZ}; // [m/s^s] NOT G
+    BLA::Matrix<3,1> accel = {aclX, aclY, aclZ}; // [m/s^s]
     BLA::Matrix<3,1> mag = {magX, magY, magZ}; // [uT]
 	BLA::Matrix<3,1> gps = {gpsX, gpsY, gpsZ}; // [m]
 	BLA::Matrix<1,1> baro = {baroZ};
 	
 	// Remove biases from each measurement
-	BLA::Matrix<3,1> unbiased_gyro = {gyro(0) - x(10), gyro(1) - x(11), gyro(2) - x(12)};
-	BLA::Matrix<3,1> unbiased_accel = {accel(0) - x(13), accel(1) - x(14), accel(2) - x(15)};
-	BLA::Matrix<3,1> umbiased_mag = {mag(0) - x(16), mag(1) - x(17), mag(2) - x(18)};
+	BLA::Matrix<3,1> unbiased_gyro = {gyro(0) - x(QMEKFInds::gb_x), gyro(1) - x(QMEKFInds::gb_y), gyro(2) - x(QMEKFInds::gb_z)};
+	BLA::Matrix<3,1> unbiased_accel = {accel(0) - x(QMEKFInds::ab_x), accel(1) - x(QMEKFInds::ab_y), accel(2) - x(QMEKFInds::ab_z)};
+	BLA::Matrix<3,1> umbiased_mag = {mag(0) - x(QMEKFInds::mb_x), mag(1) - x(QMEKFInds::mb_y), mag(2) - x(QMEKFInds::mb_z)};
 	BLA::Matrix<1,1> unbiased_baro = {baro(0) - x(20)};
 	
 	
@@ -176,104 +177,57 @@ BLA::Matrix<20,1> stateEstimator::onLoop(int state) {
 	run_gps_update = time - lastTimes(3) >= frequencies(3);
 	run_baro_update = time - lastTimeBaro(4) >= frequencies(4);
 	
-    //Check for if first iteration
-    if(!hasPassedGo) {
-        gyro_prev = gyro;
-        accel_prev = accel;
-        hasPassedGo = true;
-    }
+    // }
     
-    x_min = fastIMUProp(gyro, accel, old_v, old_p);
-    
-    P_min = P + predictionFunction(P, gyro, accel);
-
-    x = x_min;
-
-    P = P_min;
-
-    //Run updates
-    //Come back to determine how frequently
-    if(millis() - lastTimeGrav >= 100 && inPrelaunch) {
-        applyGravUpdate(x, accel);
-
-        lastTimeGrav = millis();
-    } 
-
-    else if(millis() - lastTimeMag >= 500) {
-        applyMagUpdate(x, mag);
-
-        lastTimeMag = millis();
-    }
-    
-    else if(millis() - lastTimeGPS >= 500) {
-        applyGPSUpdate(x, gps);
-
-        lastTimeGPS = millis();
-    }
-    
-    //Update sensor readings
-    gyro_prev = gyro;
-    accel_prev = accel;
-    mag_prev = mag;
-    baro_prev = baro;
-    gps_prev = gps;
-    
-    /*
 	if(run_priori) {
 		// TODO eventually implement RK4 here, but I don't understand it yet
-		lastAttUpdate = // Maximum of the lastTimes(0, 1, 2)
-		lastPVUpdate = // Maximum of the lastTimes(0, 3, 4)
+		lastAttUpdate = BLA::max(lastTimes(0), lastTimes(1), lastTimes(2)); // Maximum of the lastTimes(0, 1, 2)
+		lastPVUpdate = BLA::max(lastTimes(0), lastTimes(3), lastTimes(4)); // Maximum of the lastTimes(0, 3, 4)
 		dt_att = millis() - lastAttUpdate;
 		dt_pv = millis() - lastPVUpdate;
 		
+		x = fastIMUProp(gyro, accel, dt_att, dt_pv);
 		
 		
-		x = x;
-		P = P;
-		
-		
-		lastTimePriori = time;
-		u_prev = u;
+		lastTimes(0) = millis();
 	}
 	
 	if (run_accel_update || run_mag_update || run_gps_update || run_baro_update) {
-		P = something;
+		dt = millis() - BLA::max(lastTimes(1), lastTimes(2), lastTimes(3), lastTimes(4));
+        P = predictionFunction(P, gyro, accel, dt);
 	}
 	
 	if (run_accel_update) {
-		x = x;
-		P = P;
-		lastTimeAccel = time;
+		run_accel_update();
+		lastTimes(1) = millis();
 	}
 	
 	if (run_mag_update) {
-		x = x;
-		P = P;
-		lastTimeMag = time;
+		run_mag_update();
+		lastTimes(2) = millis();
 	}
 	
 	if (run_gps_update) {
-		x = x;
-		P = P;
-		lastTimeGPS = time;
+		run_gps_update();
+		lastTimes(3) = millis();
 	}
 	
-	if (run_baro_update) {
-		x = x;
-		P = P;
-		lastTimeBaro = time;
-	}
+	// if (run_baro_update) {
+	// 	run_baro_update();
+	// 	lastTimes(4) = millis();
+	// }
 
-    // Update previous gyro reading
+    //Update sensor readings
+    gyro_prev = unbiased_gyro;
+    accel_prev = unbiased_accel;
+    mag_prev = unbiased_mag;
+    gps_prev = gps;
+    baro_prev = unbiased_baro;
 
     return x;
-    */
 }
 
-BLA::Matrix<20,1> StateEstimator::fastIMUProp(BLA::Matrix<3,1> gyro,
-											BLA::Matrix<3, 1> accel,
-											att_dt,
-											pv_dt) {
+BLA::Matrix<20,1> StateEstimator::fastIMUProp(BLA::Matrix<3,1> gyro, BLA::Matrix<3, 1> accel, att_dt, pv_dt) {
 												
 	g = [0, 0, 9.8]
 	// TODO change to from world model when go to ECEF
@@ -309,7 +263,7 @@ BLA::Matrix<20,1> StateEstimator::fastIMUProp(BLA::Matrix<3,1> gyro,
 		x(QMEKFInds::p_x), x(QMEKFInds::p_y), x(QMEKFInds::p_z)
 	}
 	v = old_v + v_dot * pv_dt;
-	p = old_p + v * dt;
+	p = old_p + v * pv_dt;
 	
 	x(QMEKFInds::v_x) = v(0);
 	x(QMEKFInds::v_y) = v(1);
@@ -319,7 +273,7 @@ BLA::Matrix<20,1> StateEstimator::fastIMUProp(BLA::Matrix<3,1> gyro,
 	x(QMEKFInds::p_z) = p(2);
 }
 
-BLA::Matrix<19, 1> StateEstimator::predictionFunction(BLA::Matrix<19, 19> P_, BLA::Matrix<3, 1> accelVec, BLA::Matrix<3, 1> gyroVec) {
+BLA::Matrix<19, 1> StateEstimator::predictionFunction(BLA::Matrix<19, 19> P_, BLA::Matrix<3, 1> accelVec, BLA::Matrix<3, 1> gyroVec, float dt) {
     BLA::Matrix<3,3> gyroSkew = QuaternionUtils::skewSymmetric(gyroVec);
     BLA::Matrix<3,3> accelSkew = QuaternionUtils::skewSymmetric(accelVec);
 
@@ -346,8 +300,6 @@ BLA::Matrix<19, 1> StateEstimator::predictionFunction(BLA::Matrix<19, 19> P_, BL
 
     //Row 7 - 9
     F.subMatrix<3, 3>(QMEKDInds::P_x -1, 3) = I_3;
-
-    F()
     
     BLA::Matrix<19, 19> phi;
     phi = phi.Fill(0);
@@ -405,7 +357,7 @@ BLA::Matrix<19, 1> StateEstimator::predictionFunction(BLA::Matrix<19, 19> P_, BL
 
 }
 
-BLA::Matrix<20, 1> StateEstimator::run_accel_update(BLA::Matrix<3,1> mag_meas)
+BLA::Matrix<20, 1> StateEstimator::run_accel_update(BLA::Matrix<3,1> accel_meas)
 {
     BLA::Matrix<4,1> q = 
     {
@@ -424,7 +376,7 @@ BLA::Matrix<20, 1> StateEstimator::run_accel_update(BLA::Matrix<3,1> mag_meas)
     
     BLA::Matrix<3, 3> R = subMatrix(R_all)
 
-    EKFCalcErrorInject(x, P, H_mag, h_mag, R);
+    EKFCalcErrorInject(x, P, H_accel, h_accel, R);
     
 }
 
