@@ -68,16 +68,16 @@ constexpr BLA::Matrix <3, 3> R_ET = QuaternionUtils::dcm_ned2ecef(launch_lla(0),
 }; // namespace QMEKFInds
 
 #define QMEKF_LOG_DESC(X)                                                      \
-    X(0, "w", p.print(state(AttKFInds::q_w), 4))                               \
-    X(1, "i", p.print(state(AttKFInds::q_x), 4))                               \
-    X(2, "j", p.print(state(AttKFInds::q_y), 4))                               \
-    X(3, "k", p.print(state(AttKFInds::q_z), 4))                               \
-	X(4, "v_x", p.print(state(AttKFInds::v_x), 4))                             \
-    X(5, "v_y", p.print(state(AttKFInds::v_y), 4))                             \
-    X(6, "v_z", p.print(state(AttKFInds::v_z), 4))                             \
-    X(7, "p_x", p.print(state(AttKFInds::p_x), 4))                             \
-	X(8, "p_y", p.print(state(AttKFInds::p_y), 4))                             \
-    X(9, "p_z", p.print(state(AttKFInds::p_z), 4))                             \
+    X(0, "w", p.print(state(QMEKFInds::q_w), 4))                               \
+    X(1, "i", p.print(state(QMEKFInds::q_x), 4))                               \
+    X(2, "j", p.print(state(QMEKFInds::q_y), 4))                               \
+    X(3, "k", p.print(state(QMEKFInds::q_z), 4))                               \
+	X(4, "v_x", p.print(state(QMEKFInds::v_x), 4))                             \
+    X(5, "v_y", p.print(state(QMEKFInds::v_y), 4))                             \
+    X(6, "v_z", p.print(state(QMEKFInds::v_z), 4))                             \
+    X(7, "p_x", p.print(state(QMEKFInds::p_x), 4))                             \
+	X(8, "p_y", p.print(state(QMEKFInds::p_y), 4))                             \
+    X(9, "p_z", p.print(state(QMEKFInds::p_z), 4))                             \
 
 
 class QMEKFLogger : public Loggable {
@@ -113,10 +113,10 @@ class QMEKFLogger : public Loggable {
  * @author QMEKF team
  * @brief Attitude and Position/Velocity estimation. See matlab simulation for details
  */
-class AttStateEstimator {
+class StateEstimator {
 
   public:
-    AttStateEstimator(const TimedPointer<ICMData>, float dt);
+    StateEstimator(const TimedPointer<ICMData>, float dt);
 
     /**
      * @name init
@@ -211,3 +211,5 @@ BLA::Matrix<M, 1> extractSub(const BLA::Matrix<N, 1> &x,
 }
 
 BLA::Matrix<3, 3> quat2rot(const BLA::Matrix<4, 1> &q);
+
+}

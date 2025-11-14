@@ -7,7 +7,7 @@
 
 StateEstimator::StateEstimator(const TimedPointer<ICMData> IMUData, float dt) : IMUData(IMUData), dt(dt) {
     P.Fill(0.0f);
-    for(uint8_t idx : AttKFInds::quat) {
+    for(uint8_t idx : QMEKFInds::quat) {
         P(idx, idx) = 1e-8;
     }
 	for (uint8_t idx : QMEKFInds::vel) {
