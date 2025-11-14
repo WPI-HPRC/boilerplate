@@ -14,7 +14,7 @@
 
 StateEstimator::StateEstimator(const TimedPointer<ICMData> IMUData,
                                 const TimedPointer<MAX10SData> gpsData,
-                                float dt) : IMUData(IMUData), gpsData(gpsData), baroData(baroData), dt(dt) {
+                                float dt) : IMUData(IMUData), gpsData(gpsData) {
     P.Fill(0.0f);
     for(uint8_t idx : QMEKFInds::quat) {
         P(idx, idx) = 1e-8;
@@ -177,15 +177,15 @@ BLA::Matrix<20,1> StateEstimator::onLoop(int state) {
 	BLA::Matrix<3,1> unbiased_gyro = {gyro(0) - x(QMEKFInds::gb_x), gyro(1) - x(QMEKFInds::gb_y), gyro(2) - x(QMEKFInds::gb_z)};
 	BLA::Matrix<3,1> unbiased_accel = {accel(0) - x(QMEKFInds::ab_x), accel(1) - x(QMEKFInds::ab_y), accel(2) - x(QMEKFInds::ab_z)};
 	BLA::Matrix<3,1> umbiased_mag = {mag(0) - x(QMEKFInds::mb_x), mag(1) - x(QMEKFInds::mb_y), mag(2) - x(QMEKFInds::mb_z)};
-	BLA::Matrix<1,1> unbiased_baro = {baro(0) - x(20)};
+	// BLA::Matrix<1,1> unbiased_baro = {baro(0) - x(20)};
 	
 	
-	time = millis();
+	float time = millis();
 	bool run_priori = time - lastTimes(0) >= frequencies(0);
 	bool run_accel_update = time - lastTimes(1) >= frequencies(1);
 	bool run_mag_update = time - lastTimes(2) >= frequencies(2);
 	bool run_gps_update = time - lastTimes(3) >= frequencies(3);
-	bool run_baro_update = time - lastTimeBaro(4) >= frequencies(4);
+	// bool run_baro_update = time - lastTimeBaro(4) >= frequencies(4);
 
     
 	if(run_priori) {
@@ -201,7 +201,7 @@ BLA::Matrix<20,1> StateEstimator::onLoop(int state) {
 		lastTimes(0) = millis();
 	}
 	
-	if (run_accel_update || run_mag_update || run_gps_update || run_baro_update) {
+	if (run_accel_update || run_mag_update || run_gps_update) {
 		dt = millis() - BLA::max(lastTimes(1), lastTimes(2), lastTimes(3), lastTimes(4));
         P = predictionFunction(P, gyro, accel, dt);
 	}
@@ -231,7 +231,7 @@ BLA::Matrix<20,1> StateEstimator::onLoop(int state) {
     accel_prev = unbiased_accel;
     mag_prev = unbiased_mag;
     gps_prev = gps;
-    baro_prev = unbiased_baro;
+    // baro_prev = unbiased_baro;
 
     return x;
 }

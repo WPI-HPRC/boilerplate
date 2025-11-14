@@ -125,7 +125,7 @@ class StateEstimator {
      * @param x_0 - Initial State
      * @param dt  - Discrete time step
      */
-    void init();
+    void init(BLA::Matrix<3, 1> LLA);
 
     /**
      * @name onLoop
@@ -138,6 +138,7 @@ class StateEstimator {
 
   private:
     const TimedPointer<ICMData> IMUData;
+    const TimedPointer<MAX10SData> gpsData;
 
     // Prediction Functions
     // BLA::Matrix<20, 1> predictionFunction(BLA::Matrix<20, 1> x,
@@ -147,7 +148,7 @@ class StateEstimator {
 		// 								  BLA::Matrix<3, 1> gyro,
 		// 								  BLA::Matrix<3, 1> accel);
 
-    BLA::Matrix<20,1> fastIMUProp(BLA::Matrix<3,1> gyro, BLA::Matrix<3, 1> accel, float att_dt, float pv_dt)
+    BLA::Matrix<20,1> fastIMUProp(BLA::Matrix<3,1> gyro, BLA::Matrix<3, 1> accel, float att_dt, float pv_dt);
 
     // Update Functions
     void run_accel_update(BLA::Matrix<20, 1> &x, BLA::Matrix<3, 1> a_b);
@@ -202,6 +203,11 @@ class StateEstimator {
 		400,
 		2000,
 		1000};
+
+  BLA::Matrix<3,1> gyro_prev;
+  BLA::Matrix<3,1> accel_pref;
+  BLA::Matrix<3,1> mag_prev;
+  BLA::Matrix<3,1> gps_prev;
 
 template <size_t N, size_t M>
 BLA::Matrix<M, 1> extractSub(const BLA::Matrix<N, 1> &x,
