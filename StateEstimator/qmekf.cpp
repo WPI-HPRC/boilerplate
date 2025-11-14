@@ -153,6 +153,8 @@ void StateEstimator::init(BLA::Matrix<3, 1> LLA){
 BLA::Matrix<20,1> StateEstimator::onLoop(int state) {
     // Read data from sensors and convert values
     
+    float dt;
+
     float gyrX = IMUData->gyrX;
     float gyrY = IMUData->gyrY;
     float gyrZ = IMUData->gyrZ;
@@ -283,7 +285,7 @@ BLA::Matrix<20,1> StateEstimator::fastIMUProp(BLA::Matrix<3,1> gyro, BLA::Matrix
 	x(QMEKFInds::p_z) = p(2);
 }
 
-BLA::Matrix<19, 1> StateEstimator::predictionFunction(BLA::Matrix<19, 19> P_, BLA::Matrix<3, 1> accelVec, BLA::Matrix<3, 1> gyroVec, float dt) {
+BLA::Matrix<19, 19> StateEstimator::predictionFunction(BLA::Matrix<19, 19> P_, BLA::Matrix<3, 1> accelVec, BLA::Matrix<3, 1> gyroVec, float dt) {
     BLA::Matrix<3,3> gyroSkew = QuaternionUtils::skewSymmetric(gyroVec);
     BLA::Matrix<3,3> accelSkew = QuaternionUtils::skewSymmetric(accelVec);
 
@@ -298,7 +300,7 @@ BLA::Matrix<19, 1> StateEstimator::predictionFunction(BLA::Matrix<19, 19> P_, BL
     BLA::Matrix<3, 3> rotMatrix = QuaternionUtils::quatToRot(q);
 
     BLA::Matrix<19, 19> F;
-    F = F.Fill(0);
+    F.Fill(0);
 
     //Row 1 - 3
     F.Submatrix<3, 3>(0, QMEKFInds::q_w) = -1 * gyroSkew; 
@@ -342,6 +344,12 @@ BLA::Matrix<19, 1> StateEstimator::predictionFunction(BLA::Matrix<19, 19> P_, BL
     Q_d.Submatrix<3, 3>(QMEKFInds::q_w, QMEKFInds::q_w) = (gyro_var_diag * dt) + (gyro_bias_var_diag * (pow(dt, 3) / 10));
     Q_d.Submatrix<3, 3>(QMEKFInds::q_w, 9) = -1 * gyro_bias_var_diag * (pow(dt, 2) / 2);
 
+    BLA::Matrix<3, 3> R_grav_diag; 
+    R_grav_diag.Fill(0);
+    R_grav_diag(0, 0) = QMEKFInds::R_grav;
+    R_grav_diag(1, 1) = QMEKFInds::R_grav;
+    R_grav_diag(2, 2) = QMEKFInds::R_grav;
+
     Q_d.Submatrix<3 ,3>(3, 3) = QMEKFInds::R_Grav * dt + acel_bias_var_diag * (pow(dt, 3) / 3);
     Q_d.Submatrix<3, 3>(3, 6) = accel_bias_var_diag * (pow(dt ,4) / 8.0) + QMEKFInds::R_grav * (pow(dt, 2) / 2.0);
     Q_d.Submatrix<3, 3>(3, 10) = -1.0 * accel_bias_var_diag * (pow(dt, 2) / 2.0);
@@ -364,6 +372,8 @@ BLA::Matrix<19, 1> StateEstimator::predictionFunction(BLA::Matrix<19, 19> P_, BL
     BLA::Matrix<19, 19> P;
     
     P = phi * P_ * phi_t + Q_d;
+
+    return P;
 
 }
 

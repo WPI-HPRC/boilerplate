@@ -58,6 +58,7 @@ constexpr float accel_bias_var = pow(0.00098 * 9.8, 2);
 constexpr float mag_bias_var = 25;
 constexpr float baro_bias_var = pow(7.5, 2);
 
+constexpr float R_grav = pow(sqrt(asm330_const::accelXY_var) * 9.8, 2);
 
 }; // namespace QMEKFInds
 
