@@ -5,7 +5,7 @@
 namespace QuaternionUtils {
     // Convert quaternion (w,x,y,z) to rotation matrix
     // quat SHOULD be normalized
-    BLA::Matrix<3,3> quatToRot(const BLA::Matrix<13,1> &quat);
+    BLA::Matrix<3,3> quatToRot(const BLA::Matrix<4,1> &quat);
 
     // Quaternion to DCM
     BLA::Matrix<3, 3> quat2DCM(const BLA::Matrix<13, 1> &quat);

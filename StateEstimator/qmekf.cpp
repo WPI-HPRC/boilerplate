@@ -2,9 +2,8 @@
 
 #include "BasicLinearAlgebra.h"
 
-
 #include <Arduino.h>
-#include <QuaternionUtils.h>
+#include "Utilities/QuaternionUtils.h"
 #include <boilerplate/Sensors/SensorManager/SensorManager.h>
 #include "boilerplate/Logging/Loggable.h"
 #include "boilerplate/Sensors/Impl/ICM20948.h"
