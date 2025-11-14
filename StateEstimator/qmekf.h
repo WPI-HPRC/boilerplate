@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BasicLinearAlgebra.h"
-#include "Utilities/QuaternionUtils.h"
+#include <boilerplate/Utilities/QuaternionUtils.h"
 #include "boilerplate/Logging/Loggable.h"
 #include "boilerplate/Sensors/Impl/ICM20948.h"
 #include "boilerplate/Sensors/Impl/LPS22.h"
