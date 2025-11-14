@@ -135,6 +135,8 @@ void StateEstimator::init(){
 
     lastTimeAccel = millis();
     lastTimeMag  = millis();
+    lastTimeGPS  = millis();
+    lastTimeBaro = millis();
 }
 
 
@@ -189,18 +191,25 @@ BLA::Matrix<20,1> stateEstimator::onLoop(int state) {
 
     P = P_min;
 
-    //Run pdates
-    if(millis() - lastTimeGrav >= 1000 && inPrelaunch) {
+    //Run updates
+    //Come back to determine how frequently
+    if(millis() - lastTimeGrav >= 100 && inPrelaunch) {
         applyGravUpdate(x, accel);
 
         lastTimeGrav = millis();
+    } 
 
-    } else if(millis() - lastTimeMag >= 10000 && inPrelaunch) {
+    else if(millis() - lastTimeMag >= 500) {
         applyMagUpdate(x, mag);
 
         lastTimeMag = millis();
     }
+    
+    else if(millis() - lastTimeGPS >= 500) {
+        applyGPSUpdate(x, gps);
 
+        lastTimeGPS = millis();
+    }
     
     //Update sensor readings
     gyro_prev = gyro;
@@ -415,7 +424,7 @@ BLA::Matrix<20, 1> StateEstimator::run_accel_update(BLA::Matrix<3,1> mag_meas)
     
     BLA::Matrix<3, 3> R = subMatrix(R_all)
 
-    EKFCalcErrorInject(oldState, oldP, mag_meas, H_mag, h_mag, R);
+    EKFCalcErrorInject(x, P, H_mag, h_mag, R);
     
 }
 
@@ -438,13 +447,26 @@ BLA::Matrix<20, 1> StateEstimator::run_mag_update(BLA::Matrix<3, 1> mag_meas) {
 
     BLA::Matrix<3, 3> R = subMatrix(R_all); // IDK something
 
-    EKFCalcErrorInject(oldState, oldP, mag_meas, H_mag, h_mag, R);
+    EKFCalcErrorInject(x, P, mag_meas, H_mag, h_mag, R);
     
 }
 
 BLA::Matrix<20, 1> StateEstimator::run_gps_update(BLA::Matrix<3, 1> gps_meas_ecef) {
-    
+    BLA::Matrix<3, 1> pos_ned = QuaternionUtils::ecef2ned(gps_meas_ecef, launch_ecef, R_ET);
 
+    BLA::Matrix<3, 20> H_gps;
+    H_gps = H_gps.Fill(0);
+    H_gps.SubMatrix<3, 3>(0, QMEKFInds::gps_x) = I_3;
+
+    BLA::Matrix<3, 1> h_gps = {
+        x(QMEKFInds::gps_x),
+        x(QMEKFInds::gps_y),
+        x(QMEKFInds::gps_z),
+    };
+
+    BLA::Matrix<3, 3> R = subMatrix(R_all); // not right, fix
+
+    EKFCalcErrorInject(x, P, pos_ned, H_gps, h_gps, R);
     
 }
 

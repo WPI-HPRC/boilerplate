@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BasicLinearAlgebra.h"
-
+#include "QuaternionUtils.h"
 #include "boilerplate/Logging/Loggable.h"
 #include "boilerplate/Sensors/Impl/ICM20948.h"
 #include "boilerplate/Sensors/Impl/LPS22.h"
@@ -61,7 +61,9 @@ constexpr float baro_bias_var = pow(7.5, 2);
 constexpr BLA::Matrix<3, 1> normal_i = {0, 0, -9.8037}; // [m/s^2]
 constexpr BLA::Matrix<3, 1> g_i = {0, 0, 9.8037}; // [m/s^2]
 constexpr BLA::Matrix<3, 1> m_i = {19.98311, -4.87166Z, 46.99861}; // [uT]
-constexpr BLA::Matrix<3, 1> launch_ecef = {2312321, 213123213, 21312321};
+constexpr BLA::Matrix<3, 1> launch_ecef = {2312321, 213123213, 21312321}; // [m]
+constexpr BLA::Matrix<3, 3> launch_lla = {2932132, 213213, 10} // [whatevers]
+constexpr BLA::Matrix <3, 3> R_ET = QuaternionUtils::dcm_ned2ecef(launch_lla(0), launch_lla(1));
 
 }; // namespace QMEKFInds
 

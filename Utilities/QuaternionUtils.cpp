@@ -106,7 +106,28 @@ BLA::Matrix<4, 1> QuaternionUtils::quatMultiply(const BLA::Matrix<4, 1> &p, cons
 
 }
 
-BLA::Matrix<3, 1> QuaternionUtils::ecef2ned(const BLA::Matrix<3, 1> ecef_meas, )
+// BLA::Matrix<3, 3> QuaternionUtils::lla2ecef(const BLA::Matrix<3, 1> lla) {
+//     ecef
+// }
+
+BLA::Matrix<3, 3> QuaternionUtils::dcm_ned2ecef(float launchLat, float launchLon) {
+    float pi = 3.141592653;
+    lat_rads = launchLat * (pi / 180.0);
+    lon_rads = launchLon * (pi / 180.0);
+    BLA::Matrix<3, 3> R_ET = {
+        -1.0 * sin(lat_rads) * cos(lon_rads), -1.0 * sin(lon_rads), -1.0 * cos(lat_rads) * cos(lon_rads),
+        -1.0 * sin(lat_rads) * sin(lon_rads), cos(lon_rads), -1.0 * cos(lat_rads) * sin(lon_rads),
+        cos(lat_rads), 0, -1.0 * sin(lat_rads)
+    }
+    return R_ET;
+}
+
+BLA::Matrix<3, 1> QuaternionUtils::ecef2ned(const BLA::Matrix<3, 1> ecef_meas, const BLA::Matrix<3, 1> launch_ecef, const BLA::Matrix<3, 3> R_ET) {
+    return ~R_ET * (ecef_meas - launch_ecef)
+
+}
+
+
 
 BLA::Matrix<4, 1> quatConjugate(const BLA::Matrix<4, 1> &p){
     BLA::Matrix<4, 1> quat;
