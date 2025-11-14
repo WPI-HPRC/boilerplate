@@ -5,7 +5,9 @@
 
 
 
-StateEstimator::StateEstimator(const TimedPointer<ICMData> IMUData, float dt) : IMUData(IMUData), dt(dt) {
+StateEstimator::StateEstimator(const TimedPointer<ICMData> IMUData,
+                                const TimedPointer<MAX10SData> gpsData,
+                                float dt) : IMUData(IMUData), gpsData(gpsData), baroData(baroData), dt(dt) {
     P.Fill(0.0f);
     for(uint8_t idx : QMEKFInds::quat) {
         P(idx, idx) = 1e-8;
@@ -76,7 +78,7 @@ StateEstimator::StateEstimator(const TimedPointer<ICMData> IMUData, float dt) : 
 #endif
 
 }
-void StateEstimator::init(){
+void StateEstimator::init(LLA){
     // Accelerometer
     BLA::Matrix<3,1> a_b = {
         IMUData->accelX,
@@ -132,6 +134,11 @@ void StateEstimator::init(){
 
     this->x_min = x;
 
+    // Set launch site LLA/ECEF
+    launch_ecef = lla2ecef(LLA);
+    launch_lla = LLA;
+    R_ET = QuaternionUtils::dcm_ned2ecef(launch_lla(0), launch_lla(1));
+
     lastTimeAccel = millis();
     lastTimeMag  = millis();
     lastTimeGPS  = millis();
@@ -154,7 +161,7 @@ BLA::Matrix<20,1> stateEstimator::onLoop(int state) {
     float magY = IMUData->magY;
     float magZ = IMUData->magZ;
     
-    // float gpsX = GPSData->gpsX; TODO
+    BLA::Matrix<3, 1> gpsData = {gpsData->lat, gpsData->lon, baroData->altitude}; 
 	
 	// TODO get in the GPS data and baro data from somewhere
     BLA::Matrix<3,1> gyro = {gyrX, gyrY, gyrZ};   // [rad/s]
@@ -208,7 +215,7 @@ BLA::Matrix<20,1> stateEstimator::onLoop(int state) {
 	}
 	
 	if (run_gps_update) {
-		run_gps_update();
+		run_gps_update(QuaternionUtils::lla2ecef(gpsData));
 		lastTimes(3) = millis();
 	}
 	
@@ -229,7 +236,7 @@ BLA::Matrix<20,1> stateEstimator::onLoop(int state) {
 
 BLA::Matrix<20,1> StateEstimator::fastIMUProp(BLA::Matrix<3,1> gyro, BLA::Matrix<3, 1> accel, att_dt, pv_dt) {
 												
-	g = [0, 0, 9.8]
+	g = [0, 0, 9.80603]
 	// TODO change to from world model when go to ECEF
 	
 	
@@ -279,10 +286,10 @@ BLA::Matrix<19, 1> StateEstimator::predictionFunction(BLA::Matrix<19, 19> P_, BL
 
     BLA::Matrix<4, 1> q =
     {
-    x(QMEKFInds::q_w),
-    x(QMEKFInds::q_x),
-    x(QMEKFInds::q_y),
-    x(QMEKFInds::q_z)
+        x(QMEKFInds::q_w),
+        x(QMEKFInds::q_x),
+        x(QMEKFInds::q_y),
+        x(QMEKFInds::q_z)
     };
     
     BLA::Matrix<3, 3> rotMatrix = QuaternionUtils::quatToRot(q);

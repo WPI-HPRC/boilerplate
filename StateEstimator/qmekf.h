@@ -60,9 +60,9 @@ constexpr float baro_bias_var = pow(7.5, 2);
 
 constexpr BLA::Matrix<3, 1> normal_i = {0, 0, -9.8037}; // [m/s^2]
 constexpr BLA::Matrix<3, 1> g_i = {0, 0, 9.8037}; // [m/s^2]
-constexpr BLA::Matrix<3, 1> m_i = {19.98311, -4.87166Z, 46.99861}; // [uT]
-constexpr BLA::Matrix<3, 1> launch_ecef = {2312321, 213123213, 21312321}; // [m]
-constexpr BLA::Matrix<3, 3> launch_lla = {2932132, 213213, 10} // [whatevers]
+constexpr BLA::Matrix<3, 1> m_i = {18.659605, -4.540227, 49.09786}; // [uT] Kids rocket params
+constexpr BLA::Matrix<3, 1> launch_ecef = {1311800, -4337300, 4473600}; // [m] // asuming 0 above surface
+constexpr BLA::Matrix<3, 1> launch_lla = {44.825070, -73.171726, 0} // [whatever tf units are in (deg, deg, m)]
 constexpr BLA::Matrix <3, 3> R_ET = QuaternionUtils::dcm_ned2ecef(launch_lla(0), launch_lla(1));
 
 }; // namespace QMEKFInds
@@ -136,7 +136,7 @@ class StateEstimator {
     BLA::Matrix<20, 1> onLoop(int state);
 
   private:
-    const TimedPointer<ICMData> imuData;
+    const TimedPointer<ICMData> IMUData;
 
     // Prediction Functions
     // BLA::Matrix<20, 1> predictionFunction(BLA::Matrix<20, 1> x,

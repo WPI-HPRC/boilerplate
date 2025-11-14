@@ -1,4 +1,5 @@
 #include "QuaternionUtils.h"
+#include <cmath>
 
 BLA::Matrix<3, 3> QuaternionUtils::quatToRot(const BLA::Matrix<13, 1> &quat) {
     float w = quat(0);
@@ -106,9 +107,28 @@ BLA::Matrix<4, 1> QuaternionUtils::quatMultiply(const BLA::Matrix<4, 1> &p, cons
 
 }
 
-// BLA::Matrix<3, 3> QuaternionUtils::lla2ecef(const BLA::Matrix<3, 1> lla) {
-//     ecef
-// }
+BLA::Matrix<3, 1> QuaternionUtils::lla2ecef(const BLA::Matrix<3, 1> lla) {
+    float pi = 3.141592;
+    float lat_rad = lla(0) * pi / 180.0;
+    float lon_rad = lla(1) * pi / 180.0;
+    
+    float a = 6378.0 * 1000.0;
+    float b = 6357.0 * 1000.0;
+
+    float e = std::sqrt(1.0 - (std::pow(b, 2) / std::pow(a, 2)));
+
+    float N = a / std::sqrt(1.0 - std::pow(e, 2) * std::pow(sin(lat_rad), 2));
+
+    x = (N + lla(2)) * cos(lat_rad) * cos(lon_rad);
+    y = (N + lla(2)) * cos(lat_rad) * sin(lon_rad);
+    z = ((1 - std::pow(e, 2)) * N + lla(2)) * sin(lat_rad);
+
+    BLA::Matrix<3, 1> ecef = {x, y, z};
+
+    return ecef;
+
+
+}
 
 BLA::Matrix<3, 3> QuaternionUtils::dcm_ned2ecef(float launchLat, float launchLon) {
     float pi = 3.141592653;
