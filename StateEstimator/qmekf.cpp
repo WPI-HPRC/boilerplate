@@ -85,7 +85,7 @@ StateEstimator::StateEstimator(const TimedPointer<ICMData> IMUData,
 #endif
 
 }
-void StateEstimator::init(LLA){
+void StateEstimator::init(BLA::Matrix<3, 1> LLA){
     // Accelerometer
     BLA::Matrix<3,1> a_b = {
         IMUData->accelX,
@@ -146,36 +146,32 @@ void StateEstimator::init(LLA){
     launch_lla = LLA;
     R_ET = QuaternionUtils::dcm_ned2ecef(launch_lla(0), launch_lla(1));
 
-    lastTimeAccel = millis();
-    lastTimeMag  = millis();
-    lastTimeGPS  = millis();
-    lastTimeBaro = millis();
+    lastTimes = {millis(), millis(), millis(), millis(), millis()};
 }
 
 
-BLA::Matrix<20,1> stateEstimator::onLoop(int state) {
+BLA::Matrix<20,1> StateEstimator::onLoop(int state) {
     // Read data from sensors and convert values
     
-    float gyrX = IMUData->gyrX;
-    float gyrY = IMUData->gyrY;
-    float gyrZ = IMUData->gyrZ;
+    float gyrX = ICMData->gyrX;
+    float gyrY = ICMData->gyrY;
+    float gyrZ = ICMData->gyrZ;
 
-    float aclX = IMUData->accelX;
-    float aclY = IMUData->accelY;
-    float aclZ = IMUData->accelZ;
+    float aclX = ICMData->accelX;
+    float aclY = ICMData->accelY;
+    float aclZ = ICMData->accelZ;
 
-    float magX = IMUData->magX;
-    float magY = IMUData->magY;
-    float magZ = IMUData->magZ;
+    float magX = ICMData->magX;
+    float magY = ICMData->magY;
+    float magZ = ICMData->magZ;
     
-    BLA::Matrix<3, 1> gpsData = {gpsData->lat, gpsData->lon, baroData->altitude}; 
 	
 	// TODO get in the GPS data and baro data from somewhere
     BLA::Matrix<3,1> gyro = {gyrX, gyrY, gyrZ};   // [rad/s]
     BLA::Matrix<3,1> accel = {aclX, aclY, aclZ}; // [m/s^s]
     BLA::Matrix<3,1> mag = {magX, magY, magZ}; // [uT]
-	BLA::Matrix<3,1> gps = {gpsX, gpsY, gpsZ}; // [m]
-	BLA::Matrix<1,1> baro = {baroZ};
+    BLA::Matrix<3,1> gpsData = {gpsData(0), gpsData(1), gpsData(2)}; 
+	// BLA::Matrix<1,1> baro = {baroZ};
 	
 	// Remove biases from each measurement
 	BLA::Matrix<3,1> unbiased_gyro = {gyro(0) - x(QMEKFInds::gb_x), gyro(1) - x(QMEKFInds::gb_y), gyro(2) - x(QMEKFInds::gb_z)};
@@ -185,13 +181,12 @@ BLA::Matrix<20,1> stateEstimator::onLoop(int state) {
 	
 	
 	time = millis();
-	run_priori = time - lastTimes(0) >= frequencies(0);
-	run_accel_update = time - lastTimes(1) >= frequencies(1);
-	run_mag_update = time - lastTimes(2) >= frequencies(2);
-	run_gps_update = time - lastTimes(3) >= frequencies(3);
-	run_baro_update = time - lastTimeBaro(4) >= frequencies(4);
-	
-    // }
+	bool run_priori = time - lastTimes(0) >= frequencies(0);
+	bool run_accel_update = time - lastTimes(1) >= frequencies(1);
+	bool run_mag_update = time - lastTimes(2) >= frequencies(2);
+	bool run_gps_update = time - lastTimes(3) >= frequencies(3);
+	bool run_baro_update = time - lastTimeBaro(4) >= frequencies(4);
+
     
 	if(run_priori) {
 		// TODO eventually implement RK4 here, but I don't understand it yet
@@ -241,7 +236,7 @@ BLA::Matrix<20,1> stateEstimator::onLoop(int state) {
     return x;
 }
 
-BLA::Matrix<20,1> StateEstimator::fastIMUProp(BLA::Matrix<3,1> gyro, BLA::Matrix<3, 1> accel, att_dt, pv_dt) {
+BLA::Matrix<20,1> StateEstimator::fastIMUProp(BLA::Matrix<3,1> gyro, BLA::Matrix<3, 1> accel, float att_dt, float pv_dt) {
 												
 	g = [0, 0, 9.80603]
 	// TODO change to from world model when go to ECEF

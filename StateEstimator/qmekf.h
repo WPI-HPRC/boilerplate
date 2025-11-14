@@ -117,7 +117,7 @@ class QMEKFLogger : public Loggable {
 class StateEstimator {
 
   public:
-    StateEstimator(const TimedPointer<ICMData>, float dt);
+    StateEstimator(const TimedPointer<ICMData>, const TimedPointer<MAX10SData>, float dt);
 
     /**
      * @name init
@@ -146,6 +146,8 @@ class StateEstimator {
     // BLA::Matrix<19, 19> predictionJacobian(BLA::Matrix<20, 1> x,
 		// 								  BLA::Matrix<3, 1> gyro,
 		// 								  BLA::Matrix<3, 1> accel);
+
+    BLA::Matrix<20,1> fastIMUProp(BLA::Matrix<3,1> gyro, BLA::Matrix<3, 1> accel, float att_dt, float pv_dt)
 
     // Update Functions
     void run_accel_update(BLA::Matrix<20, 1> &x, BLA::Matrix<3, 1> a_b);
@@ -191,7 +193,7 @@ class StateEstimator {
     };
 
 
-	BLA::Matrix<5, 1> lastTimes = {0, 0, 0, 0, 0};
+	BLA::Matrix<5, 1> lastTimes;
 	
 	// In the format defined above, how often to run stuff
 	BLA::Matrix<5, 1> frequencies = {
