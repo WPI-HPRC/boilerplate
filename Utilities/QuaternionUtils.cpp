@@ -143,7 +143,7 @@ BLA::Matrix<3, 3> QuaternionUtils::dcm_ned2ecef(float launchLat, float launchLon
 }
 
 BLA::Matrix<3, 1> QuaternionUtils::ecef2ned(const BLA::Matrix<3, 1> ecef_meas, const BLA::Matrix<3, 1> launch_ecef, const BLA::Matrix<3, 3> R_ET) {
-    return ~R_ET * (ecef_meas - launch_ecef)
+    return ~R_ET * (ecef_meas - launch_ecef);
 
 }
 
