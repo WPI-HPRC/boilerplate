@@ -1,7 +1,8 @@
 #include "QuaternionUtils.h"
+#include "BasicLinearAlgebra.h"
 #include <cmath>
 
-BLA::Matrix<3, 3> QuaternionUtils::quatToRot(const BLA::Matrix<13, 1> &quat) {
+BLA::Matrix<3, 3> QuaternionUtils::quatToRot(const BLA::Matrix<4, 1> &quat) {
     float w = quat(0);
     float x = quat(1);
     float y = quat(2);
@@ -61,7 +62,7 @@ BLA::Matrix<3, 1> QuaternionUtils::getForwardVector(const BLA::Matrix<3, 3> &rot
     return BLA::Matrix<3, 1>(rot(0, 2), rot(1, 2), rot(2, 2));
 }
 
-BLA::Matrix<3,1> QuaternionUtils::getRightVector(const BLA::Matrix<3,3>& rot) {
+BLA::Matrix<3,1> QuaternionUtils::getRightVector(const BLA::Matrix<3,3> &rot) {
     return BLA::Matrix<3,1>(rot(0,0), rot(1,0), rot(2,0));
 }
 
@@ -69,15 +70,15 @@ BLA::Matrix<3, 1> QuaternionUtils::skewSymmetric(const BLA::Matrix<3, 1> &vec) {
     BLA::Matrix<3, 3> mat;
 
     mat(0, 0) = 0;
-    mat(0, 1) = -1 * rot(2, 0);
-    mat(0, 2) = rot(1, 0);
+    mat(0, 1) = -1 * vec(2, 0);
+    mat(0, 2) = vec(1, 0);
 
-    mat(1, 0) = rot(2, 0);
+    mat(1, 0) = vec(2, 0);
     mat(1, 1) = 0;
-    mat(1, 2) = -1 * rot(0, 0);
+    mat(1, 2) = -1 * vec(0, 0);
 
-    mat(2, 0) = -1 * rot(1, 0);
-    mat(2, 1) = rot(0, 0);
+    mat(2, 0) = -1 * vec(1, 0);
+    mat(2, 1) = vec(0, 0);
     mat(2, 2) = 0;
 
 }
@@ -86,13 +87,15 @@ BLA::Matrix<3, 1> QuaternionUtils::skewSymmetric(const BLA::Matrix<3, 1> &vec) {
 BLA::Matrix<4, 1> QuaternionUtils::rotVec2Quat(const BLA::Matrix<3, 1> &vec) {
     BLA::Matrix<4, 1> quat;
 
-    norm = BLA::Norm(vec);
-    vec_rot_normed = vec / norm;
+    float norm = BLA::Norm(vec);
+    BLA::Matrix<3, 1> vec_rot_normed = vec / norm;
 
     quat(0, 0) = cos(norm / 2);
     quat(1, 0) = vec_rot_normed(0, 0) * sin(norm / 2);
     quat(2, 0) = vec_rot_normed(1, 0) * sin(norm / 2);
     quat(3, 0) = vec_rot_normed(2, 0) * sin(norm / 2);
+
+    return quat;
 }
 
 BLA::Matrix<4, 1> QuaternionUtils::quatMultiply(const BLA::Matrix<4, 1> &p, const BLA::Matrix<4, 1> &q) {
@@ -119,9 +122,9 @@ BLA::Matrix<3, 1> QuaternionUtils::lla2ecef(const BLA::Matrix<3, 1> lla) {
 
     float N = a / std::sqrt(1.0 - std::pow(e, 2) * std::pow(sin(lat_rad), 2));
 
-    x = (N + lla(2)) * cos(lat_rad) * cos(lon_rad);
-    y = (N + lla(2)) * cos(lat_rad) * sin(lon_rad);
-    z = ((1 - std::pow(e, 2)) * N + lla(2)) * sin(lat_rad);
+    float x = (N + lla(2)) * cos(lat_rad) * cos(lon_rad);
+    float y = (N + lla(2)) * cos(lat_rad) * sin(lon_rad);
+    float z = ((1 - std::pow(e, 2)) * N + lla(2)) * sin(lat_rad);
 
     BLA::Matrix<3, 1> ecef = {x, y, z};
 
