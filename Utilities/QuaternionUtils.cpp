@@ -132,13 +132,13 @@ BLA::Matrix<3, 1> QuaternionUtils::lla2ecef(const BLA::Matrix<3, 1> lla) {
 
 BLA::Matrix<3, 3> QuaternionUtils::dcm_ned2ecef(float launchLat, float launchLon) {
     float pi = 3.141592653;
-    lat_rads = launchLat * (pi / 180.0);
-    lon_rads = launchLon * (pi / 180.0);
+    float lat_rads = launchLat * (pi / 180.0);
+    float lon_rads = launchLon * (pi / 180.0);
     BLA::Matrix<3, 3> R_ET = {
         -1.0 * sin(lat_rads) * cos(lon_rads), -1.0 * sin(lon_rads), -1.0 * cos(lat_rads) * cos(lon_rads),
         -1.0 * sin(lat_rads) * sin(lon_rads), cos(lon_rads), -1.0 * cos(lat_rads) * sin(lon_rads),
         cos(lat_rads), 0, -1.0 * sin(lat_rads)
-    }
+    };
     return R_ET;
 }
 
