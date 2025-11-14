@@ -5,10 +5,10 @@
 namespace QuaternionUtils {
     // Convert quaternion (w,x,y,z) to rotation matrix
     // quat SHOULD be normalized
-    BLA::Matrix<3,3> quatToRot(const BLA::Matrix<13,1>& quat);
+    BLA::Matrix<3,3> quatToRot(const BLA::Matrix<13,1> &quat);
 
     // Quaternion to DCM
-    BLA::Matrix<3, 3> quat2DCM(const BLA::Matrix<13, 1> &quat)
+    BLA::Matrix<3, 3> quat2DCM(const BLA::Matrix<13, 1> &quat);
 
     // Get the up vector from the rotation matrix for the payload
     // In NED coordinates, this will be the second column of the rotation matrix
@@ -31,11 +31,11 @@ namespace QuaternionUtils {
     // Quaternion multiply
     BLA::Matrix<4, 1> quatMultiply(const BLA::Matrix<4, 1> &p, const BLA::Matrix<4, 1> &q);
 
-    BLA::Matrix<3, 1> QuaternionUtils::lla2ecef(const BLA::Matrix<3, 1> lla);
+    BLA::Matrix<3, 1> QuaternionUtils::lla2ecef(const BLA::Matrix<3, 1> &lla);
 
-    BLA::Matrix<3, 3> QuaternionUtils::dcm_ned2ecef(float launchLat, float launchLon);
+    BLA::Matrix<3, 3> QuaternionUtils::dcm_ned2ecef(const BLA::Matrix<2, 1> &ll);
 
-    BLA::Matrix<3, 1> QuaternionUtils::ecef2ned(const BLA::Matrix<3, 1> ecef_meas, const BLA::Matrix<3, 1> launch_ecef, const BLA::Matrix<3, 3> R_ET);
+    BLA::Matrix<3, 1> QuaternionUtils::ecef2ned(const BLA::Matrix<3, 1> &ecef_meas, const BLA::Matrix<3, 1> &launch_ecef, const BLA::Matrix<3, 3> &R_ET);
 
     //Quaternion Conjugate
     BLA::Matrix<4, 1> quatConjugate(const BLA::Matrix<4, 1> &p);
