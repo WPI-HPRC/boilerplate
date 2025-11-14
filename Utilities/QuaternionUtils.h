@@ -23,7 +23,7 @@ namespace QuaternionUtils {
     BLA::Matrix<3,1> getRightVector(const BLA::Matrix<3,3> &rot);
 
     // Get skew symmetric of a 3x1 vector
-    BLA::Matrix<3, 1> skewSymmetric(const BLA::Matrix<3, 1> &vec);
+    BLA::Matrix<3, 3> skewSymmetric(const BLA::Matrix<3, 1> &vec);
 
     // Rotation vector to quaternion
     BLA::Matrix<4, 1> rotVec2Quat(const BLA::Matrix<3, 1> &vec);
@@ -31,11 +31,11 @@ namespace QuaternionUtils {
     // Quaternion multiply
     BLA::Matrix<4, 1> quatMultiply(const BLA::Matrix<4, 1> &p, const BLA::Matrix<4, 1> &q);
 
-    BLA::Matrix<3, 1> QuaternionUtils::lla2ecef(const BLA::Matrix<3, 1> &lla);
+    BLA::Matrix<3, 1> lla2ecef(const BLA::Matrix<3, 1> &lla);
 
-    BLA::Matrix<3, 3> QuaternionUtils::dcm_ned2ecef(const BLA::Matrix<2, 1> &ll);
+    BLA::Matrix<3, 3> dcm_ned2ecef(const BLA::Matrix<2, 1> &ll);
 
-    BLA::Matrix<3, 1> QuaternionUtils::ecef2ned(const BLA::Matrix<3, 1> &ecef_meas, const BLA::Matrix<3, 1> &launch_ecef, const BLA::Matrix<3, 3> &R_ET);
+    BLA::Matrix<3, 1> ecef2ned(const BLA::Matrix<3, 1> &ecef_meas, const BLA::Matrix<3, 1> &launch_ecef, const BLA::Matrix<3, 3> &R_ET);
 
     //Quaternion Conjugate
     BLA::Matrix<4, 1> quatConjugate(const BLA::Matrix<4, 1> &p);

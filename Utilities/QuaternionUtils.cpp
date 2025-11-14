@@ -66,7 +66,7 @@ BLA::Matrix<3,1> QuaternionUtils::getRightVector(const BLA::Matrix<3,3> &rot) {
     return BLA::Matrix<3,1>(rot(0,0), rot(1,0), rot(2,0));
 }
 
-BLA::Matrix<3, 1> QuaternionUtils::skewSymmetric(const BLA::Matrix<3, 1> &vec) {
+BLA::Matrix<3, 3> QuaternionUtils::skewSymmetric(const BLA::Matrix<3, 1> &vec) {
     BLA::Matrix<3, 3> mat;
 
     mat(0, 0) = 0;
@@ -80,6 +80,8 @@ BLA::Matrix<3, 1> QuaternionUtils::skewSymmetric(const BLA::Matrix<3, 1> &vec) {
     mat(2, 0) = -1 * vec(1, 0);
     mat(2, 1) = vec(0, 0);
     mat(2, 2) = 0;
+
+    return mat;
 
 }
 
