@@ -74,9 +74,9 @@ class ICM20948 : public Sensor, public Loggable {
 
         icm.getEvent(&accel, &gyr, &temp, &mag);
 
-        float aX = accel.acceleration.x / g;
-        float aY = accel.acceleration.y / g;
-        float aZ = accel.acceleration.z / g;
+        float aX = accel.acceleration.x;
+        float aY = accel.acceleration.y;
+        float aZ = accel.acceleration.z;
 
         float gX = gyr.gyro.x;
         float gY = gyr.gyro.y;
