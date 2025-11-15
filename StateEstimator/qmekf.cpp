@@ -57,7 +57,7 @@ StateEstimator::StateEstimator(const TimedPointer<ICMData> IMUData,
         Q(idx, idx) = powf(0.1f,2);
     }
     for(uint8_t idx : QMEKFInds::accelBias) {
-        Q(idx, idx) = powf(0.00f,2);
+        Q(idx, idx) = powf(0.01f,2);
     }
     for(uint8_t idx : QMEKFInds::magBias) {
         Q(idx, idx) = powf(0.1f, 2);
