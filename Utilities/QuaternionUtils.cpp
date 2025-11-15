@@ -28,7 +28,7 @@ BLA::Matrix<3, 3> QuaternionUtils::quatToRot(const BLA::Matrix<4, 1> &quat) {
     return rot;
 }
 
-BLA::Matrix<3, 3> QuaternionUtils::quat2DCM(const BLA::Matrix<13, 1> &quat) {
+BLA::Matrix<3, 3> QuaternionUtils::quat2DCM(const BLA::Matrix<4, 1> &quat) {
     float w = quat(0);
     float x = quat(1);
     float y = quat(2);

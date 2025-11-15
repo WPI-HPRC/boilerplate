@@ -192,8 +192,8 @@ BLA::Matrix<20,1> StateEstimator::onLoop(int state) {
     
 	if(run_priori) {
 		// TODO eventually implement RK4 here, but I don't understand it yet
-		float lastAttUpdate = max(lastTimes(0), lastTimes(1), lastTimes(2)); // Maximum of the lastTimes(0, 1, 2)
-		float lastPVUpdate = max(lastTimes(0), lastTimes(3), lastTimes(4)); // Maximum of the lastTimes(0, 3, 4)
+		float lastAttUpdate = max(max(lastTimes(0), lastTimes(1)), lastTimes(2)); // Maximum of the lastTimes(0, 1, 2)
+		float lastPVUpdate = max(max(lastTimes(0), lastTimes(3)), lastTimes(4)); // Maximum of the lastTimes(0, 3, 4)
 		float dt_att = millis() - lastAttUpdate;
 		float dt_pv = millis() - lastPVUpdate;
 		
@@ -204,7 +204,7 @@ BLA::Matrix<20,1> StateEstimator::onLoop(int state) {
 	}
 	
 	if (run_accel_update || run_mag_update || run_gps_update) {
-		dt = millis() - max(lastTimes(1), lastTimes(2), lastTimes(3), lastTimes(4));
+		dt = millis() - max(max(lastTimes(0), lastTimes(1)), max(lastTimes(2), lastTimes(3)));;
         P = predictionFunction(P, gyro, accel, dt);
 	}
 	
@@ -393,12 +393,12 @@ BLA::Matrix<20, 1> StateEstimator::runAccelUpdate(BLA::Matrix<20, 1> &x, BLA::Ma
 
     BLA::Matrix<3, 20> H_accel;
     H_accel.Fill(0);
-    H_accel.Submatrix<3, 3>(0, 0) = QuaternionUtils::skewSymmetric(QuaternionUtils::quat2DCM(q) * (-1.0 * QMEKFInds::normal_i;));
+    H_accel.Submatrix<3, 3>(0, 0) = QuaternionUtils::skewSymmetric(QuaternionUtils::quat2DCM(q) * (-1.0f * normal_i;));
     H_accel.Submatrix<3, 3>(0, QMEKFInds::ab_x - 1) = -1.0 * QuaternionUtils::quat2DCM(q);
 
     BLA::Matrix<3, 1> h_accel;
 
-    h_accel = QuaternionUtils::quat2DCM(q) * QMEKFInds::normal_i;
+    h_accel = QuaternionUtils::quat2DCM(q) * normal_i;
 
     EKFCalcErrorInject(x, P, H_accel, h_accel, R_accel);
     
@@ -453,7 +453,8 @@ BLA::Matrix<20, 1> StateEstimator::EKFCalcErrorInject(BLA::Matrix<20, 1> &oldSta
     BLA::Matrix<19, 1> postErrorState = K * residual;
 
     // Inject error angles into quat
-    BLA::Matrix<3, 1> rotVec = 1.0 * postErrorState(1:3);
+
+    BLA::Matrix<3, 1> rotVec = 1.0f * postErrorState(1:3);
     float rotVecNorm = BLA::Norm(rotVec);
     BLA::Matrix<3,1> axis = rotVec / rotVecNorm;
     BLA::Matrix<4,1> dq =
