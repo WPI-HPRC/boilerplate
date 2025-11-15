@@ -394,13 +394,13 @@ BLA::Matrix<20, 1> StateEstimator::runAccelUpdate(BLA::Matrix<20, 1> &x, BLA::Ma
     BLA::Matrix<3, 20> H_accel;
     H_accel.Fill(0);
     H_accel.Submatrix<3, 3>(0, 0) = QuaternionUtils::skewSymmetric(QuaternionUtils::quat2DCM(q) * (-1.0f * normal_i));
-    H_accel.Submatrix<3, 3>(0, QMEKFInds::ab_x - 1) = -1.0 * QuaternionUtils::quat2DCM(q);
+    H_accel.Submatrix<3, 3>(0, QMEKFInds::ab_x - 1) = -1.0f * QuaternionUtils::quat2DCM(q);
 
     BLA::Matrix<3, 1> h_accel;
 
     h_accel = QuaternionUtils::quat2DCM(q) * normal_i;
 
-    EKFCalcErrorInject(x, P, H_accel, h_accel, R_accel);
+    EKFCalcErrorInject(x, P, accel_meas, H_accel, h_accel, R_accel);
     
 }
 
@@ -432,19 +432,19 @@ BLA::Matrix<20, 1> StateEstimator::runGPSUpdate(BLA::Matrix<20, 1> &x, BLA::Matr
 
     BLA::Matrix<3, 20> H_gps;
     H_gps.Fill(0);
-    H_gps.Submatrix<3, 3>(0, QMEKFInds::gps_x) = I_3;
+    H_gps.Submatrix<3, 3>(0, QMEKFInds::p_x) = I_3;
 
     BLA::Matrix<3, 1> h_gps = {
-        x(QMEKFInds::gps_x),
-        x(QMEKFInds::gps_y),
-        x(QMEKFInds::gps_z),
+        x(QMEKFInds::p_x),
+        x(QMEKFInds::p_y),
+        x(QMEKFInds::p_z),
     };
 
     EKFCalcErrorInject(x, P, pos_ned, H_gps, h_gps, R_gps);
     
 }
 
-void StateEstimator::EKFCalcErrorInject(BLA::Matrix<20, 1> &oldState, BLA::Matrix<19, 19> &oldP, BLA::Matrix<3, 1> &sens_reading, BLA::Matrix<3, 20> H_matrix, BLA::Matrix<3, 1> h, BLA::Matrix<3, 3> R) {
+BLA::Matrix<20, 1> StateEstimator::EKFCalcErrorInject(BLA::Matrix<20, 1> &oldState, BLA::Matrix<19, 19> &oldP, BLA::Matrix<3, 1> &sens_reading, BLA::Matrix<3, 20> H_matrix, BLA::Matrix<3, 1> h, BLA::Matrix<3, 3> R) {
     BLA::Matrix<3, 1> residual;
     residual = sens_reading - h;
 
@@ -453,8 +453,9 @@ void StateEstimator::EKFCalcErrorInject(BLA::Matrix<20, 1> &oldState, BLA::Matri
     BLA::Matrix<19, 1> postErrorState = K * residual;
 
     // Inject error angles into quat
-
-    BLA::Matrix<3, 1> rotVec = 1.0f * postErrorState(1:3);
+    BLA::Matrix<3, 1> alpha;
+    alpha = {postErrorState(0), postErrorState(1), postErrorState(2)};
+    BLA::Matrix<3, 1> rotVec = 1.0f * alpha;
     float rotVecNorm = BLA::Norm(rotVec);
     BLA::Matrix<3,1> axis = rotVec / rotVecNorm;
     BLA::Matrix<4,1> dq =
@@ -506,5 +507,7 @@ void StateEstimator::EKFCalcErrorInject(BLA::Matrix<20, 1> &oldState, BLA::Matri
 
     // Set baro bias
     x(19) = x(19) + postErrorState(18);
+
+    return x;
 }
 

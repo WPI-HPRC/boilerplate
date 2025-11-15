@@ -246,6 +246,4 @@ BLA::Matrix<M, 1> extractSub(const BLA::Matrix<N, 1> &x,
 
 BLA::Matrix<3, 3> quat2rot(const BLA::Matrix<4, 1> &q);
 
-BLA::Matrix<3, 3> quat2DCM(const BLA::Matrix<4, 1> &quat) {
-
 };

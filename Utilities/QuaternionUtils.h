@@ -8,7 +8,7 @@ namespace QuaternionUtils {
     BLA::Matrix<3,3> quatToRot(const BLA::Matrix<4,1> &quat);
 
     // Quaternion to DCM
-    BLA::Matrix<3, 3> quat2DCM(const BLA::Matrix<13, 1> &quat);
+    BLA::Matrix<3, 3> quat2DCM(const BLA::Matrix<4, 1> &quat);
 
     // Get the up vector from the rotation matrix for the payload
     // In NED coordinates, this will be the second column of the rotation matrix
