@@ -179,23 +179,17 @@ class StateEstimator {
     float mag_var = icm20948_const::magXYZ_var;
     float gps_var = Max10S_const::gpsXYZ_var;
     //R matricies
-    BLA::Matrix<3, 3> R_accel;
-    R_accel.fill(0);
-    R_accel(0,0) = acceL_var;
-    R_accel(1,1) = accel_var;
-    R_accel(2,2) = accel_var;
+    BLA::Matrix<3, 3> R_accel = {accel_var, 0, 0,
+                                0, accel_var, 0,
+                                0, 0, accel_var};
 
-    BLA::Matrix<3, 3> R_mag;
-    R_mag.fill(0);
-    R_mag(0,0) = mag_var;
-    R_mag(1,1) = mag_var;
-    R_mag(2,2) = mag_var;
+    BLA::Matrix<3, 3> R_mag = {mag_var, 0, 0,
+                              0, mag_var, 0,
+                              0, 0, mag_var};
 
-    BLA::Matrix<3, 3> R_gps;
-    R_gps.fill(0);
-    R(0,0) = gps_var;
-    R(1,1) = gps_var;
-    R(2,2) = gps_var;
+    BLA::Matrix<3, 3> R_gps= {gps_var, 0, 0,
+                             0, gps_var, 0,
+                             0, 0, gps_var};
 
     BLA::Matrix<10, 1> R_all = {
       pow(sqrt(asm330_const::accelXY_var) * 9.8, 2),

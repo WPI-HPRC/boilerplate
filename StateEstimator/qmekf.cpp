@@ -144,7 +144,8 @@ void StateEstimator::init(BLA::Matrix<3, 1> LLA){
     // Set launch site LLA/ECEF
     launch_ecef = QuaternionUtils::lla2ecef(LLA);
     launch_lla = LLA;
-    R_ET = QuaternionUtils::dcm_ned2ecef(launch_lla(0), launch_lla(1));
+    BLA::Matrix<2, 1> ll = {launch_lla(0), launch_lla(1)};
+    R_ET = QuaternionUtils::dcm_ned2ecef(ll);
 
     lastTimes = {millis(), millis(), millis(), millis(), millis()};
 }
@@ -416,12 +417,12 @@ BLA::Matrix<20, 1> StateEstimator::runMagUpdate(BLA::Matrix<20, 1> &x, BLA::Matr
 
     BLA::Matrix<3, 20> H_mag;
     H_mag.Fill(0);
-    H_mag.Submatrix<3, 3>(0, 0) =  QuaternionUtils::skewSymmetric(QuaternionUtils::quat2DCM(q) * igrm_model);
+    H_mag.Submatrix<3, 3>(0, 0) =  QuaternionUtils::skewSymmetric(QuaternionUtils::quat2DCM(q) * m_i);
     H_mag.Submatrix<3, 3>(0, QMEKFInds::gb_x) = I_3;
 
     BLA::Matrix<3, 1> h_mag;
 
-    h_mag = QuaternionUtils::quat2DCM(q) * igrm_model;
+    h_mag = QuaternionUtils::quat2DCM(q) * m_i;
 
     EKFCalcErrorInject(x, P, mag_meas, H_mag, h_mag, R_mag);
     
@@ -444,10 +445,13 @@ BLA::Matrix<20, 1> StateEstimator::runGPSUpdate(BLA::Matrix<20, 1> &x, BLA::Matr
     
 }
 
-BLA::Matrix<20, 1> StateEstimator::EKFCalcErrorInject(BLA::Matrix<20, 1> &oldState, BLA::Matrix<19, 19> &oldP, BLA::Matrix<3, 1> &sens_reading, BLA::Matrix<3, 20> H_matrix, BLA::Matrix<3, 1> h, BLA::Matrix<3, 3> R) {
+BLA::Matrix<20, 1> StateEstimator::EKFCalcErrorInject(BLA::Matrix<20, 1> &oldState, BLA::Matrix<19, 19> &oldP, BLA::Matrix<3, 1> &sens_reading, BLA::Matrix<3, 20> H, BLA::Matrix<3, 1> h, BLA::Matrix<3, 3> R) {
     BLA::Matrix<3, 1> residual;
     residual = sens_reading - h;
 
+    BLA::Matrix<3, 3> S;
+    BLA::Matrix<19, 3> K;
+    
     S = H * oldP * ~H + R;
     K = (oldP * ~H) * BLA::Inverse(S);
     BLA::Matrix<19, 1> postErrorState = K * residual;
