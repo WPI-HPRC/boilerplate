@@ -154,7 +154,7 @@ class StateEstimator {
 	
 	  // void runBaroUpdate(BLA::Matrix<20, 1> &x, BLA::Matrix<1, 1> baro);
 
-    BLA::Matrix<20,1> EKFCalcErrorInject(BLA::Matrix<20, 1> &oldState, BLA::Matrix<19, 19> &oldP, BLA::Matrix<3, 1> &sens_reading, BLA::Matrix<3, 20> H_matrix, BLA::Matrix<3, 1> h, BLA::Matrix<3, 3> R);
+    BLA::Matrix<20,1> EKFCalcErrorInject(BLA::Matrix<20, 1> &oldState, BLA::Matrix<19, 19> &oldP, BLA::Matrix<3, 1> &sens_reading, BLA::Matrix<3, 19> H, BLA::Matrix<3, 1> h, BLA::Matrix<3, 3> R);
 
     // State Vector Allocation
     BLA::Matrix<20, 1> x_min;

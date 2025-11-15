@@ -392,7 +392,7 @@ BLA::Matrix<20, 1> StateEstimator::runAccelUpdate(BLA::Matrix<20, 1> &x, BLA::Ma
         x(QMEKFInds::q_z),
     };
 
-    BLA::Matrix<3, 20> H_accel;
+    BLA::Matrix<3, 19> H_accel;
     H_accel.Fill(0);
     H_accel.Submatrix<3, 3>(0, 0) = QuaternionUtils::skewSymmetric(QuaternionUtils::quat2DCM(q) * (-1.0f * normal_i));
     H_accel.Submatrix<3, 3>(0, QMEKFInds::ab_x - 1) = -1.0f * QuaternionUtils::quat2DCM(q);
@@ -415,7 +415,7 @@ BLA::Matrix<20, 1> StateEstimator::runMagUpdate(BLA::Matrix<20, 1> &x, BLA::Matr
         x(QMEKFInds::q_z)
     };
 
-    BLA::Matrix<3, 20> H_mag;
+    BLA::Matrix<3, 19> H_mag;
     H_mag.Fill(0);
     H_mag.Submatrix<3, 3>(0, 0) =  QuaternionUtils::skewSymmetric(QuaternionUtils::quat2DCM(q) * m_i);
     H_mag.Submatrix<3, 3>(0, QMEKFInds::gb_x) = I_3;
@@ -431,7 +431,7 @@ BLA::Matrix<20, 1> StateEstimator::runMagUpdate(BLA::Matrix<20, 1> &x, BLA::Matr
 BLA::Matrix<20, 1> StateEstimator::runGPSUpdate(BLA::Matrix<20, 1> &x, BLA::Matrix<3, 1> gps_meas_ecef) {
     BLA::Matrix<3, 1> pos_ned = QuaternionUtils::ecef2ned(gps_meas_ecef, launch_ecef, R_ET);
 
-    BLA::Matrix<3, 20> H_gps;
+    BLA::Matrix<3, 19> H_gps;
     H_gps.Fill(0);
     H_gps.Submatrix<3, 3>(0, QMEKFInds::p_x) = I_3;
 
@@ -445,15 +445,16 @@ BLA::Matrix<20, 1> StateEstimator::runGPSUpdate(BLA::Matrix<20, 1> &x, BLA::Matr
     
 }
 
-BLA::Matrix<20, 1> StateEstimator::EKFCalcErrorInject(BLA::Matrix<20, 1> &oldState, BLA::Matrix<19, 19> &oldP, BLA::Matrix<3, 1> &sens_reading, BLA::Matrix<3, 20> H, BLA::Matrix<3, 1> h, BLA::Matrix<3, 3> R) {
+BLA::Matrix<20, 1> StateEstimator::EKFCalcErrorInject(BLA::Matrix<20, 1> &oldState, BLA::Matrix<19, 19> &oldP, BLA::Matrix<3, 1> &sens_reading, BLA::Matrix<3, 19> H, BLA::Matrix<3, 1> h, BLA::Matrix<3, 3> R) {
     BLA::Matrix<3, 1> residual;
     residual = sens_reading - h;
 
     BLA::Matrix<3, 3> S;
     BLA::Matrix<19, 3> K;
+    BLA::Matrix<19, 3> H_t = ~H;
     
-    S = H * oldP * ~H + R;
-    K = (oldP * ~H) * BLA::Inverse(S);
+    S = H * oldP * H_t + R;
+    K = (oldP * H_t) * BLA::Inverse(S);
     BLA::Matrix<19, 1> postErrorState = K * residual;
 
     // Inject error angles into quat
