@@ -1,0 +1,3 @@
+[submodule "canard_lqr_controller"]
+	path = canard_lqr_controller
+	url = https://github.com/WPI-HPRC/canard_lqr_controller.git
