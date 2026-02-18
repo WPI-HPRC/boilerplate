@@ -1,77 +1,59 @@
 #pragma once
 
-#define kUBLOXGNSSDefaultMaxWait 250
-
-#include "../Sensor/Sensor.h"
-#include "Print.h"
-#include "boilerplate/Logging/Loggable.h"
+#include <stdint.h>
+#include "../SensorManager/SensorBase.h"
+#include <Arduino.h>
 #include <SparkFun_u-blox_GNSS_v3.h>
 
 struct MAX10SData {
-    float lat = 0;
-    float lon = 0;
-    float altMSL = 0.0;
-    float altEllipsoid = 0.0;
-    int32_t velN = 0;
-    int32_t velE = 0;
-    int32_t velD = 0;
-    uint32_t epochTime = 0;
-    uint8_t satellites = 0;
-    uint8_t gpsLockType = 0;
+    float lat;
+    float lon;
+    float altMSL;
+    float altEllipsoid;
+    int32_t velN;
+    int32_t velE;
+    int32_t velD;
+    uint32_t epochTime;
+    uint8_t satellites;
+    uint8_t gpsLockType;
 };
 
-#define MAX10S_LOG_DESC(X)                                                     \
-    X(0, "lat", p.print(getData()->lat, 7))                                       \
-    X(1, "lon", p.print(getData()->lon, 7))                                       \
-    X(2, "altMSL", p.print(getData()->altMSL, 3))                              \
-    X(3, "altEll", p.print(getData()->altEllipsoid, 3))                        \
-    X(4, "velN", p.print(getData()->velN))                                     \
-    X(5, "velE", p.print(getData()->velE))                                     \
-    X(6, "velD", p.print(getData()->velD))                                     \
-    X(7, "epochTime", p.print(getData()->epochTime))                           \
-    X(8, "satellites", p.print(getData()->satellites))                         \
-    X(9, "gpsLockType", p.print(getData()->gpsLockType))
+class MAX10S: public Sensor<MAX10S, MAX10SData> {
+public:
+    using DataType = MAX10SData;
+    // static constexpr SensorDataType TYPE = SensorDataType::GPS;
 
-class MAX10S : public Sensor, public Loggable {
-  public:
-    MAX10S()
-        : Sensor(sizeof(MAX10SData), 40), Loggable(NUM_FIELDS(MAX10S_LOG_DESC)),
-          GPS() {} // This gps initialization defaults to i2c
+    MAX10S() // 25
+        : Sensor(40),
+          GPS()//, last_update_ms_(0), poll_interval_ms_(1000 / info_.poll_rate_hz) {}
+          {}
 
-    const TimedPointer<MAX10SData> getData() const {
-        return static_cast<TimedPointer<MAX10SData>>(data);
-    }
-
-  private:
-    SFE_UBLOX_GNSS GPS;
-
-    MAKE_LOGGABLE(MAX10S_LOG_DESC)
-
-    uint32_t dataUpdatedAt() override { return getLastTimePolled(); }
-
-    TimedPointer<MAX10SData> setData() {
-        return static_cast<TimedPointer<MAX10SData>>(data);
-    }
-
-    bool init_impl() override {
+    bool init_impl() {
+        Serial.print("Initializing MAX10S...");
         if (GPS.begin()) {
             GPS.setNavigationFrequency(25);
             GPS.setAutoPVT(true);
+            Serial.println("OK");
             return true;
+        } else {
+            Serial.println("FAILED");
+            return false;
         }
-        return false;
     }
 
-    void poll() override {
-        setData()->gpsLockType = GPS.getFixType();
-        setData()->lat = (float)GPS.getLatitude() / 1e7;
-        setData()->lon = (float)GPS.getLongitude() / 1e7;
-        setData()->altMSL = (float)GPS.getAltitudeMSL() / 1000.0;
-        setData()->altEllipsoid = (float)GPS.getAltitude() / 1000.0;
-        setData()->velN = GPS.getNedNorthVel();
-        setData()->velE = GPS.getNedEastVel();
-        setData()->velD = GPS.getNedDownVel();
-        setData()->epochTime = GPS.getUnixEpoch();
-        setData()->satellites = GPS.getSIV(); // Satellites In View
+    void poll_impl(uint32_t now_ms,  MAX10SData &out) {
+        out.gpsLockType = GPS.getFixType();
+        out.lat = (float)GPS.getLatitude() / 1e7;
+        out.lon = (float)GPS.getLongitude() / 1e7;
+        out.altMSL = (float) GPS.getAltitudeMSL() / 1000.0;
+        out.altEllipsoid = (float) GPS.getAltitude() / 1000.0;
+        out.velN = GPS.getNedNorthVel();
+        out.velE = GPS.getNedEastVel();
+        out.velD = GPS.getNedDownVel();
+        out.epochTime = GPS.getUnixEpoch();
+        out.satellites = GPS.getSIV(); // sat in view
     }
+    
+private:
+    SFE_UBLOX_GNSS GPS;
 };
