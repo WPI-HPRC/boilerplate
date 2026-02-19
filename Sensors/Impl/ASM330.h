@@ -3,22 +3,27 @@
 #include "../SensorManager/SensorBase.h"
 #include "ASM330LHHSensor.h"
 #include <Arduino.h>
-#include <Wire.h>
+#include <SPI.h>
 
 struct ASM330Data {
   float accel0, accel1, accel2, gyr0, gyr1, gyr2;
 };
 
 #define ASM330_POLLING_RATE 26
+#define ASM330_CS_PIN 126
 
 class ASM330 : public Sensor<ASM330, ASM330Data> {
 public:
   ASM330()
       : Sensor(ASM330_POLLING_RATE),
-        AccGyr(&Wire, ASM330LHH_I2C_ADD_H) {}
+        AccGyr(&SPI, ASM330_CS_PIN) {}
 
   bool init_impl() {
     Serial.print("Initializing ASM330... ");
+
+    SPI.begin();
+    pinMode(ASM330_CS_PIN, OUTPUT);
+    digitalWrite(ASM330_CS_PIN, HIGH);
 
     if (AccGyr.begin() != 0) {
       Serial.println("FAILED");
