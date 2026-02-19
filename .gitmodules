@@ -1,0 +1,3 @@
+[submodule "AllanVarianceScript"]
+	path = AllanVarianceScript
+	url = https://github.com/WPI-HPRC/AllanVarianceScript.git
