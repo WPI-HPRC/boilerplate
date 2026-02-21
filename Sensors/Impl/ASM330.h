@@ -12,6 +12,9 @@
 #define X_FS 16
 #define G_FS 4000
 
+#define X_FS 16
+#define G_FS 4000
+
 struct ASM330Data {
     float accelX;
     float accelY;
