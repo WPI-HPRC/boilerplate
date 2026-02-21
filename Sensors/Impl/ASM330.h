@@ -40,6 +40,8 @@ public:
       goto end;
     }
 
+    delay(500);
+
     if (AccGyr.Set_X_ODR(104.0) != ASM330LHH_OK) {
       Serial.println("ERROR SETTING X ODR");
       ret = false;
@@ -76,16 +78,12 @@ public:
       goto end;
       }
 
+      delay(500);
+
     uint8_t status;
 
     if (AccGyr.Get_X_DRDY_Status(&status) != ASM330LHH_OK) {
       Serial.println("ERROR IN X DRDY STATUS");
-      ret = false;
-      goto end;
-      }
-
-    if (status != 0) {
-      Serial.println("X NOT DATA READY");
       ret = false;
       goto end;
       }
@@ -95,13 +93,7 @@ public:
       ret = false;
       goto end;
       }
-
-    if (status != 0) {
-      Serial.println("G NOT DATA READY");
-      ret = false;
-      goto end;
-      }
-
+      
     delay(500);
 
     int32_t st;
