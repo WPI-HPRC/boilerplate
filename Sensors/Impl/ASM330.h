@@ -2,46 +2,141 @@
 
 #include "../SensorManager/SensorBase.h"
 #include "ASM330LHHSensor.h"
+#include "Print.h"
+#include "boilerplate/Logging/Loggable.h"
 #include <Arduino.h>
-#include <SPI.h>
+
+#define X_FS 16
+#define G_FS 4000
 
 struct ASM330Data {
-  float accel0, accel1, accel2, gyr0, gyr1, gyr2;
-};
+    float accel0;
+    float accel1;
+    float accel2;
 
-#define ASM330_POLLING_RATE 26
-#define ASM330_CS_PIN 126
+    float gyr0;
+    float gyr1;
+    float gyr2;
+};
 
 class ASM330 : public Sensor<ASM330, ASM330Data> {
 public:
-  ASM330()
-      : Sensor(ASM330_POLLING_RATE),
-        AccGyr(&SPI, ASM330_CS_PIN) {}
+  ASM330(SPIClass *dev_spi, uint32_t CS, uint32_t POLLING_RATE)
+      : Sensor(POLLING_RATE),
+        AccGyr(dev_spi, CS, 2000000),
+        CS(CS) {}
 
   bool init_impl() {
     Serial.print("Initializing ASM330... ");
 
-    SPI.begin();
-    pinMode(ASM330_CS_PIN, OUTPUT);
-    digitalWrite(ASM330_CS_PIN, HIGH);
+    pinMode(CS, OUTPUT);
+    digitalWrite(CS, LOW);
+
+    bool ret = true;
 
     if (AccGyr.begin() != 0) {
-      Serial.println("FAILED");
-      return false;
+      Serial.println("FAILED ASM");
+      ret = false;
+      goto end;
     }
 
-    AccGyr.Set_X_ODR(26.0f);
-    AccGyr.Set_G_ODR(26.0f);
-    AccGyr.Set_X_FS(16);
-    AccGyr.Set_G_FS(2000);
-    AccGyr.Enable_X();
-    AccGyr.Enable_G();
+    if (AccGyr.Set_X_ODR(104.0) != ASM330LHH_OK) {
+      Serial.println("ERROR SETTING X ODR");
+      ret = false;
+      goto end;
+    }
 
-    float odr = 0.0f;
-    AccGyr.Get_X_ODR(&odr);
-    //this->pollingPeriodMs_ = (odr > 0.0f) ? 1000.0f / odr : 40.0f; // is this needed?
+    if (AccGyr.Set_G_ODR(104.0) != ASM330LHH_OK) {
+      Serial.println("ERROR SETTING G ODR");
+      ret = false;
+      goto end;
+      }
+
+    if (AccGyr.Set_X_FS(X_FS) != ASM330LHH_OK) {
+      Serial.println("ERROR SETTING X FS");
+      ret = false;
+      goto end;
+      }
+    
+    if (AccGyr.Set_G_FS(G_FS) != ASM330LHH_OK) {
+      Serial.println("ERROR SETTING G FS");
+      ret = false;
+      goto end;
+      }
+
+    if (AccGyr.Enable_X() != ASM330LHH_OK) {
+      Serial.println("ERROR ENABLING X");
+      ret = false;
+      goto end;
+      }
+
+    if (AccGyr.Enable_G() != ASM330LHH_OK) {
+      Serial.println("ERROR ENABLING G");
+       ret = false;
+      goto end;
+      }
+
+    uint8_t status;
+
+    if (AccGyr.Get_X_DRDY_Status(&status) != ASM330LHH_OK) {
+      Serial.println("ERROR IN X DRDY STATUS");
+      ret = false;
+      goto end;
+      }
+
+    if (status != 0) {
+      Serial.println("X NOT DATA READY");
+      ret = false;
+      goto end;
+      }
+    
+   if (AccGyr.Get_G_DRDY_Status(&status) != ASM330LHH_OK) {
+      Serial.println("ERROR IN G DRDY STATUS");
+      ret = false;
+      goto end;
+      }
+
+    if (status != 0) {
+      Serial.println("G NOT DATA READY");
+      ret = false;
+      goto end;
+      }
+
+    delay(500);
+
+    int32_t st;
+    if (AccGyr.Get_X_FS(&st) != ASM330LHH_OK)
+    {
+      Serial.println("ERROR GETTING X FS");
+      ret = false;
+      goto end;
+      }
+
+    if (st != X_FS)
+    {
+      Serial.printf("X FS NOT SET PROPERLY. EXPECTED {%d}, GOT {%d}\n", X_FS, st);
+      ret = false;
+      goto end;
+      }
+
+    if (AccGyr.Get_G_FS(&st) != ASM330LHH_OK)
+    {
+      Serial.println("ERROR GETTING G FS");
+      goto end;
+    }
+
+    if (st != G_FS)
+    {
+      Serial.printf("G FS NOT SET PROPERLY. EXPECTED {%d}, GOT {%d}\n", G_FS, st);
+      ret = false;
+      goto end;
+      }
+
     Serial.println("OK");
-    return true;
+
+    end:
+        digitalWrite(CS, HIGH);
+        return ret;
   }
 
   void poll_impl(uint32_t now_ms, ASM330Data &out) {
@@ -50,17 +145,26 @@ public:
     int32_t accel[3] = {0};
     int32_t gyro[3] = {0};
 
-    AccGyr.Get_X_Axes(accel);
-    AccGyr.Get_G_Axes(gyro);
+    int status;
+    status = AccGyr.Get_X_Axes(accel);
+    if(status != ASM330LHHStatusTypeDef::ASM330LHH_OK){
+      SerialUSB.println("HELP");
+    }
+    status = AccGyr.Get_G_Axes(gyro);
+    if(status != ASM330LHHStatusTypeDef::ASM330LHH_OK){
+      SerialUSB.println("HELP");
+    }
 
-    out.accel0 = (float)accel[0];
-    out.accel1 = (float)accel[1]; 
-    out.accel2 = (float)accel[2];    
-    out.gyr0 = (float)gyro[0];
-    out.gyr1 = (float)gyro[1];
-    out.gyr2 = (float)gyro[2]; 
+    out.accel0 = accel[0] / 1000.f;
+    out.accel1 = accel[1] / 1000.f;
+    out.accel2 = accel[2] / 1000.f;
+
+    out.gyr0 = gyro[0] / 1000.f;
+    out.gyr1 = gyro[1] / 1000.f;
+    out.gyr2 = gyro[2] / 1000.f;
   }
 
 private:
   ASM330LHHSensor AccGyr;
+  uint32_t CS;
 };

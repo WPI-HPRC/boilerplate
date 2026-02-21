@@ -1,3 +1,5 @@
+#pragma once
+
 #include <tuple>
 #include <cstdint>
 
@@ -33,6 +35,7 @@ public:
 
     void loop() {
         const uint32_t now = millis_();
+        int idx = 0;
         tuple_for_each(sensors_, [&](auto& s) {
             if (s.getInitStatus() &&
                 now - s.getLastTimePolled() >= s.getPollingPeriod()) {
