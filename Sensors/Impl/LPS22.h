@@ -28,12 +28,13 @@ class LPS22 : public Sensor, public Loggable {
         return static_cast<TimedPointer<LPS22Data>>(data);
     }
 
+    uint32_t dataUpdatedAt() override { return getLastTimePolled(); }
+
   private:
     Adafruit_LPS22 lps;
 
     MAKE_LOGGABLE(LPS22_LOG_DESC)
 
-    uint32_t dataUpdatedAt() override { return getLastTimePolled(); }
 
     TimedPointer<LPS22Data> setData() {
         return static_cast<TimedPointer<LPS22Data>>(data);
