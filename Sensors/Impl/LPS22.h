@@ -41,6 +41,7 @@ class LPS22 : public Sensor, public Loggable {
     }
 
     bool init_impl() override {
+        return false;
         if (!lps.begin_I2C(0x5c)) {
             return false;
         }

@@ -57,6 +57,7 @@ class ICM20948 : public Sensor, public Loggable {
     }
 
     bool init_impl() override {
+        return false;
         if (!icm.begin_I2C(0x68)) {
             icm.setAccelRange(ICM20948_ACCEL_RANGE_16_G);
             icm.setGyroRange(ICM20948_GYRO_RANGE_2000_DPS);

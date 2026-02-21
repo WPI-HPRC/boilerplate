@@ -54,6 +54,7 @@ class MAX10S : public Sensor, public Loggable {
     }
 
     bool init_impl() override {
+        return false;
         if (GPS.begin()) {
             GPS.setNavigationFrequency(25);
             GPS.setAutoPVT(true);

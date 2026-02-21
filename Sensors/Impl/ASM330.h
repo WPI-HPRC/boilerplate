@@ -86,12 +86,15 @@ public:
       return false;
     }
 
+    delay(5000);
+
     uint8_t status;
 
     if (AccGyr.Get_X_DRDY_Status(&status) != ASM330LHH_OK) {
       Serial.println("ERROR IN X DRDY STATUS");
       return false;
     }
+
 
     if (status != 0) {
       Serial.println("X NOT DATA READY");
