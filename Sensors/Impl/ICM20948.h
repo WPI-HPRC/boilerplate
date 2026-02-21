@@ -1,105 +1,67 @@
 #pragma once
 
-#include "../Sensor/Sensor.h"
-#include "Adafruit_Sensor.h"
-#include "boilerplate/Logging/Loggable.h"
-#include "boilerplate/StateEstimator/kfConsts.h"
+#include "../SensorManager/SensorBase.h"
+#include "config.h"
 #include <Adafruit_ICM20948.h>
-#include <Adafruit_ICM20X.h>
 #include <Arduino.h>
+#include <Wire.h>
+
+// #define ICM20948_POLLING_RATE
+#define ODR 40
+// is this the polling rate but named different
 
 struct ICMData {
-    float accelX, accelY, accelZ;
-    float gyrX, gyrY, gyrZ;
-    float magX, magY, magZ;
-    float temp;
+  float accel0, accel1, accel2;
+  float gyr0, gyr1, gyr2;
+  float mag0, mag1, mag2;
 };
 
-#define ICM_LOG_DESC(X)                                                            \
-    X(0, "ICMaccelX", p.print(getData()->accelX, 4))                           \
-    X(1, "ICMaccelY", p.print(getData()->accelY, 4))                           \
-    X(2, "ICMaccelZ", p.print(getData()->accelZ, 4))                           \
-    X(3, "ICMgyrX", p.print(getData()->gyrX, 4))                               \
-    X(4, "ICMgyrY", p.print(getData()->gyrY, 4))                               \
-    X(5, "ICMgyrZ", p.print(getData()->gyrZ, 4))                               \
-    X(6, "ICMmagX", p.print(getData()->magX, 4))                               \
-    X(7, "ICMmagY", p.print(getData()->magY, 4))                               \
-    X(8, "ICMmagZ", p.print(getData()->magZ, 4))                               \
-    X(9, "ICMtemp", p.print(getData()->temp, 4))
+class ICM20948 : public Sensor<ICM20948, ICMData> {
+public:
+  ICM20948()
+      : Sensor(ODR), // assuming this is the polling rate
+        icm() {}
+  // this doesnt seem done but whatever
 
-#define ODR 40
+  bool init_impl() {
+    Serial.print("Initializing ICM20948...");
 
-class ICM20948 : public Sensor, public Loggable {
-  public:
-    ICM20948(bool inPayload = false)
-        : Sensor(sizeof(ICMData), 1000 / ODR), Loggable(NUM_FIELDS(ICM_LOG_DESC)),
-          icm(), inPayload(inPayload) {}
-
-    const TimedPointer<ICMData> getData() const {
-        return static_cast<TimedPointer<ICMData>>(data);
+    if (!icm.begin_I2C(0x68)) {
+      Serial.println("FAILED");
+      return false;
     }
 
-  private:
-    Adafruit_ICM20948 icm;
+    icm.setAccelRange(ICM20948_ACCEL_RANGE_16_G);
+    icm.setGyroRange(ICM20948_GYRO_RANGE_2000_DPS);
+    uint16_t accelRateDiv =
+        1125 / ODR - 1; // Per datasheet: ODR = 1125 / (1 + div)
+    uint8_t gyrRateDiv =
+        1100 / ODR - 1; // Per datasheet: ODR = 1100 / (1 + div)
+    icm.setAccelRateDivisor(accelRateDiv);
+    icm.setGyroRateDivisor(gyrRateDiv);
+    Serial.println("OK");
 
-    MAKE_LOGGABLE(ICM_LOG_DESC)
+    // init seems weird, will look at later
+    return true;
+  }
 
-    bool inPayload;
+  void poll_impl(uint32_t now_ms, ICMData &out) {
+    sensors_event_t accel, gyr, mag;
+    icm.getEvent(&accel, &gyr, &mag);
 
-    uint32_t dataUpdatedAt() override {
-        return getLastTimePolled();
-    }
+    out.accel0 = accel.acceleration.x;
+    out.accel1 = accel.acceleration.y;
+    out.accel2 = accel.acceleration.z;
 
-    TimedPointer<ICMData> setData() {
-        return static_cast<TimedPointer<ICMData>>(data);
-    }
+    out.gyr0 = gyr.gyro.x;
+    out.gyr1 = -gyr.gyro.y;
+    out.gyr2 = gyr.gyro.z;
 
-    bool init_impl() override {
-        if (!icm.begin_I2C(0x68)) {
-            icm.setAccelRange(ICM20948_ACCEL_RANGE_16_G);
-            icm.setGyroRange(ICM20948_GYRO_RANGE_2000_DPS);
-            uint16_t accelRateDiv =
-                1125 / ODR - 1; // Per datasheet: ODR = 1125 / (1 + div)
-            uint8_t gyrRateDiv =
-                1100 / ODR - 1; // Per datasheet: ODR = 1100 / (1 + div)
-            icm.setAccelRateDivisor(accelRateDiv);
-            icm.setGyroRateDivisor(gyrRateDiv);
-            return false;
-        }
-        return true;
-    }
+    out.mag0 = mag.magnetic.x;
+    out.mag1 = mag.magnetic.y;
+    out.mag2 = mag.magnetic.z;
+  }
 
-    void poll() override {
-        sensors_event_t accel, gyr, mag, temp;
-
-        icm.getEvent(&accel, &gyr, &temp, &mag);
-
-        float aX = accel.acceleration.x / g;
-        float aY = accel.acceleration.y / g;
-        float aZ = accel.acceleration.z / g;
-
-        float gX = gyr.gyro.x;
-        float gY = gyr.gyro.y;
-        float gZ = gyr.gyro.z;
-
-        float mX = mag.magnetic.x;
-        float mY = mag.magnetic.y;
-        float mZ = mag.magnetic.z;
-
-        if (inPayload) {
-            setData()->accelX = aX;
-            setData()->accelY = aZ;
-            setData()->accelZ = -aY;
-
-            setData()->gyrX = gX;
-            setData()->gyrY = gZ;
-            setData()->gyrZ = -gY;
-
-            setData()->magX = mX;
-            setData()->magY = mZ;
-            setData()->magZ = -mY;
-        }
-
-        setData()->temp = temp.temperature;
-    }
+private:
+  Adafruit_ICM20948 icm;
 };
