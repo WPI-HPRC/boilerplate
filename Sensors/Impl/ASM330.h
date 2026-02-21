@@ -120,7 +120,7 @@ public:
       Serial.printf("X FS NOT SET PROPERLY. EXPECTED {%d}, GOT {%d}", X_FS, st);
     }
 
-    if (AccGyr.Get_X_FS(&st) != ASM330LHH_OK)
+    if (AccGyr.Get_G_FS(&st) != ASM330LHH_OK)
     {
       Serial.println("ERROR GETTING G FS");
       return false;
