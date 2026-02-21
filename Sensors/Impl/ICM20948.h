@@ -39,6 +39,9 @@ class ICM20948 : public Sensor, public Loggable {
     }
 
   private:
+
+    float g = 9.80665;
+
     Adafruit_ICM20948 icm;
 
     MAKE_LOGGABLE(ICM_LOG_DESC)

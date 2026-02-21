@@ -19,12 +19,31 @@ struct ASM330Data {
     float gyrZ;
 };
 
-class ASM330 : public Sensor<ASM330, ASM330Data> {
+#define ASM330_LOG_DESC(X)                                                     \
+    X(0, "ASMaccelX", p.print(getData()->accelX, 3))                           \
+    X(1, "ASMaccelY", p.print(getData()->accelY, 3))                           \
+    X(2, "ASMaccelZ", p.print(getData()->accelZ, 3))                           \
+    X(3, "ASMgyrX", p.print(getData()->gyrX, 3))                               \
+    X(4, "ASMgyrY", p.print(getData()->gyrY, 3))                               \
+    X(5, "ASMgyrZ", p.print(getData()->gyrZ, 3))
+
+class ASM330 : public Sensor, public Loggable {
 public:
-  ASM330(SPIClass *dev_spi, uint32_t CS, uint32_t POLLING_RATE)
-      : Sensor(POLLING_RATE),
-        AccGyr(dev_spi, CS),
+  ASM330(SPIClass *dev_spi, uint32_t CS, uint32_t POLLING_RATE, bool inPayload = false)
+      : Sensor(sizeof(ASM330Data), 0), Loggable(NUM_FIELDS(ASM330_LOG_DESC)),
+        AccGyr(dev_spi, CS), inPayload(inPayload),
         CS(CS) {}
+
+        const TimedPointer<ASM330Data> getData() const {
+          return static_cast<TimedPointer<ASM330Data>>(data);
+        }
+        TimedPointer<ASM330Data> setData() {
+          return static_cast<TimedPointer<ASM330Data>>(data);
+        }
+  
+  bool inPayload;
+
+  uint32_t dataUpdatedAt() override { return getLastTimePolled(); }
 
   bool init_impl() {
     Serial.print("Initializing ASM330... ");
@@ -116,25 +135,46 @@ public:
     return true;
   }
 
-  void poll_impl(uint32_t now_ms, ASM330Data &out) {
-    // unsigned long now = millis();
+  void poll() override {
+        static int32_t accelerometer[3] = {};
+        static int32_t gyroscope[3] = {};
+        AccGyr.Get_X_Axes(accelerometer);
+        AccGyr.Get_G_Axes(gyroscope);
 
-    int32_t accel[3] = {0};
-    int32_t gyro[3] = {0};
+        // X and Y axes rotated to match ICM orientation
+        float aX = -(float)accelerometer[1] / 1000.0;
+        float aY = (float)accelerometer[0] / 1000.0;
+        float aZ = (float)accelerometer[2] / 1000.0;
 
-    int status;
-    status = AccGyr.Get_X_Axes(accel);
-    if(status != ASM330LHHStatusTypeDef::ASM330LHH_OK){
-      SerialUSB.println("HELP");
-    }
-    status = AccGyr.Get_G_Axes(gyro);
-    if(status != ASM330LHHStatusTypeDef::ASM330LHH_OK){
-      SerialUSB.println("HELP");
-    }
+        // X and Y axes rotated to match ICM orientation
+        float gX = -(float)gyroscope[1] / 1000.0;
+        float gY = (float)gyroscope[0] / 1000.0;
+        float gZ = (float)gyroscope[2] / 1000.0;
 
-    MAKE_LOGGABLE(ASM330_LOG_DESC)
+        if (inPayload) {
+            // Axes rotated to match rocket (z up)
+            setData()->accelX = aX;
+            setData()->accelY = aZ;
+            setData()->accelZ = -aY;
+
+            setData()->gyrX = gX;
+            setData()->gyrY = gZ;
+            setData()->gyrZ = -gY;
+        } else {
+            setData()->accelX = aX;
+            setData()->accelY = aY;
+            setData()->accelZ = aZ;
+
+            setData()->gyrX = gX;
+            setData()->gyrY = gY;
+            setData()->gyrZ = gZ;
+        }
+
+    // MAKE_LOGGABLE(ASM330_LOG_DESC);
+  }
 
 private:
+  MAKE_LOGGABLE(ASM330_LOG_DESC)
   ASM330LHHSensor AccGyr;
   uint32_t CS;
 };
