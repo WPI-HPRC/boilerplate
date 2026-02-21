@@ -3,7 +3,6 @@
 #include "../Sensor/Sensor.h"
 #include "Adafruit_Sensor.h"
 #include "boilerplate/Logging/Loggable.h"
-#include "boilerplate/StateEstimator/kfConsts.h"
 #include <Adafruit_ICM20948.h>
 #include <Adafruit_ICM20X.h>
 #include <Arduino.h>
