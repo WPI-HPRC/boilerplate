@@ -4,14 +4,14 @@
 #include <Adafruit_LPS2X.h>
 #include <Adafruit_Sensor.h>
 #include <Arduino.h>
-#include <SPI.h>
+#include <Wire.h>
 
 struct LPS22Data {
   double pressure;
   double temp;
 };
 
-#define LPS22_CS_PIN 6
+//#define LPS22_CS_PIN 6
 
 class LPS22 : public Sensor<LPS22, LPS22Data> {
 public:
@@ -21,11 +21,11 @@ public:
   bool init_impl() {
     Serial.print("Initializing LPS22... ");
 
-    SPI.begin();
-    pinMode(LPS22_CS_PIN, OUTPUT);
-    digitalWrite(LPS22_CS_PIN, HIGH);
+    //SPI.begin();
+    //pinMode(LPS22_CS_PIN, OUTPUT);
+    //digitalWrite(LPS22_CS_PIN, HIGH);
 
-    if (!lps.begin_SPI(LPS22_CS_PIN, &SPI)) {
+    if (!lps.begin_I2C(0x5C)) {
       Serial.println("FAILED");
       return false;
     }
