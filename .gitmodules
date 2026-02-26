@@ -1,3 +1,6 @@
 [submodule "AllanVarianceScript"]
 	path = AllanVarianceScript
 	url = https://github.com/WPI-HPRC/AllanVarianceScript.git
+[submodule "qmekf-lib"]
+	path = qmekf-lib
+	url = https://github.com/WPI-HPRC/qmekf-lib
