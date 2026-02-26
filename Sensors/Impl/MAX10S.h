@@ -20,8 +20,6 @@ struct MAX10SData {
 
 class MAX10S: public Sensor<MAX10S, MAX10SData> {
 public:
-    using DataType = MAX10SData;
-    // static constexpr SensorDataType TYPE = SensorDataType::GPS;
 
     MAX10S() // 25
         : Sensor(40),
@@ -42,9 +40,18 @@ public:
     }
 
     void poll_impl(uint32_t now_ms,  MAX10SData &out) {
+        GPS.checkUblox();
+        
         out.gpsLockType = GPS.getFixType();
         out.lat = (float)GPS.getLatitude() / 1e7;
         out.lon = (float)GPS.getLongitude() / 1e7;
+
+        if (GPS.getNAVPOSECEF(20)) {
+            out.ecefX = GPS.packetUBXNAVPOSECEF->data.ecefX * 0.01f;
+            out.ecefY = GPS.packetUBXNAVPOSECEF->data.ecefY * 0.01f;
+            out.ecefZ = GPS.packetUBXNAVPOSECEF->data.ecefZ * 0.01f;
+        }
+
         out.altMSL = (float) GPS.getAltitudeMSL() / 1000.0;
         out.altEllipsoid = (float) GPS.getAltitude() / 1000.0;
         out.velN = GPS.getNedNorthVel();

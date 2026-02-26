@@ -46,8 +46,8 @@ public:
   }
 
   void poll_impl(uint32_t now_ms, ICMData &out) {
-    sensors_event_t accel, gyr, mag;
-    icm.getEvent(&accel, &gyr, &mag);
+    sensors_event_t accel, gyr, temp, mag;
+    icm.getEvent(&accel, &gyr, &temp, &mag);
 
     out.accel0 = accel.acceleration.x;
     out.accel1 = accel.acceleration.y;
