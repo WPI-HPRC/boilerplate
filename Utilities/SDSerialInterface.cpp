@@ -1,3 +1,4 @@
+#if false
 #include "SDSerialInterface.h"
 #include "SPI.h"
 #include "config.h"
@@ -17,23 +18,23 @@ void setupSDInterface(Context *ctx) {
   inSdInterfaceMode = true;
 
   Serial.begin(230400);
-  SPI.setSCLK(SD_SCLK);
-  SPI.setMISO(SD_MISO);
-  SPI.setMOSI(SD_MOSI);
+  // SPI.setSCLK(SD_SCLK);
+  // SPI.setMISO(SD_MISO);
+  // SPI.setMOSI(SD_MOSI);
   SPI.begin();
 
-  ctx->sd.begin(SD_CS, SD_SPI_SPEED);
+  // ctx->sd.begin(SD_CS, SD_SPI_SPEED);
 
-  pinMode(PG15, OUTPUT);
+  // pinMode(PG15, OUTPUT);
 
-  sdInterfaceStatusTimer.attachInterrupt(blinkLED<PG15>);
+  // sdInterfaceStatusTimer.attachInterrupt(blinkLED<PG15>);
   sdInterfaceStatusTimer.setOverflow(50 * 1000, MICROSEC_FORMAT);
 
   while (!Serial) {
       delay(5);
   }
 
-  digitalWrite(PG15, HIGH);
+  // digitalWrite(PG15, HIGH);
 }
 
 void handleSDInterface(Context *ctx) {
@@ -59,7 +60,7 @@ void handleSDInterface(Context *ctx) {
 
             root.close();
 
-            digitalWrite(PG15, HIGH);
+            // digitalWrite(PG15, HIGH);
             sdInterfaceStatusTimer.pause();
             break;
         }
@@ -83,7 +84,7 @@ void handleSDInterface(Context *ctx) {
 
             ctx->sd.remove(fname);
 
-            digitalWrite(PG15, HIGH);
+            // digitalWrite(PG15, HIGH);
             sdInterfaceStatusTimer.pause();
             break;
         }
@@ -121,7 +122,7 @@ void handleSDInterface(Context *ctx) {
 
             f.close();
 
-            digitalWrite(PG15, HIGH);
+            // digitalWrite(PG15, HIGH);
             sdInterfaceStatusTimer.pause();
             break;
         }
@@ -153,7 +154,7 @@ void handleSDInterface(Context *ctx) {
                 Serial.print("ERR opening file");
             }
 
-            digitalWrite(PG15, HIGH);
+            // digitalWrite(PG15, HIGH);
             sdInterfaceStatusTimer.pause();
             break;
         }
@@ -174,7 +175,7 @@ void handleSDInterface(Context *ctx) {
 
             root.close();
 
-            digitalWrite(PG15, HIGH);
+            // digitalWrite(PG15, HIGH);
             sdInterfaceStatusTimer.pause();
             break;
         }
@@ -183,11 +184,11 @@ void handleSDInterface(Context *ctx) {
             sdInterfaceStatusTimer.resume();
 
             ctx->sd.format();
-            ctx->sd.begin(SD_CS, SD_SPI_SPEED);
+            // ctx->sd.begin(SD_CS, SD_SPI_SPEED);
 
             Serial.write((uint8_t)0);
 
-            digitalWrite(PG15, HIGH);
+            // digitalWrite(PG15, HIGH);
             sdInterfaceStatusTimer.pause();
             break;
         }
@@ -198,3 +199,4 @@ void handleSDInterface(Context *ctx) {
     }  
   }
 }
+#endif

@@ -1,5 +1,6 @@
 #include <tuple>
 #include <cstdint>
+#include <Arduino.h>
 
 // simple tuple_for_each helper so you don't have to read std::apply
 template <typename Tuple, typename Func, std::size_t... I>
@@ -24,7 +25,10 @@ public:
 
     bool sensorInit() {
         bool ok = true;
+        int i = 0;
         tuple_for_each(sensors_, [&](auto& s) {
+                       Serial.println(i);
+                       i++;
             ok = ok && s.init();
         });
         sensorCount_ = std::tuple_size<decltype(sensors_)>::value;
