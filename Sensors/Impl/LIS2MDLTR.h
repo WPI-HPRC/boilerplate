@@ -5,15 +5,15 @@
 #include <LIS2MDLSensor.h>
 #include <cstdint>
 
-struct LISM2Data {
+struct LIS2MDLData {
     float mag0, mag1, mag2;
 };
 
 #define LISM2_ODR 100.0f // not sure on this, should be checked
 
-class LISM2 : public Sensor<LISM2, LISM2Data> {
+class LIS2MDL : public Sensor<LIS2MDL, LIS2MDLData> {
   public:
-    LISM2(SPIClass *spi, uint32_t cs)
+    LIS2MDL(SPIClass *spi, uint32_t cs)
         : Sensor(1000.0f / LISM2_ODR), lis2mdl(spi, cs) {}
 
     bool init_impl() {
@@ -31,7 +31,7 @@ class LISM2 : public Sensor<LISM2, LISM2Data> {
         return true;
     }
 
-    void poll_impl(uint32_t now_ms, LISM2Data &out) {
+    void poll_impl(uint32_t now_ms, LIS2MDLData &out) {
         int32_t mag[3];
         lis2mdl.GetAxes(mag);
 
