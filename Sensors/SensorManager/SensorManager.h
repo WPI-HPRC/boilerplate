@@ -27,7 +27,6 @@ public:
         bool ok = true;
         int i = 0;
         tuple_for_each(sensors_, [&](auto& s) {
-                       Serial.println(i);
                        i++;
             ok = ok && s.init();
         });

@@ -20,7 +20,7 @@ class LSM6 : public Sensor<LSM6, LSM6Data> {
           {};
 
         bool init_impl() {
-            Serial.print("Initializing for LSM6");
+            Serial.print("Initializing for LSM6... ");
 
             if (imu.begin() != LSM6DSO32_OK) {
                 Serial.println("FAILED");

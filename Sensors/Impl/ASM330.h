@@ -60,25 +60,25 @@ public:
 
     uint8_t status;
 
-    if (AccGyr.Get_X_DRDY_Status(&status) != ASM330LHH_OK) {
-      Serial.println("ERROR IN X DRDY STATUS");
-      return false;
-    }
+   //  if (AccGyr.Get_X_DRDY_Status(&status) != ASM330LHH_OK) {
+   //    Serial.println("ERROR IN X DRDY STATUS");
+   //    return false;
+   //  }
 
-    if (status != 1) {
-      Serial.printf("X NOT DATA READY, status %d\n", status);
-      return false;
-    }
+   //  if (status != 1) {
+   //    Serial.printf("X NOT DATA READY, status %d\n", status);
+   //    return false;
+   //  }
     
-   if (AccGyr.Get_G_DRDY_Status(&status) != ASM330LHH_OK) {
-      Serial.println("ERROR IN G DRDY STATUS");
-      return false;
-    }
+   // if (AccGyr.Get_G_DRDY_Status(&status) != ASM330LHH_OK) {
+   //    Serial.println("ERROR IN G DRDY STATUS");
+   //    return false;
+   //  }
 
-    if (status != 1) {
-      Serial.println("G NOT DATA READY");
-      return false;
-    }
+   //  if (status != 1) {
+   //    Serial.println("G NOT DATA READY");
+   //    return false;
+   //  }
 
     int32_t st;
     if (AccGyr.Get_X_FS(&st) != ASM330LHH_OK)
