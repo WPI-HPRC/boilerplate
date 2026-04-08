@@ -17,14 +17,18 @@ public:
   LPS22(SPIClass* spi, uint32_t cs)
       : Sensor(1000.0 / LPS22_ODR), lps(spi, cs), cs(cs) {}
 
-  bool init_impl() {
-    Serial.print("Initializing LPS22... ");
+  bool begin_impl() {
+    Serial.print("Beginning LPS22... ");
 
-    LPS22HBStatusTypeDef status = lps.begin();
-    if (status != LPS22HB_STATUS_OK) {
-      Serial.println("FAILED to begin");
+    if (lps.begin() != LPS22HB_STATUS_OK) {
+      Serial.println("FAILED");
       return false;
     }
+    return true;
+  }
+
+  bool init_impl() {
+    Serial.print("Initializing LPS22... ");
 
     status = lps.SetODR(LPS22_ODR);
     if (status != LPS22HB_STATUS_OK) {

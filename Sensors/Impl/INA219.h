@@ -25,15 +25,18 @@ public:
   //     : SensorBase<INA219, INA219Data>({TYPE, "INA219", 100}), ina219(),
   //       last_update_ms_(0), poll_interval_ms_(1000 / info_.poll_rate_hz) {}
 
-  bool init_impl() {
-    Serial.print("Initializing for INA219... ");
-
+  bool begin_impl() {
+    Serial.print("Beginning for INA219... ");
     if (!ina219.begin()) {
       Serial.println("FAILED");
       return false;
     }
-    Serial.println("OK");
     return true;
+  }
+
+  bool init_impl() {
+    Serial.print("Initializing for INA219... ");
+    // crickets
   }
 
   void poll_impl(uint32_t now_ms, INA219Data &out) {

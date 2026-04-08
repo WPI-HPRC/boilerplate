@@ -20,13 +20,17 @@ public:
         AccGyr(dev_spi, cs),
         cs(cs) {}
 
-  bool init_impl() {
-    Serial.print("Initializing ASM330... ");
-
+  bool begin_impl() {
+    Serial.print("Beginning ASM330... ");
     if (AccGyr.begin() != 0) {
-      Serial.println("FAILED ASM");
+      Serial.println("FAILED");
       return false;
     }
+    return true;
+  }
+
+  bool init_impl() {
+    Serial.print("Initializing ASM330... ");
 
     if (AccGyr.Set_G_FS(ASM330_G_FS) != ASM330LHH_OK) {
       Serial.println("ERROR SETTING G FS");

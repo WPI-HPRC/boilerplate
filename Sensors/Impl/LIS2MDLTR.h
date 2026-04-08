@@ -16,13 +16,18 @@ class LIS2MDL : public Sensor<LIS2MDL, LIS2MDLData> {
     LIS2MDL(SPIClass *spi, uint32_t cs)
         : Sensor(1000.0f / LISM2_ODR), lis2mdl(spi, cs) {}
 
-    bool init_impl() {
-        Serial.print("Initialising LISM2... ");
+    bool begin_impl() {
+        Serial.print("Beginning LISM2... ");
 
         if (!lis2mdl.begin()) {
             Serial.println("FAILED");
             return false;
         }
+        return true;
+    }
+
+    bool init_impl() {
+        Serial.print("Initialising LISM2... ");
 
         lis2mdl.SetOutputDataRate(LISM2_ODR);
 

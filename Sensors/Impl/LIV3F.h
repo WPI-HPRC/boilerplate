@@ -31,6 +31,10 @@ public:
         {
         }
 
+    bool begin_impl() {
+        // something here
+    }
+
     bool init_impl() {
         // Serial.print("Initializing LIV3F...");
         // GPS = Teseo(PinName resetPin,

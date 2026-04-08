@@ -26,11 +26,15 @@ public:
           GPS()//, last_update_ms_(0), poll_interval_ms_(1000 / info_.poll_rate_hz) {}
           {}
 
+    bool begin_impl() {
+        // WE are not using this sensor 
+    }
+
     bool init_impl() {
         Serial.print("Initializing MAX10S...");
         if (GPS.begin()) {
-            GPS.setNavigationFrequency(25);
-            GPS.setAutoPVT(true);
+            gps.setnavigationfrequency(25);
+            gps.setautopvt(true);
             Serial.println("OK");
             return true;
         } else {

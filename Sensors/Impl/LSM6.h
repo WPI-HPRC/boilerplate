@@ -19,6 +19,19 @@ class LSM6 : public Sensor<LSM6, LSM6Data> {
         : Sensor(1000.0 / LSM6_ODR), imu(spi, cs), cs(cs)
           {};
 
+        bool begin_impl() {
+            Serial.print("Beginning for LSM6... ");
+
+            if (imu.begin() != LSM6DSO32_OK) {
+                Serial.println("FAILED");
+                return false;
+            }
+
+            Serial.println("OK");
+
+            return true;
+        }
+
         bool init_impl() {
             Serial.print("Initializing for LSM6... ");
 
