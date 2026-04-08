@@ -24,10 +24,17 @@ public:
         : millis_(millis), sensors_(sensors...) {}
 
     bool sensorInit() {
-        bool ok = true;
+        bool begin_ok = true;
         int i = 0;
         tuple_for_each(sensors_, [&](auto& s) {
-                       i++;
+                    i++;
+            begin_ok = begin_ok && s.begin();            
+        });
+        
+        bool ok = true;
+        int j = 0;
+        tuple_for_each(sensors_, [&](auto& s) {
+                       j++;
             ok = ok && s.init();
         });
         sensorCount_ = std::tuple_size<decltype(sensors_)>::value;

@@ -8,6 +8,11 @@ public:
     using data_type = DataT;
     using descriptor_type = SensorData<DataT>;
 
+    bool begin() {
+        beginStatus_ = derived().begin_impl();
+        return beginStatus_;
+    }
+
     bool init() {
         initStatus_ = derived().init_impl();
         return initStatus_;
@@ -43,4 +48,5 @@ protected:
     descriptor_type data_; // contains {value, lastUpdated}
     uint32_t pollingPeriodMs_;
     bool initStatus_ = false;
+    bool beginStatus_ = false;
 };
