@@ -26,16 +26,15 @@ public:
   //       last_update_ms_(0), poll_interval_ms_(1000 / info_.poll_rate_hz) {}
 
   bool begin_impl() {
-    Serial.print("Beginning for INA219... ");
+    Serial.println("Beginning for INA219");
     if (!ina219.begin()) {
-      Serial.println("FAILED");
       return false;
     }
     return true;
   }
 
   bool init_impl() {
-    Serial.print("Initializing for INA219... ");
+    Serial.println("Initializing for INA219");
     // crickets
   }
 

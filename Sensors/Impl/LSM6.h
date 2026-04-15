@@ -20,25 +20,16 @@ class LSM6 : public Sensor<LSM6, LSM6Data> {
           {};
 
         bool begin_impl() {
-            Serial.print("Beginning for LSM6... ");
+            Serial.println("Beginning for LSM6");
 
             if (imu.begin() != LSM6DSO32_OK) {
-                Serial.println("FAILED");
                 return false;
             }
-
-            Serial.println("OK");
-
             return true;
         }
 
         bool init_impl() {
-            Serial.print("Initializing for LSM6... ");
-
-            if (imu.begin() != LSM6DSO32_OK) {
-                Serial.println("FAILED");
-                return false;
-            }
+            Serial.println("Initializing for LSM6");
 
             imu.Set_G_FS(LSM6_G_FS);
             imu.Set_X_FS(LSM6_X_FS);
@@ -46,8 +37,6 @@ class LSM6 : public Sensor<LSM6, LSM6Data> {
             imu.Set_X_ODR(LSM6_ODR);
             imu.Enable_G();
             imu.Enable_X();
-
-            Serial.println("OK");
 
             return true;
         }

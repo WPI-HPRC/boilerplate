@@ -18,28 +18,27 @@ public:
       : Sensor(1000.0 / LPS22_ODR), lps(spi, cs), cs(cs) {}
 
   bool begin_impl() {
-    Serial.print("Beginning LPS22... ");
+    Serial.println("Beginning LPS22");
 
     if (lps.begin() != LPS22HB_STATUS_OK) {
-      Serial.println("FAILED");
       return false;
     }
     return true;
   }
 
   bool init_impl() {
-    Serial.print("Initializing LPS22... ");
+    Serial.println("Initializing LPS22");
 
     status = lps.SetODR(LPS22_ODR);
+    Serial.println("\tSetting ODR");
     if (status != LPS22HB_STATUS_OK) {
-      Serial.println("FAILED to set ODR");
       return false;
     }
 
 
     status = lps.Enable();
+    Serial.println("\tSetting enable");
     if (status != LPS22HB_STATUS_OK) {
-      Serial.println("FAILED to enable");
       return false;
     }
 
@@ -47,8 +46,6 @@ public:
     lps.GetODR(&realOdr);
 
     pollingPeriodMs_ = 1000 / realOdr;
-
-    Serial.println("OK");
 
     return true;
   }

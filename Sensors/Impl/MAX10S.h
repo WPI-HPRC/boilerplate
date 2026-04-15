@@ -31,14 +31,12 @@ public:
     }
 
     bool init_impl() {
-        Serial.print("Initializing MAX10S...");
+        Serial.println("Initializing MAX10S");
         if (GPS.begin()) {
             gps.setnavigationfrequency(25);
             gps.setautopvt(true);
-            Serial.println("OK");
             return true;
         } else {
-            Serial.println("FAILED");
             return false;
         }
     }
