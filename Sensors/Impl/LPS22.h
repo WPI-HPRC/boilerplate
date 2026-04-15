@@ -29,7 +29,7 @@ public:
   bool init_impl() {
     Serial.println("Initializing LPS22");
 
-    status = lps.SetODR(LPS22_ODR);
+    LPS22HBStatusTypeDef status = lps.SetODR(LPS22_ODR);
     Serial.println("\tSetting ODR");
     if (status != LPS22HB_STATUS_OK) {
       return false;

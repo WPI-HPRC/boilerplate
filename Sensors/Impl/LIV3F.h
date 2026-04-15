@@ -33,9 +33,13 @@ public:
 
     bool begin_impl() {
         // something here
+        Serial.println("Beginning LIV3F");
+        return false;
     }
 
     bool init_impl() {
+        Serial.println("Initializing LIV3F");
+        return false;
         // Serial.print("Initializing LIV3F...");
         // GPS = Teseo(PinName resetPin,
         //   PinName wakeupPin,
