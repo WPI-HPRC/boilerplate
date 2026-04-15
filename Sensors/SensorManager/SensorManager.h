@@ -1,43 +1,65 @@
-//
-// Created by Daniel Coburn on 11/15/24.
-//
+#include <Arduino.h>
+#include <cstdint>
+#include <tuple>
 
-#pragma once
+// simple tuple_for_each helper so you don't have to read std::apply
+template <typename Tuple, typename Func, std::size_t... I>
+void tuple_for_each_impl(Tuple &t, Func f, std::index_sequence<I...>) {
+    (f(std::get<I>(t)), ...);
+}
 
-#include "../Sensor/Sensor.h"
+template <typename Tuple, typename Func> void tuple_for_each(Tuple &t, Func f) {
+    constexpr std::size_t N =
+        std::tuple_size<std::remove_reference_t<Tuple>>::value;
+    tuple_for_each_impl(t, f, std::make_index_sequence<N>{});
+}
 
-template <typename MillisFn, size_t N> class SensorManager {
+// MillisFn is a function that returns a uint32_t and is used to pass around
+// millis()
+//  the compiler makes it now = millis() in the end instead of millis_()
+template <typename MillisFn, typename... Sensors> class SensorManager {
   public:
-    // NOTE: the `sensors field` being declared as Sensor * (&sensors)[N] is to
-    // force the compiler to not decay the array into a poiner, and therefore
-    // allow template argument deduction to work.
-    SensorManager<MillisFn, N>(Sensor *(&sensors)[N], MillisFn millis)
-        : sensors(sensors), millis(millis) {}
-
-    // read the sensors
-    void loop() {
-        for (size_t i = 0; i < N; i++) {
-            if (sensors[i]->getInitStatus()) {
-                uint32_t currentTime = this->millis();
-                if (currentTime - sensors[i]->getLastTimePolled() >=
-                    sensors[i]->getPollingPeriod()) {
-                    sensors[i]->poll();
-                }
-            }
-        }
-    }
+    SensorManager(MillisFn millis, Sensors &...sensors)
+        : millis_(millis), sensors_(sensors...) {}
 
     bool sensorInit() {
-        bool success = true;
-        for (size_t i = 0; i < N; i++) {
-            sensors[i]->init();
-            success = success && sensors[i]->getInitStatus();
-        }
-        return success;
-    } // true if success false if something fail
+        bool begin_ok = true;
+        bool tmp;
+        int i = 0;
+        tuple_for_each(sensors_, [&](auto &s) {
+            i++;
+            tmp = s.begin();
+            Serial.println(tmp ? "\tok" : "\terr");
+            begin_ok = begin_ok && tmp;
+        });
+
+        bool ok = true;
+        int j = 0;
+        tuple_for_each(sensors_, [&](auto &s) {
+            j++;
+            tmp = s.init();
+            Serial.println(tmp ? "\tok" : "\terr");
+            ok = ok && tmp;
+        });
+        sensorCount_ = std::tuple_size<decltype(sensors_)>::value;
+        return ok;
+    }
+
+    void loop() {
+        const uint32_t now = millis_();
+        tuple_for_each(sensors_, [&](auto &s) {
+            if (s.getInitStatus() &&
+                now - s.getLastTimePolled() >= s.getPollingPeriod()) {
+                s.poll(now);
+            }
+        });
+    }
+
+    // TODO: fix size_t to the proper type
+    size_t count() const { return sensorCount_; }
 
   private:
-    Sensor **sensors;
-    MillisFn millis; // time
-    uint32_t currentTime = 0;
+    MillisFn millis_;
+    std::tuple<Sensors &...> sensors_;
+    size_t sensorCount_;
 };
