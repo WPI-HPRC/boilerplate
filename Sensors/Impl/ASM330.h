@@ -20,7 +20,7 @@ class ASM330 : public Sensor<ASM330, ASM330Data> {
 
     bool begin_impl() {
         Serial.println("Beginning ASM330");
-        if (AccGyr.begin() != 0) {
+        if (AccGyr.begin() != ASM330LHH_OK) {
             return false;
         }
         return true;
@@ -104,7 +104,7 @@ class ASM330 : public Sensor<ASM330, ASM330Data> {
         return true;
     }
 
-    void poll_impl(uint32_t now_ms, ASM330Data &out) {
+    bool poll_impl(uint32_t now_ms, ASM330Data &out) {
         // unsigned long now = millis();
 
         int32_t accel[3] = {0};
@@ -126,6 +126,8 @@ class ASM330 : public Sensor<ASM330, ASM330Data> {
         out.gyr0 = (float)gyro[0];
         out.gyr1 = (float)gyro[1];
         out.gyr2 = (float)gyro[2];
+
+        return true;
     }
 
   private:

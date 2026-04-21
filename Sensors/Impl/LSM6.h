@@ -41,7 +41,7 @@ class LSM6 : public Sensor<LSM6, LSM6Data> {
             return true;
         }
 
-        void poll_impl(uint32_t now_ms, LSM6Data &out) {
+        bool poll_impl(uint32_t now_ms, LSM6Data &out) {
             int32_t acc[3], gyr[3];
             imu.Get_X_Axes(acc);
             imu.Get_G_Axes(gyr);
@@ -53,6 +53,8 @@ class LSM6 : public Sensor<LSM6, LSM6Data> {
             out.gyr0 = (float)gyr[0] / 1000.0f;
             out.gyr1 = (float)gyr[1] / 1000.0f;
             out.gyr2 = (float)gyr[2] / 1000.0f;
+
+            return true;
         }
 
     private:

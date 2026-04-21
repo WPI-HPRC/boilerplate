@@ -29,8 +29,10 @@ public:
     // Called by SensorManager
     void poll(uint32_t now_ms) {
         // let the derived class fill in data_.value
-        derived().poll_impl(now_ms, data_.data);
-        data_.markUpdated(now_ms);
+        bool updated = derived().poll_impl(now_ms, data_.data);
+        if (updated) {
+            data_.markUpdated(now_ms);
+        }
     }
 
     // Access to the data

@@ -19,7 +19,7 @@ class LIS2MDL : public Sensor<LIS2MDL, LIS2MDLData> {
     bool begin_impl() {
         Serial.println("Beginning LISM2");
 
-        if (!lis2mdl.begin()) {
+        if (lis2mdl.begin() != LIS2MDL_OK) {
             return false;
         }
         return true;
@@ -35,14 +35,16 @@ class LIS2MDL : public Sensor<LIS2MDL, LIS2MDLData> {
         return true;
     }
 
-    void poll_impl(uint32_t now_ms, LIS2MDLData &out) {
+    bool poll_impl(uint32_t now_ms, LIS2MDLData &out) {
         int32_t mag[3];
         lis2mdl.GetAxes(mag);
 
+        // these are in gauss
         out.mag0 = (float)mag[0] / 1000.0f;
         out.mag1 = (float)mag[1] / 1000.0f;
         out.mag2 = (float)mag[2] / 1000.0f;
-        // these are in gauss
+
+        return true;
     }
 
   private:

@@ -50,13 +50,15 @@ public:
     return true;
   }
 
-  void poll_impl(uint32_t now_ms, LPS22Data &out) {
+  bool poll_impl(uint32_t now_ms, LPS22Data &out) {
     float pressure, temperature;
     lps.GetPressure(&pressure);
     lps.GetTemperature(&temperature);
 
     out.pressure = pressure;
     out.temp = temperature;
+
+    return true;
   }
 
 private:
