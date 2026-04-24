@@ -2,6 +2,7 @@
 
 #include "../SensorManager/SensorBase.h"
 #include "ASM330LHHSensor.h"
+#include "wiring_constants.h"
 #include <Arduino.h>
 #include <Wire.h>
 
@@ -120,12 +121,12 @@ class ASM330 : public Sensor<ASM330, ASM330Data> {
             SerialUSB.println("HELP");
         }
 
-        out.accel0 = (float)accel[0];
-        out.accel1 = (float)accel[1];
-        out.accel2 = (float)accel[2];
-        out.gyr0 = (float)gyro[0];
-        out.gyr1 = (float)gyro[1];
-        out.gyr2 = (float)gyro[2];
+        out.accel0 = (float)accel[0] / 1000.0f;
+        out.accel1 = (float)accel[1] / 1000.0f;
+        out.accel2 = (float)accel[2] / 1000.0f;
+        out.gyr0 = (float)gyro[0] / 1000.0f * DEG_TO_RAD;
+        out.gyr1 = (float)gyro[1] / 1000.0f * DEG_TO_RAD;
+        out.gyr2 = (float)gyro[2] / 1000.0f * DEG_TO_RAD;
 
         return true;
     }
