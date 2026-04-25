@@ -27,7 +27,7 @@ class MockASM330 : public Sensor<MockASM330, ASM330Data> {
     bool poll_impl(uint32_t now_ms, ASM330Data &out) {
         float vals[6];
         loadCSVRow(&dataFile, 6, vals);
-        float *accel = vals, *gyro = vals+3;
+        float *accel = vals+3, *gyro = vals;
 
         out.accel0 = accel[0];
         out.accel1 = accel[1];

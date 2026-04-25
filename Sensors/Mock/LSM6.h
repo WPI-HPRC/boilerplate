@@ -28,7 +28,7 @@ class MockLSM6 : public Sensor<MockLSM6, LSM6Data> {
         bool poll_impl(uint32_t now_ms, LSM6Data &out) {
             float vals[6];
             loadCSVRow(&dataFile, 6, vals);
-            float *acc = vals, *gyr = vals+3;
+            float *acc = vals+3, *gyr = vals;
 
             out.accel0 = acc[0];
             out.accel1 = acc[1];

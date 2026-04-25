@@ -6,7 +6,9 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#define ASM330_ODR 104.0f
+const float G = 9.80665;
+
+#define ASM330_ODR 417.0f
 #define ASM330_X_FS 16
 #define ASM330_G_FS 4000
 
@@ -121,9 +123,9 @@ class ASM330 : public Sensor<ASM330, ASM330Data> {
             Log.errorln("HELP");
         }
 
-        out.accel0 = (float)accel[0] / 1000.0f;
-        out.accel1 = (float)accel[1] / 1000.0f;
-        out.accel2 = (float)accel[2] / 1000.0f;
+        out.accel0 = (float)accel[0] / 1000.0f * G;
+        out.accel1 = (float)accel[1] / 1000.0f * G;
+        out.accel2 = (float)accel[2] / 1000.0f * G;
         out.gyr0 = (float)gyro[0] / 1000.0f * DEG_TO_RAD;
         out.gyr1 = (float)gyro[1] / 1000.0f * DEG_TO_RAD;
         out.gyr2 = (float)gyro[2] / 1000.0f * DEG_TO_RAD;
