@@ -28,7 +28,7 @@ class LIV3F : public Sensor<LIV3F, LIV3FData> {
 
     bool begin_impl() {
         // something here
-        Serial.println("Beginning LIV3F");
+        Log.infoln("Beginning LIV3F");
 
         pinMode(GPS_RESET, OUTPUT);
         digitalWrite(GPS_RESET, HIGH);
@@ -69,7 +69,7 @@ class LIV3F : public Sensor<LIV3F, LIV3FData> {
     }
 
     bool init_impl() {
-        Serial.println("Initializing LIV3F");
+        Log.infoln("Initializing LIV3F");
         return true;
     }
 

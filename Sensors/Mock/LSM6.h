@@ -2,30 +2,32 @@
 
 #include "../SensorManager/SensorBase.h"
 #include "../Impl/LSM6.h"
+#include "STM32SD.h"
 #include "Stream.h"
 #include "boilerplate/Utilities/CSVParser.h"
 #include <Arduino.h>
 
 class MockLSM6 : public Sensor<MockLSM6, LSM6Data> {
     public:
-        MockLSM6(Stream *dataFile, float rate) 
-        : Sensor(1000.0 / rate), dataFile(dataFile)
+        MockLSM6(const char *filename, float rate) 
+        : Sensor(1000.0 / rate), filename(filename)
           {};
 
         bool begin_impl() {
-            Serial.println("Beginning for Mock LSM6");
+            Log.infoln("Beginning for Mock LSM6");
+            dataFile = SD.open(filename);
             return true;
         }
 
         bool init_impl() {
-            Serial.println("Initializing for Mock LSM6");
+            Log.infoln("Initializing for Mock LSM6");
 
-            return skipCSVRow(dataFile);
+            return true;
         }
 
         bool poll_impl(uint32_t now_ms, LSM6Data &out) {
             float vals[6];
-            loadCSVRow(dataFile, 6, vals);
+            loadCSVRow(&dataFile, 6, vals);
             float *acc = vals, *gyr = vals+3;
 
             out.accel0 = acc[0];
@@ -40,5 +42,6 @@ class MockLSM6 : public Sensor<MockLSM6, LSM6Data> {
         }
 
     private:
-        Stream *dataFile;
+        const char *filename;
+        File dataFile;
 };

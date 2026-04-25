@@ -11,12 +11,12 @@ public:
       : Sensor(1000.0 / rate), dataFile(dataFile) {}
 
   bool begin_impl() {
-    Serial.println("Beginning LPS22");
+    Log.infoln("Beginning LPS22");
     return true;
   }
 
   bool init_impl() {
-    Serial.println("Initializing LPS22");
+    Log.infoln("Initializing LPS22");
     return skipCSVRow(dataFile);
   }
 
