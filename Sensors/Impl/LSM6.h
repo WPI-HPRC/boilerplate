@@ -20,7 +20,7 @@ class LSM6 : public Sensor<LSM6, LSM6Data> {
           {};
 
         bool begin_impl() {
-            Serial.println("Beginning for LSM6");
+            Log.infoln("Beginning for LSM6");
 
             if (imu.begin() != LSM6DSO32_OK) {
                 return false;
@@ -29,7 +29,7 @@ class LSM6 : public Sensor<LSM6, LSM6Data> {
         }
 
         bool init_impl() {
-            Serial.println("Initializing for LSM6");
+            Log.infoln("Initializing for LSM6");
 
             imu.Set_G_FS(LSM6_G_FS);
             imu.Set_X_FS(LSM6_X_FS);

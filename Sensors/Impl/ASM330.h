@@ -6,7 +6,9 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#define ASM330_ODR 104.0f
+const float G = 9.80665;
+
+#define ASM330_ODR 417.0f
 #define ASM330_X_FS 16
 #define ASM330_G_FS 4000
 
@@ -20,7 +22,7 @@ class ASM330 : public Sensor<ASM330, ASM330Data> {
         : Sensor(1000.0 / ASM330_ODR), AccGyr(dev_spi, cs), cs(cs) {}
 
     bool begin_impl() {
-        Serial.println("Beginning ASM330");
+        Log.infoln("Beginning ASM330");
         if (AccGyr.begin() != ASM330LHH_OK) {
             return false;
         }
@@ -28,34 +30,34 @@ class ASM330 : public Sensor<ASM330, ASM330Data> {
     }
 
     bool init_impl() {
-        Serial.println("Initializing ASM330");
+        Log.infoln("Initializing ASM330");
 
-        Serial.println("\tSetting G FS");
+        Log.traceln("\tSetting G FS");
         if (AccGyr.Set_G_FS(ASM330_G_FS) != ASM330LHH_OK) {
             return false;
         }
 
-        Serial.println("\tSetting G ODR");
+        Log.traceln("\tSetting G ODR");
         if (AccGyr.Set_G_ODR(ASM330_ODR) != ASM330LHH_OK) {
             return false;
         }
 
-        Serial.println("\tSetting X FS");
+        Log.traceln("\tSetting X FS");
         if (AccGyr.Set_X_FS(ASM330_X_FS) != ASM330LHH_OK) {
             return false;
         }
 
-        Serial.println("\tSetting X ODR");
+        Log.traceln("\tSetting X ODR");
         if (AccGyr.Set_X_ODR(ASM330_ODR) != ASM330LHH_OK) {
             return false;
         }
 
-        Serial.println("\tEnabling X");
+        Log.traceln("\tEnabling X");
         if (AccGyr.Enable_X() != ASM330LHH_OK) {
             return false;
         }
 
-        Serial.println("\tEnabling G");
+        Log.traceln("\tEnabling G");
         if (AccGyr.Enable_G() != ASM330LHH_OK) {
             return false;
         }
@@ -83,23 +85,23 @@ class ASM330 : public Sensor<ASM330, ASM330Data> {
         //  }
 
         int32_t st;
-        Serial.println("\tGetting X FS");
+        Log.traceln("\tGetting X FS");
         if (AccGyr.Get_X_FS(&st) != ASM330LHH_OK) {
             return false;
         }
 
         if (st != ASM330_X_FS) {
-            Serial.printf("\tX FS NOT SET PROPERLY. EXPECTED {%d}, GOT {%d}\n",
+            Log.warningln("\tX FS NOT SET PROPERLY. EXPECTED {%d}, GOT {%d}\n",
                           ASM330_X_FS, st);
         }
 
-        Serial.println("\tGetting G FS");
+        Log.traceln("\tGetting G FS");
         if (AccGyr.Get_G_FS(&st) != ASM330LHH_OK) {
             return false;
         }
 
         if (st != ASM330_G_FS) {
-            Serial.printf("\tG FS NOT SET PROPERLY. EXPECTED {%d}, GOT {%d}\n",
+            Log.warningln("\tG FS NOT SET PROPERLY. EXPECTED {%d}, GOT {%d}\n",
                           ASM330_G_FS, st);
         }
         return true;
@@ -114,16 +116,16 @@ class ASM330 : public Sensor<ASM330, ASM330Data> {
         int status;
         status = AccGyr.Get_X_Axes(accel);
         if (status != ASM330LHHStatusTypeDef::ASM330LHH_OK) {
-            SerialUSB.println("HELP");
+            Log.errorln("HELP");
         }
         status = AccGyr.Get_G_Axes(gyro);
         if (status != ASM330LHHStatusTypeDef::ASM330LHH_OK) {
-            SerialUSB.println("HELP");
+            Log.errorln("HELP");
         }
 
-        out.accel0 = (float)accel[0] / 1000.0f;
-        out.accel1 = (float)accel[1] / 1000.0f;
-        out.accel2 = (float)accel[2] / 1000.0f;
+        out.accel0 = (float)accel[0] / 1000.0f * G;
+        out.accel1 = (float)accel[1] / 1000.0f * G;
+        out.accel2 = (float)accel[2] / 1000.0f * G;
         out.gyr0 = (float)gyro[0] / 1000.0f * DEG_TO_RAD;
         out.gyr1 = (float)gyro[1] / 1000.0f * DEG_TO_RAD;
         out.gyr2 = (float)gyro[2] / 1000.0f * DEG_TO_RAD;

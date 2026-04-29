@@ -17,7 +17,7 @@ class LIS2MDL : public Sensor<LIS2MDL, LIS2MDLData> {
         : Sensor(1000.0f / LISM2_ODR), lis2mdl(spi, cs) {}
 
     bool begin_impl() {
-        Serial.println("Beginning LISM2");
+        Log.infoln("Beginning LISM2");
 
         if (lis2mdl.begin() != LIS2MDL_OK) {
             return false;
@@ -26,7 +26,7 @@ class LIS2MDL : public Sensor<LIS2MDL, LIS2MDLData> {
     }
 
     bool init_impl() {
-        Serial.println("Initialising LISM2");
+        Log.infoln("Initialising LISM2");
 
         lis2mdl.SetOutputDataRate(LISM2_ODR);
 

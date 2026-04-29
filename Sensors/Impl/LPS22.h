@@ -18,7 +18,7 @@ public:
       : Sensor(1000.0 / LPS22_ODR), lps(spi, cs), cs(cs) {}
 
   bool begin_impl() {
-    Serial.println("Beginning LPS22");
+    Log.infoln("Beginning LPS22");
 
     if (lps.begin() != LPS22HB_STATUS_OK) {
       return false;
@@ -27,17 +27,17 @@ public:
   }
 
   bool init_impl() {
-    Serial.println("Initializing LPS22");
+    Log.infoln("Initializing LPS22");
 
     LPS22HBStatusTypeDef status = lps.SetODR(LPS22_ODR);
-    Serial.println("\tSetting ODR");
+    Log.traceln("\tSetting ODR");
     if (status != LPS22HB_STATUS_OK) {
       return false;
     }
 
 
     status = lps.Enable();
-    Serial.println("\tSetting enable");
+    Log.traceln("\tSetting enable");
     if (status != LPS22HB_STATUS_OK) {
       return false;
     }

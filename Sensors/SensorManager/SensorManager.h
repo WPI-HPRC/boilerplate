@@ -1,3 +1,4 @@
+#include "ArduinoLog.h"
 #include <Arduino.h>
 #include <cstdint>
 #include <tuple>
@@ -29,7 +30,11 @@ template <typename MillisFn, typename... Sensors> class SensorManager {
         tuple_for_each(sensors_, [&](auto &s) {
             i++;
             tmp = s.begin();
-            Serial.println(tmp ? "\tok" : "\terr");
+            if (tmp) {
+                Log.infoln("ok");
+            } else {
+                Log.errorln("err");
+            }
             begin_ok = begin_ok && tmp;
         });
 
@@ -38,7 +43,11 @@ template <typename MillisFn, typename... Sensors> class SensorManager {
         tuple_for_each(sensors_, [&](auto &s) {
             j++;
             tmp = s.init();
-            Serial.println(tmp ? "\tok" : "\terr");
+            if (tmp) {
+                Log.infoln("ok");
+            } else {
+                Log.errorln("err");
+            }
             ok = ok && tmp;
         });
         sensorCount_ = std::tuple_size<decltype(sensors_)>::value;

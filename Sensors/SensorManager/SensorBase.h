@@ -1,6 +1,8 @@
 // Sensor.h
 #pragma once
+#include "ArduinoLog.h"
 #include "SensorData.h"
+#include "Stream.h"
 
 template <typename Derived, typename DataT>
 class Sensor {
