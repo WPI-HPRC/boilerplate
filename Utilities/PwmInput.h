@@ -37,7 +37,8 @@ public:
 private:
     uint32_t pin;
     uint32_t channelRising, channelFalling;
-    volatile uint32_t FrequencyMeasured, DutycycleMeasured, LastPeriodCapture = 0, CurrentCapture, HighStateMeasured;
+    volatile uint32_t LastPeriodCapture = 0, CurrentCapture, HighStateMeasured;
+    volatile float FrequencyMeasured, DutycycleMeasured;
     uint32_t input_freq = 0;
     volatile uint32_t rolloverCompareCount = 0;
     HardwareTimer *timer;
@@ -61,13 +62,13 @@ private:
         if (CurrentCapture > LastPeriodCapture)
         {
           FrequencyMeasured = input_freq / (CurrentCapture - LastPeriodCapture);
-          DutycycleMeasured = (HighStateMeasured * 100) / (CurrentCapture - LastPeriodCapture);
+          DutycycleMeasured = (HighStateMeasured * 100.f) / (CurrentCapture - LastPeriodCapture);
         }
         else if (CurrentCapture <= LastPeriodCapture)
         {
           /* 0x1000 is max overflow value */
           FrequencyMeasured = input_freq / (0x10000 + CurrentCapture - LastPeriodCapture);
-          DutycycleMeasured = (HighStateMeasured * 100) / (0x10000 + CurrentCapture - LastPeriodCapture);
+          DutycycleMeasured = (HighStateMeasured * 100.f) / (0x10000 + CurrentCapture - LastPeriodCapture);
         }
 
         LastPeriodCapture = CurrentCapture;
