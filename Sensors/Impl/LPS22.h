@@ -6,11 +6,12 @@
 #include <Wire.h>
 
 struct LPS22Data {
-  double pressure;
-  double temp;
+  float pressure;
+  float temp;
 };
 
-#define LPS22_ODR 75.0f
+// #define LPS22_ODR 75.0f
+#define LPS22_ODR 50.0f
 
 class LPS22 : public Sensor<LPS22, LPS22Data> {
 public:

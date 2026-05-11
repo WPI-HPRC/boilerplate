@@ -9,7 +9,8 @@ struct LSM6Data {
     float accel0, accel1, accel2, gyr0, gyr1, gyr2;
 };
 
-#define LSM6_ODR 208.0f
+// #define LSM6_ODR 208.0f
+#define LSM6_ODR 52.0f
 #define LSM6_X_FS 32
 #define LSM6_G_FS 2000
 

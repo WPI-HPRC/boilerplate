@@ -8,7 +8,8 @@
 
 const float G = 9.80665;
 
-#define ASM330_ODR 417.0f
+// #define ASM330_ODR 417.0f
+#define ASM330_ODR 52.0f
 #define ASM330_X_FS 16
 #define ASM330_G_FS 4000
 
