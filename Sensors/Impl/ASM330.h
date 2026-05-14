@@ -8,8 +8,7 @@
 
 const float G = 9.80665;
 
-// #define ASM330_ODR 417.0f
-#define ASM330_ODR 52.0f
+#define ASM330_ODR 208.0f
 #define ASM330_X_FS 16
 #define ASM330_G_FS 4000
 
@@ -19,8 +18,9 @@ struct ASM330Data {
 
 class ASM330 : public Sensor<ASM330, ASM330Data> {
   public:
+        // We use INT2 here because there can only be one interrupt per pin *number* and LSM_INT1 and ASM_INT1 are both on pin 3 of their respective ports
     ASM330(SPIClass *dev_spi, uint32_t cs)
-        : Sensor(1000.0 / ASM330_ODR), AccGyr(dev_spi, cs), cs(cs) {}
+        : Sensor(digitalPinToPinName(ASM_INT2)), AccGyr(dev_spi, cs, 10'000'000), cs(cs) {}
 
     bool begin_impl() {
         Log.infoln("Beginning ASM330");
@@ -32,6 +32,10 @@ class ASM330 : public Sensor<ASM330, ASM330Data> {
 
     bool init_impl() {
         Log.infoln("Initializing ASM330");
+
+        AccGyr.Disable_G();
+        AccGyr.Disable_X();
+        AccGyr.Write_Reg(0xe, 0x00);
 
         Log.traceln("\tSetting G FS");
         if (AccGyr.Set_G_FS(ASM330_G_FS) != ASM330LHH_OK) {
@@ -50,6 +54,12 @@ class ASM330 : public Sensor<ASM330, ASM330Data> {
 
         Log.traceln("\tSetting X ODR");
         if (AccGyr.Set_X_ODR(ASM330_ODR) != ASM330LHH_OK) {
+            return false;
+        }
+
+        Log.traceln("\tSetting up interrupt");
+        // LSB enables interrupt on accel drdy
+        if (AccGyr.Write_Reg(0x0e, 0x01) != ASM330LHH_OK) {
             return false;
         }
 
@@ -105,6 +115,7 @@ class ASM330 : public Sensor<ASM330, ASM330Data> {
             Log.warningln("\tG FS NOT SET PROPERLY. EXPECTED {%d}, GOT {%d}\n",
                           ASM330_G_FS, st);
         }
+
         return true;
     }
 

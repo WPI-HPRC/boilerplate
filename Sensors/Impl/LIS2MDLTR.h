@@ -9,8 +9,8 @@ struct LIS2MDLData {
     float mag0, mag1, mag2;
 };
 
-// #define LISM2_ODR 100.0f // not sure on this, should be checked
-#define LISM2_ODR 50.0f // not sure on this, should be checked
+#define LISM2_ODR 100.0f // not sure on this, should be checked
+// #define LISM2_ODR 50.0f // not sure on this, should be checked
 
 class LIS2MDL : public Sensor<LIS2MDL, LIS2MDLData> {
   public:

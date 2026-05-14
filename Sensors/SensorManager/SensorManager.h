@@ -57,8 +57,7 @@ template <typename MillisFn, typename... Sensors> class SensorManager {
     void loop() {
         const uint32_t now = millis_();
         tuple_for_each(sensors_, [&](auto &s) {
-            if (s.getInitStatus() &&
-                now - s.getLastTimePolled() >= s.getPollingPeriod()) {
+            if (s.getInitStatus()) {
                 s.poll(now);
             }
         });

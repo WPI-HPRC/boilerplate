@@ -9,15 +9,14 @@ struct LSM6Data {
     float accel0, accel1, accel2, gyr0, gyr1, gyr2;
 };
 
-// #define LSM6_ODR 208.0f
-#define LSM6_ODR 52.0f
+#define LSM6_ODR 208.0f
 #define LSM6_X_FS 32
 #define LSM6_G_FS 2000
 
 class LSM6 : public Sensor<LSM6, LSM6Data> {
     public:
         LSM6(SPIClass *spi, uint32_t cs) 
-        : Sensor(1000.0 / LSM6_ODR), imu(spi, cs), cs(cs)
+        : Sensor(digitalPinToPinName(LSM_INT1)), imu(spi, cs, 10'000'000), cs(cs)
           {};
 
         bool begin_impl() {
@@ -32,10 +31,16 @@ class LSM6 : public Sensor<LSM6, LSM6Data> {
         bool init_impl() {
             Log.infoln("Initializing for LSM6");
 
+            imu.Disable_G();
+            imu.Disable_X();
+            imu.Write_Reg(0x0d, 0x00);
+
             imu.Set_G_FS(LSM6_G_FS);
             imu.Set_X_FS(LSM6_X_FS);
             imu.Set_G_ODR(LSM6_ODR);
             imu.Set_X_ODR(LSM6_ODR);
+            // Set INT1 on accel drdy
+            imu.Write_Reg(0x0d, 0x01);
             imu.Enable_G();
             imu.Enable_X();
 
