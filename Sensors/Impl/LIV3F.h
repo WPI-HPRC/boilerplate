@@ -42,7 +42,7 @@ class LIV3F : public Sensor<LIV3F, LIV3FData> {
         digitalWrite(GPS_RESET, LOW);
         delay(50);
         digitalWrite(GPS_RESET, HIGH);
-        delay(100);
+        // delay(2000);
 
         // Set the enabled messages to the ones MicroNMEA understands
         MicroNMEA::sendSentence(gps, "$PSTMSETPAR,1201,0x00000042");
@@ -57,7 +57,7 @@ class LIV3F : public Sensor<LIV3F, LIV3FData> {
         // Reset the device so that the changes can take place
         MicroNMEA::sendSentence(gps, "$PSTMSRR");
 
-        delay(200);
+        // delay(4000);
 
         // Reinitialize serial port with 115200 baud rate
         gps.end();
@@ -102,6 +102,7 @@ class LIV3F : public Sensor<LIV3F, LIV3FData> {
         while (gps.available()) {
             char c = gps.read();
             nmea.process(c);
+            // Serial.print(c);
         }
     }
 
