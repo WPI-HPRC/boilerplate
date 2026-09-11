@@ -8,6 +8,9 @@
 struct MAX10SData {
     float lat;
     float lon;
+    float ecefX;
+    float ecefY;
+    float ecefZ;
     float altMSL;
     float altEllipsoid;
     int32_t velN;
@@ -20,30 +23,45 @@ struct MAX10SData {
 
 class MAX10S: public Sensor<MAX10S, MAX10SData> {
 public:
+    //using DataType = MAX10SData;
+    // static constexpr SensorDataType TYPE = SensorDataType::GPS;
 
-    MAX10S() // 25
+    explicit MAX10S(TwoWire &wire = Wire) // 25
         : Sensor(40),
-          GPS()//, last_update_ms_(0), poll_interval_ms_(1000 / info_.poll_rate_hz) {}
+          GPS(),
+          wire_(wire)//, last_update_ms_(0), poll_interval_ms_(1000 / info_.poll_rate_hz) {}
           {}
 
     bool begin_impl() {
-        // WE are not using this sensor 
-    }
+        Serial.print("Initializing MAX10S...");
 
-    bool init_impl() {
-        Serial.println("Initializing MAX10S");
-        if (GPS.begin()) {
-            gps.setnavigationfrequency(25);
-            gps.setautopvt(true);
+        pinMode(GPS_RESET, OUTPUT);
+        digitalWrite(GPS_RESET, HIGH);
+
+        wire_.beginTransmission(0x42);
+        uint8_t i2cErr = wire_.endTransmission();
+        Serial.print("I2C probe @0x42 result: ");
+        Serial.println(i2cErr); // 0 = ACK/success, 2 = NACK on address (no device), others = bus error
+
+        if (GPS.begin(wire_)) {
+            GPS.setNavigationFrequency(25);
+            GPS.setAutoPVT(true);
+            Serial.println("OK");
             return true;
         } else {
+            Serial.println("FAILED");
             return false;
         }
     }
 
-    void poll_impl(uint32_t now_ms,  MAX10SData &out) {
+    bool init_impl() {
+        Serial.print("Initializing MAX10S... done or sometjgkasldg");
+        return true;
+    }
+
+    bool poll_impl(uint32_t now_ms,  MAX10SData &out) {
         GPS.checkUblox();
-        
+
         out.gpsLockType = GPS.getFixType();
         out.lat = (float)GPS.getLatitude() / 1e7;
         out.lon = (float)GPS.getLongitude() / 1e7;
@@ -59,10 +77,12 @@ public:
         out.velN = GPS.getNedNorthVel();
         out.velE = GPS.getNedEastVel();
         out.velD = GPS.getNedDownVel();
-        out.epochTime = GPS.getUnixEpoch();
-        out.satellites = GPS.getSIV(); // sat in view
+        out.epochTime = 0;//GPS.getUnixEpoch();
+        out.satellites = 0;//GPS.getSIV(); // sat in view
+        return true;
     }
     
 private:
     SFE_UBLOX_GNSS GPS;
+    TwoWire &wire_;
 };
