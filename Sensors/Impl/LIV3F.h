@@ -1,8 +1,7 @@
 #pragma once
 
 #include "../SensorManager/SensorBase.h"
-#include "wiring_digital.h"
-#include <Arduino.h>
+#include "../../HPRC_HAL.h"
 #include <stdint.h>
 
 #include <MicroNMEA.h>

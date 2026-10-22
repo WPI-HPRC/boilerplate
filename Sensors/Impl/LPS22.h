@@ -1,9 +1,7 @@
 #pragma once
 
 #include "../SensorManager/SensorBase.h"
-#include <LPS22HBSensor.h>
-#include <Arduino.h>
-#include <Wire.h>
+#include "../../HPRC_HAL.h"
 
 struct LPS22Data {
   float pressure;

@@ -1,11 +1,7 @@
 // Sensor.h
 #pragma once
-#include "ArduinoLog.h"
-#include "PinNames.h"
+#include "../../HPRC_HAL.h"
 #include "SensorData.h"
-#include "WInterrupts.h"
-#include "pins_arduino.h"
-#include "wiring_constants.h"
 
 template <typename Derived, typename DataT> class Sensor {
   public:

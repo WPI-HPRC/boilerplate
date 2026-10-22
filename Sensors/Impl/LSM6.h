@@ -1,9 +1,7 @@
 #pragma once
 
 #include "../SensorManager/SensorBase.h"
-#include <LSM6DSO32Sensor.h>
-#include <Arduino.h>
-#include <Wire.h>
+#include "../../HPRC_HAL.h"
 
 struct LSM6Data {
     float accel0, accel1, accel2, gyr0, gyr1, gyr2;

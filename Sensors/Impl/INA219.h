@@ -1,10 +1,8 @@
 #pragma once
 
-#include "Adafruit_INA219.h"
 #include "../SensorManager/SensorBase.h"
-#include <Arduino.h>
-#include <Wire.h>
-#include "Adafruit_INA219.h"
+#include "../../HPRC_HAL.h"
+
 
 // #define INA219_POLLING_RATE
 

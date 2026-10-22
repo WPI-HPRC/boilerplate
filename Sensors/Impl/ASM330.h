@@ -1,11 +1,7 @@
 #pragma once
 
 #include "../SensorManager/SensorBase.h"
-#include "ASM330LHHSensor.h"
-#include "wiring_constants.h"
-#include <Arduino.h>
-#include <Wire.h>
-
+#include "../../HPRC_HAL.h"
 const float G = 9.80665;
 
 #define ASM330_ODR 208.0f

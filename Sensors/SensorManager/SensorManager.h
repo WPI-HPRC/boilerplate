@@ -1,5 +1,5 @@
-#include "ArduinoLog.h"
-#include <Arduino.h>
+#include "boilerplate/HPRC_HAL.h"
+#include "SensorData.h"
 #include <cstdint>
 #include <tuple>
 

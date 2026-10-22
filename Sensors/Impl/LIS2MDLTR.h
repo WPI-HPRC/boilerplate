@@ -1,8 +1,7 @@
 #pragma once
 
 #include "../SensorManager/SensorBase.h"
-#include <Arduino.h>
-#include <LIS2MDLSensor.h>
+#include "../../HPRC_HAL.h"
 #include <cstdint>
 
 struct LIS2MDLData {
