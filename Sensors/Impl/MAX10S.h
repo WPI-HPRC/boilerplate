@@ -30,13 +30,7 @@ public:
         // WE are not using this sensor 
     }
 
-<<<<<<< Updated upstream
     bool init_impl() {
-        Serial.println("Initializing MAX10S");
-        if (GPS.begin()) {
-            gps.setnavigationfrequency(25);
-            gps.setautopvt(true);
-=======
         pinMode(GPS_RESET, OUTPUT);
         digitalWrite(GPS_RESET, HIGH);
 
@@ -54,21 +48,12 @@ public:
             GPS.setAutoNAVPOSECEF(true); // non-blocking ECEF instead of polling every loop
             GPS.setAutoNAVSATrate(10);   // NAV-SAT once every 10 nav epochs (1Hz) for printSatellites()
             Serial.println("OK");
->>>>>>> Stashed changes
             return true;
         } else {
             return false;
         }
     }
 
-<<<<<<< Updated upstream
-    void poll_impl(uint32_t now_ms,  MAX10SData &out) {
-        GPS.checkUblox();
-        
-        out.gpsLockType = GPS.getFixType();
-        out.lat = (float)GPS.getLatitude() / 1e7;
-        out.lon = (float)GPS.getLongitude() / 1e7;
-=======
     bool init_impl() {
         Serial.println("max10s init impl called!");
         return true;
@@ -81,7 +66,6 @@ public:
         if (!GPS.getPVT()) {
             return false;
         }
->>>>>>> Stashed changes
 
         out.gpsLockType = GPS.getFixType();
         out.lat = (double)GPS.getLatitude() / 1e7;
@@ -99,12 +83,8 @@ public:
         out.velE = GPS.getNedEastVel();
         out.velD = GPS.getNedDownVel();
         out.epochTime = GPS.getUnixEpoch();
-<<<<<<< Updated upstream
-        out.satellites = GPS.getSIV(); // sat in view
-=======
         out.satellites = GPS.getSIV(); // sats used in fix
         return true;
->>>>>>> Stashed changes
     }
 
     // Debug: dump every satellite the receiver knows about with its signal strength (C/N0).
@@ -149,8 +129,5 @@ private:
     }
 
     SFE_UBLOX_GNSS GPS;
-<<<<<<< Updated upstream
-=======
     TwoWire &wire_;
->>>>>>> Stashed changes
 };
