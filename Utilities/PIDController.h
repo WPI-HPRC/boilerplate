@@ -74,7 +74,7 @@ public:
         Serial.print(">pid_measured:"); Serial.println(measured);
 #endif
 
-        currTime = lastTime;
+        lastTime = currTime;
         lastError = error;
         return output;
     }
