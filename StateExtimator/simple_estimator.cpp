@@ -1,4 +1,4 @@
-#include "../include/simple_estimator.h"
+#include "simple_estimator.h"
 
 #include <cmath>
 #include <limits>
