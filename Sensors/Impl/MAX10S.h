@@ -78,7 +78,7 @@ public:
         out.velE = GPS.getNedEastVel();
         out.velD = GPS.getNedDownVel();
         out.epochTime = 0;//GPS.getUnixEpoch();
-        out.satellites = 0;//GPS.getSIV(); // sat in view
+        out.satellites = GPS.getSIV(); // sat in view
         return true;
     }
     
